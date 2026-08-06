@@ -10,6 +10,11 @@
     pastel --default,
     dim --prefersdark;
 }
+
+/* Hide Alpine-managed elements until Alpine initializes them. */
+[x-cloak] {
+  display: none !important;
+}
 @plugin "daisyui/theme" {
   name: "pastel";
   default: true;
