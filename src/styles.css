@@ -2,6 +2,9 @@
 @import "../node_modules/photoswipe/dist/photoswipe.css";
 
 @import "tailwindcss";
+
+@plugin "@tailwindcss/typography";
+
 @plugin "daisyui" {
   themes:
     pastel --default,
@@ -22,7 +25,6 @@
 }
 
 @custom-variant dark (&:where([data-theme=dim], [data-theme=dim] *));
-@plugin "@tailwindcss/typography";
 
 @theme {
   --font-display: "Libertinus Serif", serif; /* For headings */
