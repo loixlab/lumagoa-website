@@ -449,14 +449,7 @@ schemaData: {
             <a href="https://wa.me/918087723455?text=Hi%20Luma%20Goa%20team%2C%20I'm%20interested%20in%20renting%20your%20yoga%20shala%20and%20huts%20for%20my%20group%20or%20retreat.%20Please%20send%20availability%20and%20rates." class="btn btn-primary px-10 py-5 text-lg inline-flex items-center">
               Enquire via WhatsApp
             </a>
-            <script>
-              var user = "contact";
-              var domain = "lumagoa.com";
-              var email = user + "@" + domain;
-              document.write(
-                '<a href="mailto:' + email + '" class="btn btn-outline px-10 py-5 text-lg">Send Email Enquiry</a>'
-              );
-            </script>
+            <a x-data="emailLink" :href="href" class="btn btn-outline px-10 py-5 text-lg">Send Email Enquiry</a>
 
           </div>
           <p class="mt-6 text-base text-gray-600">
