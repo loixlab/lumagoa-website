@@ -386,7 +386,7 @@
           </div>
 
           <div class="w-full lg:w-2/3">
-            <div id="map" class="h-[400px] w-full rounded-2xl shadow-inner overflow-hidden border-4 border-stone-50"></div>
+            <div id="map" x-data="googleMap('cafe')" class="h-[400px] w-full rounded-2xl shadow-inner overflow-hidden border-4 border-stone-50"></div>
           </div>
 
         </div>
@@ -414,55 +414,6 @@
 
   <!-- Footer -->
   <%- include('./src/partials/footer.ejs') %>
-
-  <script>
-    window.initMap = function() {
-      const mapEl = document.getElementById("map");
-      console.log(mapEl);
-      if (!mapEl) return;
-
-      const cafePosition = {
-        lat: 15.0127876,
-        lng: 74.0212761
-      };
-
-      const map = new google.maps.Map(mapEl, {
-        center: cafePosition,
-        zoom: 17,
-        mapTypeId: "roadmap",
-        mapId: "roots-bloom-map",
-        zoomControl: true,
-        zoomControlOptions: {
-          position: google.maps.ControlPosition.RIGHT_BOTTOM,
-        },
-      });
-
-      const marker = new google.maps.marker.AdvancedMarkerElement({
-        position: cafePosition,
-        map: map,
-        title: "Roots & Bloom Café @ LUMA",
-      });
-
-      const infoWindow = new google.maps.InfoWindow({
-        content: `
-      <div style="text-align: center; font-family: sans-serif; padding: 10px;">
-        <h2 style="font-size: 1.1rem; margin: 0 0 5px 0; color: #2f5d50;">Roots & Bloom Café</h2>
-        <p style="font-size: 0.9rem; margin: 0 0 10px 0; color: #444;">Vegan & Vegetarian Sanctuary</p>
-        <a href="https://rootsandbloomcafe.com" target="_blank" style="text-decoration: none;">
-          <button style="background-color: #2f5d50; color: white; padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.8rem;">View Full Website</button>
-        </a>
-      </div>
-    `,
-      });
-
-      marker.addListener("click", () => {
-        infoWindow.open({
-          anchor: marker,
-          map
-        });
-      });
-    };
-  </script>
 
   <script type="module" src="/src/main.ts"></script>
 </body>
