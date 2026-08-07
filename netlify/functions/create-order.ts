@@ -9,15 +9,20 @@ export default async (req: Request) => {
   const amount = params.get("amount");
   const bookingId = params.get("id") || "manual_entry";
 
-  // Accessing the keys securely from environment variables
-  const instance = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID ?? "",
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
-  });
-
   if (!amount) {
     return Response.json({ error: "Amount is required" }, { status: 400 });
   }
+
+  // Accessing the keys securely from environment variables
+  const keyId = process.env.RAZORPAY_KEY_ID;
+  const keySecret = process.env.RAZORPAY_KEY_SECRET;
+  if (!keyId || !keySecret) {
+    console.error(
+      "create-order: RAZORPAY_KEY_ID / RAZORPAY_KEY_SECRET env vars are not set",
+    );
+    return Response.json({ error: "Internal server error" }, { status: 500 });
+  }
+  const instance = new Razorpay({ key_id: keyId, key_secret: keySecret });
 
   try {
     // Razorpay expects amount in PAISA (INR * 100)
@@ -25,6 +30,9 @@ export default async (req: Request) => {
     const amountInPaisa = Math.round(
       parseFloat(amount.replace(/,/g, "")) * 100,
     );
+    if (!Number.isFinite(amountInPaisa) || amountInPaisa <= 0) {
+      return Response.json({ error: "Invalid amount" }, { status: 400 });
+    }
 
     const shortTimestamp = Date.now().toString().slice(-6);
     const receiptId = `${bookingId}_${shortTimestamp}`.slice(0, 40);
