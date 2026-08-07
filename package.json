@@ -7,6 +7,10 @@
     "dev": "vite",
     "dev:netlify": "netlify dev",
     "build": "vite build",
+    "format": "prettier --write .",
+    "typecheck": "yarn typecheck:src && yarn typecheck:netlify",
+    "typecheck:src": "tsc -p tsconfig.json",
+    "typecheck:netlify": "tsc -p netlify/tsconfig.json",
     "generate-gallery-metadata": "python3 ./scripts/image_metadata.py $PWD/public/img/gallery/large $PWD/public --output ./public/gallery-img-metadata.json",
     "preview": "vite preview"
   },
@@ -26,6 +30,7 @@
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4.1.18",
+    "typescript": "^7.0.2",
     "vite": "^7.3.1",
     "vite-plugin-virtual-mpa": "^1.12.1"
   },

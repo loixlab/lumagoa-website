@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
-Sitemap: https://lumagoa.com/sitemap.xml
+Sitemap: https://www.lumagoa.com/sitemap.xml
 
 # Disallow folders that don't need to be indexed (e.g., source code or partials)
 Disallow: /deposit-payment
