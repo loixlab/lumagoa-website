@@ -18,8 +18,29 @@ interface BookingData {
 function formatHumanDate(dateStr: string): string {
   if (!dateStr) return "...";
   const date = new Date(dateStr);
-  const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-  const days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+  const months = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
 
   const d = date.getDate();
   // Standard ordinal suffix logic
@@ -79,7 +100,9 @@ export function registerDepositPaymentComponents(alpine: typeof Alpine) {
       this.lookupError = false;
 
       try {
-        const response = await fetch(`/.netlify/functions/get-booking?id=${id}`);
+        const response = await fetch(
+          `/.netlify/functions/get-booking?id=${id}`,
+        );
         if (!response.ok) throw new Error("Booking not found");
 
         const data: BookingData = await response.json();
