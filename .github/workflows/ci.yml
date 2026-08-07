@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+# Cancel superseded runs on the same ref (e.g. rapid pushes to a PR).
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # Add more jobs here as needed (lint, test, …); they run in parallel.
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      # Type-checks both projects (tsconfig.json + netlify/tsconfig.json).
+      - run: yarn typecheck
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      # Run the same script a developer runs, then fail if it rewrote anything.
+      - run: yarn format
+      - name: Fail if Prettier changed any file
+        run: |
+          if ! git diff --exit-code; then
+            echo "::error::'yarn format' changed the files above. Run 'yarn format' locally and commit the result."
+            exit 1
+          fi
