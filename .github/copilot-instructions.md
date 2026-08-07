@@ -32,6 +32,7 @@ This is the universal Copilot file (mirror of the root `CLAUDE.md`). Path-scoped
 - `yarn build` — production build into `dist/`. `yarn preview` — serve the built output.
 - `yarn generate-gallery-metadata` — regenerate `public/gallery-img-metadata.json` from `public/img/gallery/large`.
 - `yarn typecheck` — `tsc` for **both** TypeScript projects (`yarn typecheck:src` / `yarn typecheck:netlify` run one).
+- `yarn format` — Prettier over the repo. **Run this and `yarn typecheck` before every commit** — CI enforces both.
 
 ## Cross-cutting rules (MANDATORY)
 
@@ -46,7 +47,8 @@ This is the universal Copilot file (mirror of the root `CLAUDE.md`). Path-scoped
 - **Nothing else type-checks.** Vite and Netlify's esbuild both strip types without checking, so `yarn typecheck` is the only thing standing between a type error and production.
 - **TypeScript is strict in both projects, including `noUncheckedIndexedAccess`** — indexing an array or record yields `T | undefined`. Narrow it or default it (`row[0] ?? ""`); don't reach for `!` or `as`.
 - **Client logic lives in `src/ts/` as a registered Alpine component**, not in inline `<script>` blocks or inline `x-data` object literals. Register it in `src/main.ts` before `Alpine.start()`.
-- **Formatting is Prettier** (`.prettierrc`: 2 spaces, 80 cols) with `prettier-plugin-tailwindcss`, which sorts Tailwind classes — let it reorder rather than hand-sorting `class` attributes. **Nothing runs it automatically** — there is no format script, no pre-commit hook and no CI check, and `yarn build` is only `vite build`. It applies via the editor's Prettier extension or an explicit `npx prettier --write <files>`, so match the surrounding formatting when editing by hand.
+- **Formatting is Prettier** (`.prettierrc`: 2 spaces, 80 cols) with `prettier-plugin-tailwindcss`, which sorts Tailwind classes — let it reorder rather than hand-sorting `class` attributes. Nothing formats on save or on commit, so run `yarn format` yourself. `.prettierignore` deliberately excludes build output, the vendored daisyUI reference, and the generated gallery metadata JSON — don't format those back in.
+- **Run `yarn format` and `yarn typecheck` before every commit (MANDATORY).** Both are CI jobs on every PR and push to `main`: `typecheck` runs `yarn typecheck`, and `format` runs `yarn format` then fails the build via `git diff --exit-code` if Prettier rewrote anything. Committing without them means a red build, so run both, stage whatever `yarn format` changed, and only then commit.
 - **Git:** branch off `main`; commit or push only when asked. End commit messages with the `Co-Authored-By: Claude …` trailer.
 
 ## Instruction-file upkeep
