@@ -3,7 +3,7 @@
 
     <div class="border-b border-stone-800 pb-12 mb-16 text-center">
       <div class="max-w-2xl mx-auto space-y-4" x-data="dailyQuote">
-        <p class="text-xl md:text-2xl font-serif italic text-stone-200 leading-relaxed" x-text="'&quot;' + text + '&quot;'">
+        <p class="text-xl md:text-2xl font-serif italic text-stone-200 leading-relaxed" x-text='`"${text}"`'>
           "The soul always knows what to do to heal itself."
         </p>
         <p class="text-[10px] uppercase tracking-[0.3em] text-stone-500 font-bold" x-text="'— ' + author">

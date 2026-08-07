@@ -38,12 +38,12 @@ const PRESETS: Record<string, MapConfig> = {
 
         <div style="display: flex; flex-direction: column; gap: 8px;">
           <a href="https://search.google.com/local/writereview?placeid=ChIJLQjFN7dFvjsR8yezomPB5ao"
-            target="_blank"
+            target="_blank" rel="noopener noreferrer"
             style="background-color: ${PRIMARY_BRAND_COLOR}; color: white; padding: 10px 20px; text-decoration: none; border-radius: 50px; font-size: 0.8rem; font-weight: 600; font-family: sans-serif;">
             Leave a Review
           </a>
           <a href="https://www.google.com/maps/dir/?api=1&destination=15.0126252,74.0210419"
-            target="_blank"
+            target="_blank" rel="noopener noreferrer"
             style="color: ${PRIMARY_BRAND_COLOR}; font-size: 0.75rem; text-decoration: underline; font-family: sans-serif; font-weight: 600;">
             Get Directions
           </a>
@@ -60,7 +60,7 @@ const PRESETS: Record<string, MapConfig> = {
       <div style="text-align: center; font-family: sans-serif; padding: 10px;">
         <h2 style="font-size: 1.1rem; margin: 0 0 5px 0; color: #2f5d50;">Roots & Bloom Café</h2>
         <p style="font-size: 0.9rem; margin: 0 0 10px 0; color: #444;">Vegan & Vegetarian Sanctuary</p>
-        <a href="https://rootsandbloomcafe.com" target="_blank" style="text-decoration: none;">
+        <a href="https://rootsandbloomcafe.com" target="_blank" rel="noopener noreferrer" style="text-decoration: none;">
           <button style="background-color: #2f5d50; color: white; padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; font-size: 0.8rem;">View Full Website</button>
         </a>
       </div>

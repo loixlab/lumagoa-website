@@ -100,7 +100,9 @@ export function registerDepositPaymentComponents(alpine: typeof Alpine) {
       this.lookupError = false;
 
       try {
-        const response = await fetch(`/api/get-booking?id=${id}`);
+        const response = await fetch(
+          `/api/get-booking?id=${encodeURIComponent(id)}`,
+        );
         if (!response.ok) throw new Error("Booking not found");
 
         const data: BookingData = await response.json();
@@ -143,7 +145,7 @@ export function registerDepositPaymentComponents(alpine: typeof Alpine) {
       try {
         // 1. Create the Razorpay Order via the Netlify function
         const response = await fetch(
-          `/api/create-order?amount=${this.booking.depositAmount}&id=${this.bookingId}`,
+          `/api/create-order?amount=${encodeURIComponent(this.booking.depositAmount)}&id=${encodeURIComponent(this.bookingId)}`,
         );
         const order = await response.json();
         if (!response.ok) throw new Error(order.error);
