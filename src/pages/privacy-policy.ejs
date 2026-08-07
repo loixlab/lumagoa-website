@@ -89,14 +89,7 @@
           <h2 class="font-display">Contact Us</h2>
           <p>If you have any questions about this Privacy Policy, please contact us at:</p>
           <p>Puralobo Hospitality Pvt Ltd. <br>
-            Email: <script>
-              var user = "contact";
-              var domain = "lumagoa.com";
-              var email = user + "@" + domain;
-              document.write(
-                '<a href="mailto:' + email + '">' + email + "</a>",
-              );
-            </script> <br>
+            Email: <a x-data="emailLink" :href="href" x-text="address"></a> <br>
             Address: <br>
             HNo. 120/21-A(Part), Ground Floor Nagorcem Palolem Canacona South Goa 403702</p>
 

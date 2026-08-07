@@ -10,7 +10,7 @@
 <body class="pt-[var(--header-height-mobile)] md:pt-[var(--header-height-desktop)]">
   <%- include('./src/partials/header.ejs') %>
 
-  <main class="min-h-[calc(100vh-var(--header-height-mobile))] md:min-h-[calc(100vh-var(--header-height-desktop))] flex flex-col items-center justify-center p-6 bg-stone-50 text-center">
+  <main x-data="paymentSuccess" class="min-h-[calc(100vh-var(--header-height-mobile))] md:min-h-[calc(100vh-var(--header-height-desktop))] flex flex-col items-center justify-center p-6 bg-stone-50 text-center">
 
     <div class="mb-8 relative">
       <div class="w-20 h-20 bg-emerald-50 rounded-full flex items-center justify-center">
@@ -22,15 +22,18 @@
     </div>
 
     <h1 class="text-xs uppercase tracking-[0.4em] text-stone-400 font-bold mb-4">Payment Received</h1>
-    <h2 class="text-4xl md:text-5xl font-display italic text-stone-900 mb-6">Your space in the sun is ready.</h2>
+    <h2 class="text-4xl md:text-5xl font-display italic text-stone-900 mb-6">
+      <span x-cloak x-show="firstName"><span x-text="firstName"></span>,<br /></span>
+      <span x-text="firstName ? 'your space in the sun is ready.' : 'Your space in the sun is ready.'">Your space in the sun is ready.</span>
+    </h2>
 
-    <div id="countdown-container" class="hidden mb-8">
+    <div x-cloak x-show="countdown" class="mb-8">
       <div class="inline-flex items-center gap-2 px-4 py-2 bg-stone-100 rounded-full">
         <span class="relative flex h-2 w-2">
           <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
           <span class="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
         </span>
-        <span id="countdown-text" class="text-sm uppercase tracking-[0.2em] font-bold text-stone-600"></span>
+        <span x-text="countdown" class="text-sm uppercase tracking-[0.2em] font-bold text-stone-600"></span>
       </div>
     </div>
 
@@ -42,11 +45,11 @@
       <div class="space-y-4 text-sm border-t border-stone-50 pt-8">
         <div class="flex justify-between items-center">
           <span class="text-stone-400 uppercase tracking-widest text-xs font-bold">Reference</span>
-          <span class="font-mono font-bold text-stone-800" id="display-ref">...</span>
+          <span class="font-mono font-bold text-stone-800" x-text="bookingRef">...</span>
         </div>
         <div class="flex justify-between items-center">
           <span class="text-stone-400 uppercase tracking-widest text-xs font-bold">Payment ID</span>
-          <span class="font-mono text-stone-500 text-xs" id="display-pay-id">...</span>
+          <span class="font-mono text-stone-500 text-xs" x-text="paymentId">...</span>
         </div>
       </div>
     </div>
@@ -63,48 +66,7 @@
 
   <%- include('./src/partials/footer.ejs') %>
 
-  <script>
-    // Extract parameters from the URL sent by the Razorpay handler 
-    const urlParams = new URLSearchParams(window.location.search);
-    const bookingId = urlParams.get('id');
-    const paymentId = urlParams.get('payment_id');
-    const guestName = urlParams.get('name');
-    const arrivalStr = urlParams.get('arrival');
-
-    // Dynamically update the page content
-    if (bookingId) {
-      document.getElementById('display-ref').textContent = bookingId;
-    }
-    if (guestName) {
-      const headline = document.querySelector('h2');
-      headline.innerHTML = `${decodeURIComponent(guestName).split(' ')[0]},<br/>your space in the sun is ready.`;
-    }
-    if (paymentId) {
-      document.getElementById('display-pay-id').textContent = paymentId;
-    }
-    if (arrivalStr) {
-      const arrivalDate = new Date(arrivalStr);
-      const today = new Date();
-
-      // Reset hours to compare only calendar days
-      today.setHours(0, 0, 0, 0);
-      arrivalDate.setHours(0, 0, 0, 0);
-
-      const timeDiff = arrivalDate.getTime() - today.getTime();
-      const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
-
-      const countdownContainer = document.getElementById('countdown-container');
-      const countdownText = document.getElementById('countdown-text');
-
-      if (daysDiff > 0) {
-        countdownText.textContent = `${daysDiff} days until your arrival`;
-        countdownContainer.classList.remove('hidden');
-      } else if (daysDiff === 0) {
-        countdownText.textContent = `See you today!`;
-        countdownContainer.classList.remove('hidden');
-      }
-    }
-  </script>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 
 </html>

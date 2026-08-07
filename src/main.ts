@@ -1,69 +1,18 @@
-import PhotoSwipeLightbox from "photoswipe/lightbox";
-import Masonry from "masonry-layout";
-import imagesLoaded from "imagesloaded";
-import { googleMap } from "./google_map";
-import { addPswpAttributes } from "./gallery_img_metadata";
-import { updateDailyQuote } from "./daily_quote";
+import Alpine from "alpinejs";
+import { registerQuoteComponents } from "./ts/daily-quote";
+import { registerGalleryComponents } from "./ts/gallery";
+import { registerMapComponents } from "./ts/google-map";
+import { registerEmailComponents } from "./ts/email-link";
+import { registerPaymentSuccessComponents } from "./ts/payment-success";
+import { registerDepositPaymentComponents } from "./ts/deposit-payment";
 
-function gallery() {
-  const lightbox = new PhotoSwipeLightbox({
-    gallery: "#gallery",
-    children: "a",
-    pswpModule: () => import("photoswipe"),
-    escKey: true,
-  });
-
-  lightbox.init();
-}
-
-function masonry() {
-  const grid = document.querySelector("#masonry-grid");
-  if (!grid) {
-    console.info("Masonry grid element not found");
-    return;
-  } else {
-    const msnry = new Masonry(grid, {
-      itemSelector: ".grid-item",
-      columnWidth: ".grid-sizer", // Uses sizer for precise column width
-      gutter: ".gutter-sizer", // Uses sizer for precise gutter
-      percentPosition: true,
-    });
-
-    imagesLoaded(grid).on("progress", function () {
-      // Re-layout Masonry after each image loads
-      msnry.layout?.();
-    });
-
-    // Handle resize for responsiveness
-    window.addEventListener("resize", () => {
-      msnry.layout?.();
-    });
-  }
-}
-
-function init() {
-  const isHome =
-    window.location.pathname === "/" ||
-    window.location.pathname === "/index.html";
-  const isYogaShala = window.location.pathname === "/yoga-shala";
-  const isCafeRestaurant = window.location.pathname === "/cafe-restaurant";
-  const isGallery = window.location.pathname === "/gallery";
-
-  if (isHome) {
-    googleMap();
-  } else if (isYogaShala) {
-    addPswpAttributes("gallery-shala-img-metadata.json");
-    gallery();
-    masonry();
-  } else if (isCafeRestaurant) {
-    googleMap();
-  } else if (isGallery) {
-    addPswpAttributes("gallery-img-metadata.json");
-    gallery();
-    masonry();
-  }
-
-  updateDailyQuote();
-}
-
-window.addEventListener("DOMContentLoaded", init);
+// Components must be registered before start(). Each component no-ops on pages
+// that don't reference it, so there is no per-page routing here.
+window.Alpine = Alpine;
+registerQuoteComponents(Alpine);
+registerGalleryComponents(Alpine);
+registerMapComponents(Alpine);
+registerEmailComponents(Alpine);
+registerPaymentSuccessComponents(Alpine);
+registerDepositPaymentComponents(Alpine);
+Alpine.start();
