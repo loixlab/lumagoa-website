@@ -1,0 +1,20 @@
+<%
+/* Treatment image with a deliberate-looking placeholder while photography is
+   pending. Params: src (string|null), alt, title, aspect (e.g. "aspect-[4/3]"),
+   rounded (e.g. "rounded-[1.5rem]"), compact (optional — mark only, for small
+   thumbnails). Real images drop in via the JSON `image` field without touching
+   the page. */
+var isCompact = typeof compact !== "undefined" && compact;
+%>
+<% if (src) { %>
+  <div class="<%= aspect %> <%= rounded %> overflow-hidden">
+    <img src="<%= src %>" alt="<%= alt %>" class="h-full w-full object-cover" loading="lazy" />
+  </div>
+<% } else { %>
+  <div class="<%= aspect %> <%= rounded %> flex flex-col items-center justify-center gap-3 overflow-hidden border border-stone-100 bg-stone-50 p-4" role="img" aria-label="<%= alt %>">
+    <div class="<%= isCompact ? 'h-10 w-10' : 'h-16 w-16 md:h-20 md:w-20' %> bg-[#c66f54] opacity-[0.12] [mask-image:url('/img/logo-sq.svg')] [mask-position:center] [mask-repeat:no-repeat] [mask-size:contain]"></div>
+    <% if (!isCompact) { %>
+      <p class="text-center font-serif text-sm italic text-stone-400"><%= title %></p>
+    <% } %>
+  </div>
+<% } %>

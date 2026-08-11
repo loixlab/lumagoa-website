@@ -28,6 +28,7 @@
           <li><a href="#rooms" class="hover:text-secondary transition-colors">Boutique Huts</a></li>
           <li><a href="/yoga-shala" class="hover:text-secondary transition-colors">Yoga Shala</a></li>
           <li><a href="/cafe-restaurant" class="hover:text-secondary transition-colors">Roots & Bloom Café</a></li>
+          <li><a href="/ayurveda-massage" class="hover:text-secondary transition-colors">Ayurveda & Massage</a></li>
           <li><a href="/booking" target="_blank" class="hover:text-secondary transition-colors">Check Availability</a></li>
         </ul>
       </div>
@@ -41,11 +42,11 @@
           </li>
           <li class="flex items-center gap-3">
             <span class="text-stone-500 italic">Call:</span>
-            <a href="tel:+918087723455" class="hover:text-secondary">+91 808 772 34 55</a>
+            <a href="tel:<%= phone.tel %>" class="hover:text-secondary"><%= phone.display %></a>
           </li>
           <li class="flex items-center gap-3">
             <span class="text-stone-500 italic">Email:</span>
-            <a href="mailto:contact@lumagoa.com" class="hover:text-secondary">contact@lumagoa.com</a>
+            <a x-data="emailLink" :href="href" x-text="address" class="hover:text-secondary"></a>
           </li>
         </ul>
       </div>
