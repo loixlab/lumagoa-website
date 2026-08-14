@@ -203,6 +203,9 @@
                 <a href="<%= p.client.wa.low %>" :href="card.wa[season]" target="_blank" rel="noopener" x-data="packageTracking" @click="track('<%= p.id %>', '<%= p.name %>', card.values[season], 'package_card', season)" class="btn btn-primary btn-block rounded-full font-bold shadow-xl">
                   Enquire on WhatsApp
                 </a>
+                <p class="mt-2 w-full text-center text-sm text-stone-500" x-data="packageTracking">
+                  or <a x-data="emailLink" :href="href" @click="track('<%= p.id %>', '<%= p.name %>', card.values[season], 'package_card', season)" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">enquire by email</a>
+                </p>
               </div>
             </div>
           </article>
@@ -345,7 +348,7 @@
         <div x-data="packagesAccordion" class="mx-auto max-w-3xl divide-y divide-stone-200 border-y border-stone-200">
           <div>
             <h3>
-              <button type="button" @click="toggle(0)" aria-expanded="false" :aria-expanded="isOpen(0).toString()" aria-controls="good-to-know-0" class="flex w-full items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
+              <button type="button" @click="toggle(0)" aria-expanded="false" :aria-expanded="isOpen(0).toString()" aria-controls="good-to-know-0" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
                 What's not included
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(0) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
@@ -359,7 +362,7 @@
 
           <div>
             <h3>
-              <button type="button" @click="toggle(1)" aria-expanded="false" :aria-expanded="isOpen(1).toString()" aria-controls="good-to-know-1" class="flex w-full items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
+              <button type="button" @click="toggle(1)" aria-expanded="false" :aria-expanded="isOpen(1).toString()" aria-controls="good-to-know-1" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
                 Yoga schedule
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(1) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
@@ -373,7 +376,7 @@
 
           <div>
             <h3>
-              <button type="button" @click="toggle(2)" aria-expanded="false" :aria-expanded="isOpen(2).toString()" aria-controls="good-to-know-2" class="flex w-full items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
+              <button type="button" @click="toggle(2)" aria-expanded="false" :aria-expanded="isOpen(2).toString()" aria-controls="good-to-know-2" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
                 Booking your massages
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(2) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
@@ -387,7 +390,7 @@
 
           <div>
             <h3>
-              <button type="button" @click="toggle(3)" aria-expanded="false" :aria-expanded="isOpen(3).toString()" aria-controls="good-to-know-3" class="flex w-full items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
+              <button type="button" @click="toggle(3)" aria-expanded="false" :aria-expanded="isOpen(3).toString()" aria-controls="good-to-know-3" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
                 Arrival and departure
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(3) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
@@ -401,7 +404,7 @@
 
           <div>
             <h3>
-              <button type="button" @click="toggle(4)" aria-expanded="false" :aria-expanded="isOpen(4).toString()" aria-controls="good-to-know-4" class="flex w-full items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
+              <button type="button" @click="toggle(4)" aria-expanded="false" :aria-expanded="isOpen(4).toString()" aria-controls="good-to-know-4" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
                 Deposits and changes
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(4) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
@@ -416,7 +419,7 @@
 
           <div>
             <h3>
-              <button type="button" @click="toggle(5)" aria-expanded="false" :aria-expanded="isOpen(5).toString()" aria-controls="good-to-know-5" class="flex w-full items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
+              <button type="button" @click="toggle(5)" aria-expanded="false" :aria-expanded="isOpen(5).toString()" aria-controls="good-to-know-5" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
                 Season
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(5) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
