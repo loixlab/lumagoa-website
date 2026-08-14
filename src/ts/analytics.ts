@@ -16,6 +16,7 @@ const CTA_LOCATIONS = [
   "tier2_row",
   "combination",
   "doctor",
+  "package_card",
   "final_cta",
   "whatsapp_float",
 ] as const;
@@ -64,4 +65,36 @@ export function trackIntentFilter(intent: string): void {
  */
 export function trackFindTreatment(location: CtaLocation): void {
   push({ event: "find_treatment", cta_location: location });
+}
+
+/**
+ * A package-enquiry CTA click on /packages (WhatsApp). Also reports a Meta
+ * Pixel `Lead`. Generic CTAs (final CTA, float) pass value 0 — the
+ * value/price fields are then omitted rather than sent as 0. Card CTAs pass
+ * the two-sharing package price as the Lead value.
+ */
+export function trackPackageEnquiry(
+  id: string,
+  name: string,
+  value: number,
+  location: CtaLocation,
+): void {
+  push({
+    event: "package_enquiry",
+    package_id: id,
+    cta_location: location,
+    ...(value > 0 ? { package_value: value } : {}),
+  });
+  window.fbq?.("track", "Lead", {
+    content_name: name,
+    ...(value > 0 ? { value, currency: "INR" } : {}),
+  });
+}
+
+/**
+ * A navigation CTA pointing at the package cards (the /packages hero
+ * button). Engagement, not booking intent — no Pixel `Lead`.
+ */
+export function trackViewPackages(location: CtaLocation): void {
+  push({ event: "view_packages", cta_location: location });
 }

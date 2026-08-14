@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import { createMpaPlugin } from "vite-plugin-virtual-mpa";
 import { loadTreatmentPageData } from "./src/data/load-treatments.mjs";
+import { loadPackagesPageData } from "./src/data/load-packages.mjs";
 import { sitePageData } from "./src/data/site.mjs";
 
 export default defineConfig({
@@ -55,6 +56,15 @@ export default defineConfig({
           // treatments.json — loadTreatmentPageData() validates the data and
           // throws (failing the build) on malformed records.
           data: loadTreatmentPageData(),
+        },
+        {
+          name: "packages",
+          template: resolve(__dirname, "src/pages/packages.ejs"),
+          filename: "packages.html",
+          // Package prices/dates and the included-treatments list (derived
+          // from treatments.json via packageEligible) — validated at build
+          // time; loadPackagesPageData() throws on malformed data.
+          data: loadPackagesPageData(),
         },
         {
           name: "gallery",
