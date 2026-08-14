@@ -15,8 +15,6 @@ export const SEASON_LABELS = { low: "Low", mid: "Mid", high: "High" };
 // resolve High first. A range whose `from` is greater than its `to` wraps
 // the year end. The Mid rule runs to 02-29 so it still matches 29 February
 // in a leap year.
-// [CONFIRM] March was not assigned by the owner — specced as Mid because it
-// sits between Mid February and Low April. One-line change if Low.
 export const SEASON_RULES = [
   { season: "high", from: "12-15", to: "01-15" },
   { season: "mid", from: "12-01", to: "02-29" },

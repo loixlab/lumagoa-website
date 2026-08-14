@@ -6,9 +6,6 @@
 // shapes everything the EJS template needs (JSON-LD, WhatsApp links, the
 // included-treatments list).
 //
-// Remaining owner-unconfirmed values ([CONFIRM]): the March season rule (in
-// season.mjs), the check-in/out times and the timeline class times.
-//
 // Never render the room rates, the ₹1,000 per-person/day or ₹2,500 massage
 // components, or any breakdown, in guest-facing output — the embedded
 // massage value only stays below the cheapest eligible treatment while it
@@ -62,10 +59,9 @@ const RATES = {
   roomDiscountPerNight: 500,
 };
 
-// [CONFIRM] Check-in / check-out times assumed.
 const STAY = { checkIn: "14:00", checkOut: "11:00" };
 
-// [CONFIRM] Recommended class times, not a confirmed schedule — verify
+// Recommended class times, not a confirmed schedule — verify
 // against the final October schedule before publishing.
 const TIMELINE = [
   {
