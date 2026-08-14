@@ -4,9 +4,9 @@
     title: 'Yoga Shala Palolem South Goa | Authentic Yoga Classes at Luma Goa',
     description: 'Experience authentic yoga in Palolem at Luma Goa\'s new yoga shala. Drop-in classes, retreats, and sound baths in a serene beachside setting. Book now!',
     extraMeta: `<meta property="og:url" content="${siteUrl}/yoga-shala">
-    <meta property="og:image" content="/img/yoga-shala-hero_og.jpg">
+    <meta property="og:image" content="${siteUrl}/img/yoga-shala-hero_og.jpg">
     <meta name="twitter:url" content="${siteUrl}/yoga-shala">
-  <meta name="twitter:image" content="/img/yoga-shala-hero_twitter.jpg">`,
+  <meta name="twitter:image" content="${siteUrl}/img/yoga-shala-hero_twitter.jpg">`,
 extraContent: `<link rel="canonical" href="${siteUrl}/yoga-shala" />`,
 schemaData: {
   "@context": "https://schema.org",
@@ -52,7 +52,7 @@ schemaData: {
         "itemOffered": {
           "@type": "Service",
           "name": "Sound Bath Sessions",
-          "description": "Experience restorative sound healing for 800 INR."
+          "description": "Experience restorative sound healing for " + prices.soundBath + " INR."
         }
       },
       {
@@ -65,6 +65,9 @@ schemaData: {
       }
     ]
   },
+  // Off season — restore with the new class grid when we re-open in October
+  // (together with the commented-out schedule table below).
+  /*
   "event": [
     {
       "@type": "Event",
@@ -93,6 +96,7 @@ schemaData: {
       }
     }
   ]
+  */
 }
 }) %>
 
@@ -161,8 +165,13 @@ schemaData: {
     <section id="schedule" class="py-18">
       <div class="px-6 lg:container lg:mx-auto">
         <h2 class="text-center font-display text-3xl font-bold mb-4 md:text-5xl">Weekly Schedule</h2>
-        <h3 class="text-center font-display text-xl mb-8 md:text-2xl">March 9th - March 15th 2026</h3>
 
+        <p class="text-center text-lg text-stone-600 max-w-2xl mx-auto leading-relaxed">
+          We're currently on our off-season pause. The new weekly schedule will be posted when we re-open in October.
+        </p>
+
+        <!-- Off season — restore the schedule table (and the event block in
+             schemaData above) with the new grid when we re-open in October.
         <div class="my-16 overflow-x-auto">
           <table class="w-full min-w-[1000px] table-fixed border-collapse bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100">
             <thead class="bg-stone-50 border-b border-stone-100">
@@ -223,6 +232,7 @@ schemaData: {
             </tbody>
           </table>
         </div>
+        -->
 
         <!-- Pricing -->
         <div class="mt-12 container max-w-4xl mx-auto text-center">
@@ -230,13 +240,16 @@ schemaData: {
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
             <div class="text-center">
               <h4 class="font-bold text-xl mb-2">Drop-in classes</h4>
-              <p>600 INR (* Call for pricing, ** Free entry)</p>
+              <p>600 INR</p>
             </div>
             <div class="text-center">
               <h4 class="font-bold text-xl mb-2">Sound bath</h4>
-              <p>800 INR<br>(limited spots, contact for enquiry <%= phone.display %>)</p>
+              <p><%= prices.soundBath %> INR<br>(limited spots, contact for enquiry <%= phone.display %>)</p>
             </div>
           </div>
+          <p class="mt-10 text-stone-600">
+            Staying with us? Yoga is included in <a href="/packages" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">every LUMA package</a>.
+          </p>
         </div>
       </div>
     </section>

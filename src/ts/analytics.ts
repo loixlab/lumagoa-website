@@ -9,17 +9,28 @@
  * same reason.
  */
 
-/** Where a booking CTA lives on the page — the `cta_location` values. */
-const CTA_LOCATIONS = [
-  "hero",
+/**
+ * The `cta_location` values, typed per page so a copy-pasted CTA can't
+ * report a location belonging to the other page's funnel.
+ */
+const SHARED_CTA_LOCATIONS = ["hero", "final_cta", "whatsapp_float"] as const;
+
+/** Where a booking CTA lives on /ayurveda-massage. */
+const TREATMENT_CTA_LOCATIONS = [
+  ...SHARED_CTA_LOCATIONS,
   "signature_card",
   "tier2_row",
   "combination",
   "doctor",
-  "final_cta",
-  "whatsapp_float",
 ] as const;
-export type CtaLocation = (typeof CTA_LOCATIONS)[number];
+export type TreatmentCtaLocation = (typeof TREATMENT_CTA_LOCATIONS)[number];
+
+/** Where a booking CTA lives on /packages. */
+const PACKAGE_CTA_LOCATIONS = [
+  ...SHARED_CTA_LOCATIONS,
+  "package_card",
+] as const;
+export type PackageCtaLocation = (typeof PACKAGE_CTA_LOCATIONS)[number];
 
 function push(event: Record<string, unknown>): void {
   window.dataLayer = window.dataLayer || [];
@@ -35,7 +46,7 @@ export function trackTreatmentEnquiry(
   id: string,
   title: string,
   price: number,
-  location: CtaLocation,
+  location: TreatmentCtaLocation,
 ): void {
   push({
     event: "treatment_enquiry",
@@ -62,6 +73,49 @@ export function trackIntentFilter(intent: string): void {
  * Deliberately NOT a `treatment_enquiry`/Pixel `Lead` — it measures
  * engagement, not booking intent.
  */
-export function trackFindTreatment(location: CtaLocation): void {
+export function trackFindTreatment(location: TreatmentCtaLocation): void {
   push({ event: "find_treatment", cta_location: location });
+}
+
+/**
+ * A package-enquiry CTA click on /packages (WhatsApp). Also reports a Meta
+ * Pixel `Lead`. Generic CTAs (final CTA, float) pass value 0 — the
+ * value/price fields are then omitted rather than sent as 0. Card CTAs pass
+ * the selected season's two-sharing price as the Lead value, plus the
+ * season id, so conversions are attributed at the right seasonal value.
+ */
+export function trackPackageEnquiry(
+  id: string,
+  name: string,
+  value: number,
+  location: PackageCtaLocation,
+  season?: string,
+): void {
+  push({
+    event: "package_enquiry",
+    package_id: id,
+    cta_location: location,
+    ...(season ? { season } : {}),
+    ...(value > 0 ? { package_value: value } : {}),
+  });
+  window.fbq?.("track", "Lead", {
+    content_name: name,
+    ...(value > 0 ? { value, currency: "INR" } : {}),
+  });
+}
+
+/**
+ * A season pill activated on the /packages selector — tells the owner which
+ * season browsers are actually shopping for.
+ */
+export function trackSeasonSelect(season: string): void {
+  push({ event: "season_select", season });
+}
+
+/**
+ * A navigation CTA pointing at the package cards (the /packages hero
+ * button). Engagement, not booking intent — no Pixel `Lead`.
+ */
+export function trackViewPackages(location: PackageCtaLocation): void {
+  push({ event: "view_packages", cta_location: location });
 }

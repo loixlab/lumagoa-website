@@ -7,24 +7,39 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h8m-8 6h16" />
           </svg>
         </div>
-        <ul tabindex="0" class="dropdown-content menu z-1 mt-3 w-56 rounded-box bg-base-100 p-2 shadow">
+        <ul tabindex="0" class="dropdown-content menu z-1 mt-3 w-40 rounded-box bg-base-100 p-2 shadow">
           <li>
             <a href="#">Home</a>
           </li>
-          <li>
-            <a href="/#rooms"> Rooms </a>
+
+          <!-- Sub-menu flies out to the right so it doesn't stretch the
+               narrow mobile panel; parent stays w-40 so the w-48 flyout
+               still fits a 360px viewport. -->
+          <li class="dropdown dropdown-right">
+            <div tabindex="0" role="button" class="justify-between">
+              The Resort
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+              </svg>
+            </div>
+            <ul tabindex="0" class="dropdown-content menu z-1 w-48 rounded-box bg-base-100 p-2 shadow">
+              <li>
+                <a href="/#rooms"> Rooms </a>
+              </li>
+              <li>
+                <a href="/yoga-shala"> Yoga Shala </a>
+              </li>
+              <li>
+                <a href="/ayurveda-massage"> Ayurveda & Massage </a>
+              </li>
+              <li>
+                <a href="/cafe-restaurant"> Café Restaurant </a>
+              </li>
+            </ul>
           </li>
 
           <li>
-            <a href="/yoga-shala"> Yoga Shala </a>
-          </li>
-
-          <li>
-            <a href="/ayurveda-massage"> Ayurveda & Massage </a>
-          </li>
-
-          <li>
-            <a href="/cafe-restaurant"> Café Restaurant </a>
+            <a href="/packages"> Packages </a>
           </li>
 
           <li>
@@ -47,20 +62,32 @@
         <li>
           <a href="/">Home</a>
         </li>
-        <li>
-          <a href="/#rooms"> Rooms </a>
+
+        <li class="dropdown">
+          <div tabindex="0" role="button" class="gap-1">
+            The Resort
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+          <ul tabindex="0" class="dropdown-content menu z-1 mt-2 w-52 rounded-box bg-base-100 p-2 shadow">
+            <li>
+              <a href="/#rooms"> Rooms </a>
+            </li>
+            <li>
+              <a href="/yoga-shala"> Yoga Shala </a>
+            </li>
+            <li>
+              <a href="/ayurveda-massage"> Ayurveda & Massage </a>
+            </li>
+            <li>
+              <a href="/cafe-restaurant"> Café Restaurant </a>
+            </li>
+          </ul>
         </li>
 
         <li>
-          <a href="/yoga-shala"> Yoga Shala </a>
-        </li>
-
-        <li>
-          <a href="/ayurveda-massage"> Ayurveda & Massage </a>
-        </li>
-
-        <li>
-          <a href="/cafe-restaurant"> Café Restaurant </a>
+          <a href="/packages"> Packages </a>
         </li>
 
         <li>

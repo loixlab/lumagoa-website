@@ -1,5 +1,10 @@
 // Generic build-time helpers shared by the data loaders in this directory.
 
+/** Guest-facing INR price string: 26000 → "₹26,000". */
+export function formatPrice(price) {
+  return `₹${price.toLocaleString("en-IN")}`;
+}
+
 const ONES = [
   "zero",
   "one",
