@@ -3,6 +3,10 @@
 // treatments.json and derives everything the EJS template needs (grouped
 // categories, JSON-LD, WhatsApp links) from the one array.
 //
+// treatments.json is owner-approved and several of its apparent
+// inconsistencies are deliberate decisions — read
+// docs/ayurveda-massage-notes.md before "fixing" the data.
+//
 // The JSON is imported (not readFileSync'd) so Vite tracks it as a config
 // dependency and auto-restarts the dev server when it changes.
 import rawTreatments from "./treatments.json" with { type: "json" };

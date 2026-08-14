@@ -16,6 +16,7 @@ The site is a Vite multi-page app built with `vite-plugin-virtual-mpa`. EJS temp
   ```
 
 - **EJS includes are resolved from the project root**, not from the including file — always `<%- include('./src/partials/…') %>`, never `../partials/`.
+- **`src/data/treatments.json` is owner-approved content.** Apparent inconsistencies with the printed treatment menu (missing therapies, rewritten descriptions, a facial that isn't `packageEligible`) are deliberate decisions — read [docs/ayurveda-massage-notes.md](../docs/ayurveda-massage-notes.md) before changing the data. `load-treatments.mjs` validates it at build time and fails the build on malformed records or `DRAFT` descriptions.
 - **Every page receives shared build-time locals from `src/data/site.mjs`** (`siteUrl`, `email`, `phone.display`, `phone.tel`, `phone.wa`, `waHref(message)`), merged into each page's `data` by the `.map()` at the end of the `pages` array in `vite.config.mjs`. Use them instead of hardcoding the domain, contact email, phone number or `wa.me` URLs — `footer.ejs` relies on them, so a page rendered without them fails to build. `email` is for JSON-LD schemas (deliberately public); visible email links must keep using the `emailLink` Alpine component, which assembles the address at runtime from the same `EMAIL_PARTS` constant.
 - **There is no layout partial.** Every page repeats the same skeleton itself, so copy an existing page rather than assembling one from scratch:
 
