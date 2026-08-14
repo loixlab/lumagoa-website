@@ -139,6 +139,14 @@
               Prices shown are for stays within one season. Stays crossing a season boundary are quoted per night at the applicable rate &mdash; <a href="<%= waHref("Hi LUMA, I'd like a quote for a stay that crosses seasons. My dates are: ") %>" target="_blank" rel="noopener" x-data="packageTracking" @click="track('cross-season', 'Cross-Season Stay', 0, 'package_card')" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">just ask</a>.
             </p>
           </div>
+          <!-- Without JS the pills are inert and the cards keep their
+               server-rendered Low-season prices — say so. -->
+          <noscript>
+            <% var lowSeason = seasons.find(function (s) { return s.id === "low"; }); %>
+            <p class="mt-4 text-center text-sm text-stone-500">
+              Prices shown are for low season (<%= lowSeason.window %>). For stays in December &ndash; March, message us for the seasonal rate.
+            </p>
+          </noscript>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:items-stretch">
@@ -345,91 +353,54 @@
           </h2>
         </div>
 
+        <%
+        // The accordion items as data — one markup block below renders them
+        // all, so chrome tweaks happen once and indices can't drift.
+        var accordionLink = "text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800";
+        var highSeason = seasons.find(function (s) { return s.id === "high"; });
+        var goodToKnow = [
+          {
+            title: "What's not included",
+            body: `Lunch, dinner, airport transfer, and treatments beyond those listed. Sound baths are &#8377;800, or &#8377;500 for package guests.`,
+          },
+          {
+            title: "Yoga schedule",
+            body: `Morning and evening classes run daily. Class styles rotate through the week; the full schedule is on the <a href="/yoga-shala" class="${accordionLink}">Yoga Shala page</a>.`,
+          },
+          {
+            title: "Booking your massages",
+            body: `Please choose your treatment times at check-in. Our therapists are in demand and we want to guarantee your slot.`,
+          },
+          {
+            title: "Arrival and departure",
+            body: `Check-in from ${stay.checkIn}, check-out by ${stay.checkOut}.`,
+          },
+          {
+            title: "Deposits and changes",
+            body: `A 50% deposit confirms your booking. It's fully refundable up to 15 days before arrival &mdash; 30 days during high season (${highSeason.window}) &mdash; and the balance is due at check-in. Full details in our <a href="/terms-and-services" class="${accordionLink}">Terms of Service</a>.`,
+          },
+          {
+            title: "Season",
+            body: `Packages are available ${season.display}.`,
+          },
+        ];
+        %>
         <div x-data="packagesAccordion" class="mx-auto max-w-3xl divide-y divide-stone-200 border-y border-stone-200">
+          <% goodToKnow.forEach(function (item, i) { %>
           <div>
             <h3>
-              <button type="button" @click="toggle(0)" aria-expanded="false" :aria-expanded="isOpen(0).toString()" aria-controls="good-to-know-0" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
-                What's not included
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(0) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <button type="button" @click="toggle(<%= i %>)" aria-expanded="false" :aria-expanded="isOpen(<%= i %>).toString()" aria-controls="good-to-know-<%= i %>" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
+                <%= item.title %>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(<%= i %>) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
             </h3>
-            <div id="good-to-know-0" x-show="isOpen(0)" x-cloak class="pb-5 text-stone-600 leading-relaxed">
-              Lunch, dinner, airport transfer, and treatments beyond those listed. Sound baths are &#8377;800, or &#8377;500 for package guests.
+            <div id="good-to-know-<%= i %>" x-show="isOpen(<%= i %>)" x-cloak class="pb-5 text-stone-600 leading-relaxed">
+              <%- item.body %>
             </div>
           </div>
-
-          <div>
-            <h3>
-              <button type="button" @click="toggle(1)" aria-expanded="false" :aria-expanded="isOpen(1).toString()" aria-controls="good-to-know-1" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
-                Yoga schedule
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(1) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            </h3>
-            <div id="good-to-know-1" x-show="isOpen(1)" x-cloak class="pb-5 text-stone-600 leading-relaxed">
-              Morning and evening classes run daily. Class styles rotate through the week; the full schedule is on the <a href="/yoga-shala" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">Yoga Shala page</a>.
-            </div>
-          </div>
-
-          <div>
-            <h3>
-              <button type="button" @click="toggle(2)" aria-expanded="false" :aria-expanded="isOpen(2).toString()" aria-controls="good-to-know-2" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
-                Booking your massages
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(2) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            </h3>
-            <div id="good-to-know-2" x-show="isOpen(2)" x-cloak class="pb-5 text-stone-600 leading-relaxed">
-              Please choose your treatment times at check-in. Our therapists are in demand and we want to guarantee your slot.
-            </div>
-          </div>
-
-          <div>
-            <h3>
-              <button type="button" @click="toggle(3)" aria-expanded="false" :aria-expanded="isOpen(3).toString()" aria-controls="good-to-know-3" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
-                Arrival and departure
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(3) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            </h3>
-            <div id="good-to-know-3" x-show="isOpen(3)" x-cloak class="pb-5 text-stone-600 leading-relaxed">
-              Check-in from <%= stay.checkIn %>, check-out by <%= stay.checkOut %>.
-            </div>
-          </div>
-
-          <div>
-            <h3>
-              <button type="button" @click="toggle(4)" aria-expanded="false" :aria-expanded="isOpen(4).toString()" aria-controls="good-to-know-4" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
-                Deposits and changes
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(4) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            </h3>
-            <div id="good-to-know-4" x-show="isOpen(4)" x-cloak class="pb-5 text-stone-600 leading-relaxed">
-              <% var highSeason = seasons.find(function (s) { return s.id === "high"; }); %>
-              A 50% deposit confirms your booking. It's fully refundable up to 15 days before arrival &mdash; 30 days during high season (<%= highSeason.window %>) &mdash; and the balance is due at check-in. Full details in our <a href="/terms-and-services" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">Terms of Service</a>.
-            </div>
-          </div>
-
-          <div>
-            <h3>
-              <button type="button" @click="toggle(5)" aria-expanded="false" :aria-expanded="isOpen(5).toString()" aria-controls="good-to-know-5" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
-                Season
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(5) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-            </h3>
-            <div id="good-to-know-5" x-show="isOpen(5)" x-cloak class="pb-5 text-stone-600 leading-relaxed">
-              Packages are available <%= season.display %>.
-            </div>
-          </div>
+          <% }); %>
         </div>
       </div>
     </section>

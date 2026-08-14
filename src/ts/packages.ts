@@ -4,7 +4,7 @@ import {
   trackPackageEnquiry,
   trackSeasonSelect,
   trackViewPackages,
-  type CtaLocation,
+  type PackageCtaLocation,
 } from "./analytics";
 
 const SEASON_IDS = ["low", "mid", "high"] as const;
@@ -111,12 +111,12 @@ export function registerPackagesComponents(alpine: typeof Alpine) {
       id: string,
       name: string,
       value: number,
-      location: CtaLocation,
+      location: PackageCtaLocation,
       season?: SeasonId,
     ) {
       trackPackageEnquiry(id, name, value, location, season);
     },
-    trackView(location: CtaLocation) {
+    trackView(location: PackageCtaLocation) {
       trackViewPackages(location);
     },
   }));

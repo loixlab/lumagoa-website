@@ -3,7 +3,7 @@ import {
   trackFindTreatment,
   trackIntentFilter,
   trackTreatmentEnquiry,
-  type CtaLocation,
+  type TreatmentCtaLocation,
 } from "./analytics";
 
 const HASH_PREFIX = "#find=";
@@ -126,10 +126,15 @@ export function registerTreatmentFinderComponents(alpine: typeof Alpine) {
   }));
 
   alpine.data("enquiryTracking", () => ({
-    track(id: string, title: string, price: number, location: CtaLocation) {
+    track(
+      id: string,
+      title: string,
+      price: number,
+      location: TreatmentCtaLocation,
+    ) {
       trackTreatmentEnquiry(id, title, price, location);
     },
-    trackFind(location: CtaLocation) {
+    trackFind(location: TreatmentCtaLocation) {
       trackFindTreatment(location);
     },
   }));
