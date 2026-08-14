@@ -14,7 +14,7 @@
     ],
     "intents": ["tension", "rest", "energy"],
     "packageEligible": true,
-    "image": null,
+    "image": "img/massages/abhyangam-massage.jpg",
     "active": true
   },
   {
@@ -32,7 +32,7 @@
     ],
     "intents": ["tension", "detox"],
     "packageEligible": true,
-    "image": null,
+    "image": "img/massages/podikizhi-massage.jpg",
     "active": true
   },
   {
@@ -50,7 +50,7 @@
     ],
     "intents": ["tension", "detox"],
     "packageEligible": true,
-    "image": null,
+    "image": "img/massages/elakizhi-massage.jpg",
     "active": true
   },
   {
@@ -68,7 +68,7 @@
     ],
     "intents": ["energy", "rest"],
     "packageEligible": true,
-    "image": null,
+    "image": "img/massages/marma-massage.jpg",
     "active": true
   },
   {
@@ -86,7 +86,7 @@
     ],
     "intents": ["detox", "energy"],
     "packageEligible": true,
-    "image": null,
+    "image": "img/massages/udwarthanam-massage.jpg",
     "active": true
   },
   {
@@ -104,7 +104,7 @@
     ],
     "intents": ["detox", "skin"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/ayurvedic-body-scrub.jpg",
     "active": true
   },
   {
@@ -122,7 +122,7 @@
     ],
     "intents": ["skin", "rest"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/mukhalepam-mukhabhyangam.jpg",
     "active": true
   },
   {
@@ -140,7 +140,7 @@
     ],
     "intents": ["head", "rest", "tension"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/head-massage.jpg",
     "active": true
   },
   {
@@ -158,7 +158,7 @@
     ],
     "intents": ["tension"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/head-neck-shoulder-massage.jpg",
     "active": true
   },
   {
@@ -180,7 +180,7 @@
     ],
     "intents": ["energy", "rest"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/foot-massage.jpg",
     "active": true
   },
   {
@@ -198,7 +198,7 @@
     ],
     "intents": ["tension"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/back-massage.jpg",
     "active": true
   },
   {
@@ -216,7 +216,7 @@
     ],
     "intents": ["head"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/netra-tarpanam.jpg",
     "active": true
   },
   {
@@ -234,7 +234,7 @@
     ],
     "intents": ["tension", "detox"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/kadikizhi-massage.jpg",
     "active": true
   },
   {
@@ -252,7 +252,7 @@
     ],
     "intents": ["head", "rest"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/talapothichil-massage.jpg",
     "active": true
   },
   {
@@ -270,7 +270,7 @@
     ],
     "intents": ["skin"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/njavara-facial.jpg",
     "active": true
   },
   {
@@ -288,7 +288,7 @@
     ],
     "intents": ["detox", "tension"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/njavarakizhi-massage.jpg",
     "active": true
   },
   {
@@ -306,7 +306,7 @@
     ],
     "intents": ["tension"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/kati-vasti-massage.jpg",
     "active": true
   },
   {
@@ -324,7 +324,7 @@
     ],
     "intents": ["tension"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/janu-vasti-massage.jpg",
     "active": true
   },
   {
@@ -342,7 +342,7 @@
     ],
     "intents": ["tension"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/greeva-vasti-massage.jpg",
     "active": true
   },
   {
@@ -360,7 +360,7 @@
     ],
     "intents": ["head"],
     "packageEligible": false,
-    "image": null,
+    "image": "img/massages/nasyam-dhoomapanam.jpg",
     "active": true
   },
   {
@@ -378,7 +378,7 @@
     ],
     "intents": ["tension"],
     "packageEligible": true,
-    "image": null,
+    "image": "img/massages/deep-tissue-massage.jpg",
     "active": true
   },
   {
@@ -396,7 +396,7 @@
     ],
     "intents": ["rest", "tension"],
     "packageEligible": true,
-    "image": null,
+    "image": "img/massages/swedish-massage.jpg",
     "active": true
   },
   {
