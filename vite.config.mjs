@@ -2,6 +2,8 @@ import { resolve } from "path";
 import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import { createMpaPlugin } from "vite-plugin-virtual-mpa";
+import { loadTreatmentPageData } from "./src/data/load-treatments.mjs";
+import { sitePageData } from "./src/data/site.mjs";
 
 export default defineConfig({
   plugins: [
@@ -17,6 +19,8 @@ export default defineConfig({
       },
     },
     createMpaPlugin({
+      // Every page gets the shared site data (phone, waHref) as EJS locals;
+      // per-page `data` entries are merged on top.
       pages: [
         {
           name: "index",
@@ -44,6 +48,15 @@ export default defineConfig({
           filename: "cafe-restaurant.html",
         },
         {
+          name: "ayurveda-massage",
+          template: resolve(__dirname, "src/pages/ayurveda-massage.ejs"),
+          filename: "ayurveda-massage.html",
+          // Treatment menu is rendered at build time from src/data/
+          // treatments.json — loadTreatmentPageData() validates the data and
+          // throws (failing the build) on malformed records.
+          data: loadTreatmentPageData(),
+        },
+        {
           name: "gallery",
           template: resolve(__dirname, "src/pages/gallery.ejs"),
           filename: "gallery.html",
@@ -68,7 +81,7 @@ export default defineConfig({
           template: resolve(__dirname, "src/pages/privacy-policy.ejs"),
           filename: "privacy-policy.html",
         },
-      ],
+      ].map((page) => ({ ...page, data: { ...sitePageData, ...page.data } })),
       htmlMinify: true,
       watchOptions: {
         include: "**/*.ejs", // Watch all .ejs files in the project

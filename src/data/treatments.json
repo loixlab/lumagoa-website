@@ -1,0 +1,474 @@
+[
+  {
+    "id": "abhyangam",
+    "title": "Abhyangam",
+    "subtitle": "Traditional Ayurvedic Massage",
+    "description": "Rejuvenate with an Indian traditional hand massage using warm herbal oils tailored to your Dosha. Long, rhythmic strokes help remove toxins, boost tissue strength, improve blood circulation, enhance skin complexion, and restore the body's natural balance.",
+    "category": "signature",
+    "order": 1,
+    "durations": [
+      {
+        "length": 60,
+        "price": 2900
+      }
+    ],
+    "intents": ["tension", "rest", "energy"],
+    "packageEligible": true,
+    "image": "img/massages/abhyangam-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "podikizhi",
+    "title": "Podikizhi",
+    "subtitle": "Herbal Powder Pouch Therapy",
+    "description": "A poultice of herbal powders, rock salt, coconut, and lemon juice is tied in muslin cloth boluses, soaked in herbal oil, and used to massage the body. This treatment relieves joint and muscle stiffness, removes toxins from the skin, and improves metabolism and inflammatory conditions.",
+    "category": "signature",
+    "order": 2,
+    "durations": [
+      {
+        "length": 60,
+        "price": 3600
+      }
+    ],
+    "intents": ["tension", "detox"],
+    "packageEligible": true,
+    "image": "img/massages/podikizhi-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "elakizhi",
+    "title": "Elakizhi",
+    "subtitle": "Herbal Leaf Pouch Therapy",
+    "description": "A therapeutic massage using heated herb pouches with garlic, lemon, and coconut in hot oil eases aches and pains, supports lymphatic drainage, and nourishes the nerves. Traditionally chosen for stiff, aching joints and long-held muscular tension.",
+    "category": "signature",
+    "order": 3,
+    "durations": [
+      {
+        "length": 60,
+        "price": 3400
+      }
+    ],
+    "intents": ["tension", "detox"],
+    "packageEligible": true,
+    "image": "img/massages/elakizhi-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "marma-massage",
+    "title": "Marma Massage",
+    "subtitle": "Energy Point Massage",
+    "description": "Stimulating vital energy points with pressure maintains Prana flow and clears obstructions. Dosha-specific herbal oil soothes the skin and nourishes vital body parts.",
+    "category": "signature",
+    "order": 4,
+    "durations": [
+      {
+        "length": 60,
+        "price": 3400
+      }
+    ],
+    "intents": ["energy", "rest"],
+    "packageEligible": true,
+    "image": "img/massages/marma-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "udwarthanam",
+    "title": "Udwarthanam",
+    "subtitle": "Herbal Powder Massage",
+    "description": "A dry massage with medicated powder stimulates nerves, promotes blood flow, revitalizes the body, and generates energy. It aids in detoxification, nourishes tissues, activates skin metabolism, and improves lymph flow.",
+    "category": "specialized-body",
+    "order": 1,
+    "durations": [
+      {
+        "length": 60,
+        "price": 3200
+      }
+    ],
+    "intents": ["detox", "energy"],
+    "packageEligible": true,
+    "image": "img/massages/udwarthanam-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "ayurvedic-body-scrub",
+    "title": "Ayurvedic Body Scrub",
+    "subtitle": null,
+    "description": "A luxurious blend of traditional herbs and sesame oil cleanses your skin by removing dead cells, moisturizing deeply, and encouraging new cell growth for a healthier, radiant appearance.",
+    "category": "specialized-body",
+    "order": 2,
+    "durations": [
+      {
+        "length": 60,
+        "price": 4500
+      }
+    ],
+    "intents": ["detox", "skin"],
+    "packageEligible": false,
+    "image": "img/massages/ayurvedic-body-scrub.jpg",
+    "active": true
+  },
+  {
+    "id": "mukhalepam-mukhabhyangam",
+    "title": "Mukhalepam + Mukhabhyangam",
+    "subtitle": "Ayurvedic Face Massage",
+    "description": "An Ayurvedic face massage with specific herbal oil, including Indian saffron, relaxes facial muscles, stimulates blood and lymphatic circulation, removes stress-induced toxins, and restores your face's natural glow and radiance.",
+    "category": "focused",
+    "order": 1,
+    "durations": [
+      {
+        "length": 60,
+        "price": 2500
+      }
+    ],
+    "intents": ["skin", "rest"],
+    "packageEligible": false,
+    "image": "img/massages/mukhalepam-mukhabhyangam.jpg",
+    "active": true
+  },
+  {
+    "id": "head-massage",
+    "title": "Head Massage",
+    "subtitle": null,
+    "description": "A head massage involves gentle kneading and pressure on the scalp to relieve tension, improve circulation, and promote relaxation, often using aromatic oils for added benefits like headache relief and scalp nourishment.",
+    "category": "focused",
+    "order": 2,
+    "durations": [
+      {
+        "length": 30,
+        "price": 1400
+      }
+    ],
+    "intents": ["head", "rest", "tension"],
+    "packageEligible": false,
+    "image": "img/massages/head-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "head-neck-shoulder-massage",
+    "title": "Head, Neck & Shoulder Massage",
+    "subtitle": null,
+    "description": "A focused treatment targeting the upper body's tension zones, releasing accumulated stress and restoring mobility and comfort to these critical areas.",
+    "category": "focused",
+    "order": 3,
+    "durations": [
+      {
+        "length": 45,
+        "price": 2000
+      }
+    ],
+    "intents": ["tension"],
+    "packageEligible": false,
+    "image": "img/massages/head-neck-shoulder-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "foot-massage",
+    "title": "Foot Massage",
+    "subtitle": "Indian Foot Reflexology",
+    "description": "Indian Foot Reflexology to stimulate blood circulation and activate marma points, promoting Prana flow and vital energy throughout the body based on ancient healing traditions.",
+    "category": "focused",
+    "order": 4,
+    "durations": [
+      {
+        "length": 30,
+        "price": 1500
+      },
+      {
+        "length": 60,
+        "price": 2500
+      }
+    ],
+    "intents": ["energy", "rest"],
+    "packageEligible": false,
+    "image": "img/massages/foot-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "back-massage",
+    "title": "Back Massage",
+    "subtitle": null,
+    "description": "An Ayurvedic back massage combining several forms of pressure and hand movement with warm sesame oil, usually blended with aromatherapy essential oils. The oil is continuously replenished warm so that its benefits are heightened.",
+    "category": "focused",
+    "order": 5,
+    "durations": [
+      {
+        "length": 30,
+        "price": 1500
+      }
+    ],
+    "intents": ["tension"],
+    "packageEligible": false,
+    "image": "img/massages/back-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "netra-tarpanam",
+    "title": "Netra Tarpanam",
+    "subtitle": null,
+    "description": "An Ayurvedic therapy in which warm medicated ghee is held gently over the eyes within a ring of dough — a cooling, restful treatment traditionally used to soothe tired, dry eyes after long days of screens, sun or travel.",
+    "category": "doctor-recommended",
+    "order": 1,
+    "durations": [
+      {
+        "length": 30,
+        "price": 2500
+      }
+    ],
+    "intents": ["head"],
+    "packageEligible": false,
+    "image": "img/massages/netra-tarpanam.jpg",
+    "active": true
+  },
+  {
+    "id": "kadikizhi",
+    "title": "Kadikizhi",
+    "subtitle": null,
+    "description": "An Ayurvedic therapy involving heated herbal poultices that are applied to the body, aiding in alleviating stiffness, inflammation, and promoting overall rejuvenation and well-being.",
+    "category": "doctor-recommended",
+    "order": 2,
+    "durations": [
+      {
+        "length": 60,
+        "price": 3000
+      }
+    ],
+    "intents": ["tension", "detox"],
+    "packageEligible": false,
+    "image": "img/massages/kadikizhi-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "talapothichil",
+    "title": "Talapothichil",
+    "subtitle": null,
+    "description": "An Ayurvedic therapy where a paste of medicinal herbs is applied to the scalp and kept for a specific duration, promoting relaxation, nourishing the scalp, and improving hair health.",
+    "category": "doctor-recommended",
+    "order": 3,
+    "durations": [
+      {
+        "length": 30,
+        "price": 2500
+      }
+    ],
+    "intents": ["head", "rest"],
+    "packageEligible": false,
+    "image": "img/massages/talapothichil-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "njavara-facial",
+    "title": "Njavara Facial",
+    "subtitle": null,
+    "description": "A traditional Ayurvedic facial using Njavara rice and saffron oil, known for their nourishing and rejuvenating properties. This treatment deeply cleanses the skin, enhances natural radiance, improves complexion, and helps reduce signs of ageing.",
+    "category": "doctor-recommended",
+    "order": 4,
+    "durations": [
+      {
+        "length": 60,
+        "price": 3500
+      }
+    ],
+    "intents": ["skin"],
+    "packageEligible": false,
+    "image": "img/massages/njavara-facial.jpg",
+    "active": true
+  },
+  {
+    "id": "njavarakizhi",
+    "title": "Njavarakizhi",
+    "subtitle": "Rice Pouch Therapy",
+    "description": "Scrubbing warm herbal boluses over the body to improve circulation, muscle tone, digestion, and tissue vigor, beneficial for degenerative conditions and supporting muscular tissue rebuilding.",
+    "category": "doctor-recommended",
+    "order": 5,
+    "durations": [
+      {
+        "length": 60,
+        "price": 4000
+      }
+    ],
+    "intents": ["detox", "tension"],
+    "packageEligible": false,
+    "image": "img/massages/njavarakizhi-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "kati-vasti",
+    "title": "Kati Vasti",
+    "subtitle": null,
+    "description": "A circular dough of flour, infused with medicated oil, is applied to the lower back to alleviate lumbar pain, nourish muscles and tissues, and improve circulation.",
+    "category": "doctor-recommended",
+    "order": 6,
+    "durations": [
+      {
+        "length": 45,
+        "price": 2500
+      }
+    ],
+    "intents": ["tension"],
+    "packageEligible": false,
+    "image": "img/massages/kati-vasti-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "janu-vasti",
+    "title": "Janu Vasti",
+    "subtitle": null,
+    "description": "Applying medicated herbal oil to knee joints enhances blood circulation, aiding in the healing of damaged tissues and cartilage, and rejuvenates and hydrates the joints, beneficial for degenerative disorders.",
+    "category": "doctor-recommended",
+    "order": 7,
+    "durations": [
+      {
+        "length": 45,
+        "price": 2500
+      }
+    ],
+    "intents": ["tension"],
+    "packageEligible": false,
+    "image": "img/massages/janu-vasti-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "greeva-vasti",
+    "title": "Greeva Vasti",
+    "subtitle": null,
+    "description": "Applying medicated herbal oil in a black gram dough well helps strengthen cervical muscles, nourish and rehydrate cervical vertebrae, and alleviate stiffness and pain while improving circulation, beneficial for cervical degenerative disorders.",
+    "category": "doctor-recommended",
+    "order": 8,
+    "durations": [
+      {
+        "length": 45,
+        "price": 2500
+      }
+    ],
+    "intents": ["tension"],
+    "packageEligible": false,
+    "image": "img/massages/greeva-vasti-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "nasyam-dhoomapanam",
+    "title": "Nasyam + Dhoomapanam",
+    "subtitle": null,
+    "description": "Nasal instillation of herbal medicines followed by medicated steam, traditionally used to clear the sinuses, ease tension headaches, and leave the head feeling light and clear.",
+    "category": "doctor-recommended",
+    "order": 9,
+    "durations": [
+      {
+        "length": 45,
+        "price": 2000
+      }
+    ],
+    "intents": ["head"],
+    "packageEligible": false,
+    "image": "img/massages/nasyam-dhoomapanam.jpg",
+    "active": true
+  },
+  {
+    "id": "deep-tissue-massage",
+    "title": "Deep Tissue Massage",
+    "subtitle": null,
+    "description": "A therapeutic massage focused on relieving chronic muscle tension and deep-seated stress. Using slow, firm strokes and targeted pressure, this treatment works on deeper layers of muscles and connective tissues to improve mobility, reduce pain, and promote overall relaxation.",
+    "category": "western",
+    "order": 1,
+    "durations": [
+      {
+        "length": 60,
+        "price": 3500
+      }
+    ],
+    "intents": ["tension"],
+    "packageEligible": true,
+    "image": "img/massages/deep-tissue-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "swedish-massage",
+    "title": "Swedish Massage",
+    "subtitle": null,
+    "description": "A relaxing full-body massage designed to ease muscle tension and improve blood circulation. Using long, flowing strokes, gentle kneading, and rhythmic movements, this therapy helps reduce stress, promote deep relaxation, and restore overall balance.",
+    "category": "western",
+    "order": 2,
+    "durations": [
+      {
+        "length": 60,
+        "price": 3500
+      }
+    ],
+    "intents": ["rest", "tension"],
+    "packageEligible": true,
+    "image": "img/massages/swedish-massage.jpg",
+    "active": true
+  },
+  {
+    "id": "abhyangam-podikizhi",
+    "title": "Abhyangam + Podikizhi",
+    "subtitle": null,
+    "description": "Ninety minutes beginning with warm-oil Abhyangam to open the body, followed by herbal powder poultices to release joint and muscle stiffness.",
+    "category": "combo",
+    "order": 1,
+    "durations": [
+      {
+        "length": 90,
+        "price": 4500
+      }
+    ],
+    "intents": ["tension", "detox"],
+    "packageEligible": false,
+    "image": null,
+    "active": true
+  },
+  {
+    "id": "abhyangam-elakizhi",
+    "title": "Abhyangam + Elakizhi",
+    "subtitle": null,
+    "description": "Warm-oil Abhyangam followed by heated herbal leaf pouches, for deep aches, stiffness and tired nerves.",
+    "category": "combo",
+    "order": 2,
+    "durations": [
+      {
+        "length": 90,
+        "price": 4500
+      }
+    ],
+    "intents": ["tension", "rest"],
+    "packageEligible": false,
+    "image": null,
+    "active": true
+  },
+  {
+    "id": "abhyangam-njavarakizhi",
+    "title": "Abhyangam + Njavarakizhi",
+    "subtitle": null,
+    "description": "Warm-oil Abhyangam followed by Njavara rice boluses, to rebuild muscle tone and restore tissue vigour.",
+    "category": "combo",
+    "order": 3,
+    "durations": [
+      {
+        "length": 90,
+        "price": 5000
+      }
+    ],
+    "intents": ["tension", "detox"],
+    "packageEligible": false,
+    "image": null,
+    "active": true
+  },
+  {
+    "id": "doctor-consultation",
+    "title": "Doctor Consultation",
+    "subtitle": null,
+    "description": "A personal consultation with our experienced Ayurvedic doctor to assess your constitution and wellness goals, and to recommend the treatments best suited to you.",
+    "category": "consultation",
+    "order": 1,
+    "durations": [
+      {
+        "length": 30,
+        "price": 1000
+      }
+    ],
+    "intents": [],
+    "packageEligible": false,
+    "image": null,
+    "active": true
+  }
+]

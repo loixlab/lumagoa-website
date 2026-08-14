@@ -4,18 +4,18 @@
 <%- include('./src/partials/head.ejs', { 
   title: 'Roots & Bloom Café | Healthy Vegan & Vegetarian Dining in Palolem ', 
   description: 'Discover Roots & Bloom at LUMA Resort. The best healthy breakfast, Buddha bowls, and vegan eats in Palolem, South Goa. Alcohol-free dining designed for yoga, rest, and renewal.',
-  extraMeta: `<meta property="og:url" content="https://lumagoa.com/cafe-restaurant">
+  extraMeta: `<meta property="og:url" content="${siteUrl}/cafe-restaurant">
   <meta property="og:image" content="/img/cafe-hero_og.jpg">
-  <meta name="twitter:url" content="https://lumagoa.com/cafe-restaurant">
+  <meta name="twitter:url" content="${siteUrl}/cafe-restaurant">
   <meta name="twitter:image" content="/img/cafe-hero_twitter.jpg">`,
-  extraContent: `<link rel="canonical" href="https://lumagoa.com/cafe-restaurant" />`,
+  extraContent: `<link rel="canonical" href="${siteUrl}/cafe-restaurant" />`,
   schemaData: {
       "@context": "https://schema.org",
        "@type": "Restaurant",
        "name": "Roots & Bloom Café",
        "description": "Healthy vegan and vegetarian dining at LUMA Resort in Palolem, South Goa. Alcohol-free café offering breakfast, Buddha bowls, and plant-based meals.",
        "image": "/img/cafe-hero_display.jpg",
-       "url": "https://lumagoa.com/cafe-restaurant",
+       "url": siteUrl + "/cafe-restaurant",
        "telephone": "+91 738 71 45 897",
        "address": {
         "@type": "PostalAddress",
@@ -25,7 +25,7 @@
           "postalCode": "403702",
           "addressCountry": "IN"
       },
-      "email": "contact@lumagoa.com",
+      "email": email,
       "geo": {
         "@type": "GeoCoordinates",
         "latitude": 15.0127876,
@@ -40,7 +40,7 @@
       "parentOrganization": {
         "@type": "Hotel",
         "name": "Luma",
-        "url": "https://lumagoa.com/"
+        "url": siteUrl + "/"
       }
     }
 }) %>
@@ -314,10 +314,10 @@
                 <span class="w-8 h-px bg-secondary mr-4 group-hover:w-12 transition-all"></span>
                 Stay in our A-Frame Huts
               </a>
-              <span class="flex items-center text-white group">
-                <span class="w-8 h-px bg-secondary mr-4"></span>
-                Holistic Massage Therapy (soon!)
-              </span>
+              <a href="/ayurveda-massage" class="flex items-center text-white hover:text-secondary transition-colors group">
+                <span class="w-8 h-px bg-secondary mr-4 group-hover:w-12 transition-all"></span>
+                Ayurvedic Massage & Therapies
+              </a>
             </div>
           </div>
 

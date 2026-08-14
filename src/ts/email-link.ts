@@ -1,4 +1,5 @@
 import type Alpine from "alpinejs";
+import { EMAIL_PARTS } from "../data/site.mjs";
 
 /**
  * Registers the Alpine component behind the obfuscated contact email links,
@@ -11,7 +12,7 @@ import type Alpine from "alpinejs";
  */
 export function registerEmailComponents(alpine: typeof Alpine) {
   alpine.data("emailLink", () => {
-    const address = ["contact", "lumagoa.com"].join("@");
+    const address = EMAIL_PARTS.join("@");
     return {
       address,
       href: `mailto:${address}`,
