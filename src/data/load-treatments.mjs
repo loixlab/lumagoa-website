@@ -1,10 +1,11 @@
 // Build-time loader for the Ayurveda & Massage page. Imported by
-// vite.config.mjs only — never shipped to the client. Parses
-// treatments.json, validates it, and derives everything the EJS template
-// needs (grouped categories, JSON-LD, WhatsApp links) from the one array.
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
-import { fileURLToPath } from "node:url";
+// vite.config.mjs only — never shipped to the client. Validates
+// treatments.json and derives everything the EJS template needs (grouped
+// categories, JSON-LD, WhatsApp links) from the one array.
+//
+// The JSON is imported (not readFileSync'd) so Vite tracks it as a config
+// dependency and auto-restarts the dev server when it changes.
+import rawTreatments from "./treatments.json" with { type: "json" };
 import { EMAIL, PHONE_DISPLAY, SITE_URL, waHref } from "./site.mjs";
 
 const CATEGORY_ORDER = [
@@ -122,6 +123,9 @@ function validate(raw) {
     if (typeof t.packageEligible !== "boolean") {
       throw new Error(`treatments.json: missing packageEligible on ${label}`);
     }
+    if (t.image !== null && (typeof t.image !== "string" || t.image === "")) {
+      throw new Error(`treatments.json: invalid image on ${label}`);
+    }
     if (typeof t.active !== "boolean") {
       throw new Error(`treatments.json: missing active on ${label}`);
     }
@@ -202,18 +206,18 @@ function buildSchema(treatments) {
   };
 }
 
-/** Loads, validates and shapes the treatment data for the page template. */
+/** Validates and shapes the treatment data for the page template. */
 export function loadTreatmentPageData() {
-  const jsonPath = join(
-    dirname(fileURLToPath(import.meta.url)),
-    "treatments.json",
-  );
-  const raw = JSON.parse(readFileSync(jsonPath, "utf8"));
-  validate(raw);
+  validate(rawTreatments);
 
-  const treatments = raw
+  const treatments = rawTreatments
     .filter((t) => t.active !== false)
-    .sort((a, b) => a.order - b.order);
+    .sort((a, b) => a.order - b.order)
+    // Asset paths must be root-relative; tolerate owner-edited paths
+    // without the leading slash.
+    .map((t) =>
+      t.image && !t.image.startsWith("/") ? { ...t, image: `/${t.image}` } : t,
+    );
 
   const byCategory = CATEGORY_ORDER.map((key) => ({
     key,
