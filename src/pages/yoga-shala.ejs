@@ -52,7 +52,7 @@ schemaData: {
         "itemOffered": {
           "@type": "Service",
           "name": "Sound Bath Sessions",
-          "description": "Experience restorative sound healing for 800 INR."
+          "description": "Experience restorative sound healing for " + prices.soundBath + " INR."
         }
       },
       {
@@ -244,7 +244,7 @@ schemaData: {
             </div>
             <div class="text-center">
               <h4 class="font-bold text-xl mb-2">Sound bath</h4>
-              <p>800 INR<br>(limited spots, contact for enquiry <%= phone.display %>)</p>
+              <p><%= prices.soundBath %> INR<br>(limited spots, contact for enquiry <%= phone.display %>)</p>
             </div>
           </div>
           <p class="mt-10 text-stone-600">
