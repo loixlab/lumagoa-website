@@ -11,9 +11,11 @@
 // dependency and auto-restarts the dev server when it changes.
 import rawTreatments from "./treatments.json" with { type: "json" };
 import { EMAIL, PHONE_DISPLAY, SITE_URL, waHref } from "./site.mjs";
-import { numberToWord } from "./utils.mjs";
+import { formatPrice, numberToWord } from "./utils.mjs";
 
-const CATEGORY_ORDER = [
+// Also imported by load-packages.mjs to sort the included-treatments list —
+// exporting it keeps the two pages' category order in lockstep.
+export const CATEGORY_ORDER = [
   "signature",
   "specialized-body",
   "focused",
@@ -156,10 +158,6 @@ function validate(raw) {
       `treatments.json: no active treatments in category ${emptyCategories.join(", ")}`,
     );
   }
-}
-
-function formatPrice(price) {
-  return `₹${price.toLocaleString("en-IN")}`;
 }
 
 function waLink(title) {

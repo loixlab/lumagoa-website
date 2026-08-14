@@ -112,17 +112,38 @@
 
     <!-- 3. The three packages -->
     <section id="packages" class="py-20 md:py-32 bg-stone-50 scroll-mt-[75px] md:scroll-mt-[102px]">
-      <div class="container mx-auto px-6 max-w-6xl">
-        <div class="text-center max-w-3xl mx-auto mb-16 md:mb-20">
+      <div class="container mx-auto px-6 max-w-6xl" x-data="seasonSelector">
+        <div class="text-center max-w-3xl mx-auto mb-12 md:mb-16">
           <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Choose Your Stay</span>
           <h2 class="mt-4 text-4xl md:text-5xl font-display text-stone-800 leading-tight">
-            Three, five or <span class="italic text-primary">seven nights</span>
+            Three, five or seven nights
           </h2>
+        </div>
+
+        <!-- Season selector — server renders Low-season prices; without JS the
+             page stays a plain Low-season price list. -->
+        <div class="mb-12 md:mb-16 text-center">
+          <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Choose your season</span>
+          <div role="group" aria-label="Season" class="mt-5 flex flex-wrap justify-center gap-3 md:gap-4">
+            <% seasons.forEach(function (s) { %>
+            <button type="button" @click="select('<%= s.id %>')" aria-pressed="false" :aria-pressed="isActive('<%= s.id %>').toString()" class="btn btn-lg h-auto rounded-full px-6 py-2 flex-col gap-0 font-medium" :class="isActive('<%= s.id %>') ? 'btn-primary' : 'btn-outline border-stone-300 text-stone-600 hover:border-emerald-700 hover:bg-transparent hover:text-stone-600'">
+              <span class="text-base"><%= s.label %></span>
+              <span class="text-xs font-normal opacity-80"><%= s.window %></span>
+            </button>
+            <% }); %>
+          </div>
+          <p class="sr-only" aria-live="polite" x-text="announcement"></p>
+          <div class="mx-auto mt-6 max-w-2xl rounded-xl border border-stone-200 border-l-4 border-l-[#c66f54] bg-white p-5 text-left shadow-sm">
+            <p class="text-sm text-stone-600 leading-relaxed">
+              <span class="font-bold text-stone-800">Booking across seasons?</span>
+              Prices shown are for stays within one season. Stays crossing a season boundary are quoted per night at the applicable rate &mdash; <a href="<%= waHref("Hi LUMA, I'd like a quote for a stay that crosses seasons. My dates are: ") %>" target="_blank" rel="noopener" x-data="packageTracking" @click="track('cross-season', 'Cross-Season Stay', 0, 'package_card')" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">just ask</a>.
+            </p>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:items-stretch">
           <% packages.forEach(function (p) { %>
-          <article class="card rounded-xl bg-white shadow-lg <%= p.featured ? 'relative border-2 border-primary md:scale-105 order-first md:order-none' : 'border border-stone-100' %>">
+          <article x-data="packageCard(<%= JSON.stringify(p.client) %>)" class="card rounded-xl bg-white shadow-lg <%= p.featured ? 'relative border-2 border-primary md:scale-105 order-first md:order-none' : 'border border-stone-100' %>">
             <% if (p.featured) { %>
             <span class="badge badge-primary absolute -top-3 left-1/2 -translate-x-1/2 px-4 text-xs font-bold uppercase tracking-widest">Most popular</span>
             <% } %>
@@ -164,21 +185,22 @@
                 <div>
                   <p class="flex items-baseline justify-between gap-2">
                     <span class="text-stone-600">Solo</span>
-                    <span class="text-2xl font-display text-stone-800"><%= formatPrice(p.price.solo) %></span>
+                    <span class="text-2xl font-display text-stone-800" x-text="card.prices[season].solo"><%= p.client.prices.low.solo %></span>
                   </p>
+                  <!-- The saving is season-independent (flat ₹500/night room discount) — no binding needed. -->
                   <p class="text-right text-sm text-emerald-800 font-bold">Save <%= formatPrice(p.saving.solo) %> vs booking separately</p>
                 </div>
                 <div>
                   <p class="flex items-baseline justify-between gap-2">
                     <span class="text-stone-600">Two sharing</span>
-                    <span class="text-2xl font-display text-stone-800"><%= formatPrice(p.price.double) %> <span class="text-sm font-sans text-stone-500">total</span></span>
+                    <span class="text-2xl font-display text-stone-800"><span x-text="card.prices[season].double"><%= p.client.prices.low.double %></span> <span class="text-sm font-sans text-stone-500">total</span></span>
                   </p>
                   <p class="text-right text-sm text-emerald-800 font-bold">Save <%= formatPrice(p.saving.double) %> vs booking separately</p>
                 </div>
               </div>
 
               <div class="card-actions mt-6">
-                <a href="<%= p.wa %>" target="_blank" rel="noopener" x-data="packageTracking" @click="track('<%= p.id %>', '<%= p.name %>', <%= p.price.double %>, 'package_card')" class="btn btn-primary btn-block rounded-full font-bold shadow-xl">
+                <a href="<%= p.client.wa.low %>" :href="card.wa[season]" target="_blank" rel="noopener" x-data="packageTracking" @click="track('<%= p.id %>', '<%= p.name %>', card.values[season], 'package_card', season)" class="btn btn-primary btn-block rounded-full font-bold shadow-xl">
                   Enquire on WhatsApp
                 </a>
               </div>
@@ -299,7 +321,7 @@
           <li class="flex flex-col items-center text-center space-y-4">
             <span class="w-12 h-12 rounded-full bg-stone-800 text-white flex items-center justify-center font-display text-xl">3</span>
             <h3 class="font-serif text-xl text-stone-800">Secure with a deposit</h3>
-            <p class="text-stone-600 leading-relaxed">A 50% deposit confirms your dates, through our <a href="/deposit-payment" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">secure deposit page</a>.</p>
+            <p class="text-stone-600 leading-relaxed">A 50% deposit confirms your dates.</p>
           </li>
           <li class="flex flex-col items-center text-center space-y-4">
             <span class="w-12 h-12 rounded-full bg-stone-800 text-white flex items-center justify-center font-display text-xl">4</span>
@@ -387,7 +409,8 @@
               </button>
             </h3>
             <div id="good-to-know-4" x-show="isOpen(4)" x-cloak class="pb-5 text-stone-600 leading-relaxed">
-              A 50% deposit confirms your booking, payable through our <a href="/deposit-payment" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">secure deposit page</a>. It's fully refundable up to 15 days before arrival &mdash; 30 days during high season &mdash; and the balance is due at check-in. Full details in our <a href="/terms-and-services" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">Terms of Service</a>.
+              <% var highSeason = seasons.find(function (s) { return s.id === "high"; }); %>
+              A 50% deposit confirms your booking. It's fully refundable up to 15 days before arrival &mdash; 30 days during high season (<%= highSeason.window %>) &mdash; and the balance is due at check-in. Full details in our <a href="/terms-and-services" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">Terms of Service</a>.
             </div>
           </div>
 

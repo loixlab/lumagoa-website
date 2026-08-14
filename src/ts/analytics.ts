@@ -71,24 +71,35 @@ export function trackFindTreatment(location: CtaLocation): void {
  * A package-enquiry CTA click on /packages (WhatsApp). Also reports a Meta
  * Pixel `Lead`. Generic CTAs (final CTA, float) pass value 0 — the
  * value/price fields are then omitted rather than sent as 0. Card CTAs pass
- * the two-sharing package price as the Lead value.
+ * the selected season's two-sharing price as the Lead value, plus the
+ * season id, so conversions are attributed at the right seasonal value.
  */
 export function trackPackageEnquiry(
   id: string,
   name: string,
   value: number,
   location: CtaLocation,
+  season?: string,
 ): void {
   push({
     event: "package_enquiry",
     package_id: id,
     cta_location: location,
+    ...(season ? { season } : {}),
     ...(value > 0 ? { package_value: value } : {}),
   });
   window.fbq?.("track", "Lead", {
     content_name: name,
     ...(value > 0 ? { value, currency: "INR" } : {}),
   });
+}
+
+/**
+ * A season pill activated on the /packages selector — tells the owner which
+ * season browsers are actually shopping for.
+ */
+export function trackSeasonSelect(season: string): void {
+  push({ event: "season_select", season });
 }
 
 /**
