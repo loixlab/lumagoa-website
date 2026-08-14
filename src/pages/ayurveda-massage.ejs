@@ -45,7 +45,7 @@
           </p>
 
           <div class="pt-8">
-            <a href="#find" x-data="enquiryTracking" @click="track('general', 'Ayurvedic Treatment', 0, 'hero')" class="btn btn-primary btn-lg rounded-full px-10 font-bold tracking-wide shadow-xl">
+            <a href="#find" x-data="enquiryTracking" @click="trackFind('hero')" class="btn btn-primary btn-lg rounded-full px-10 font-bold tracking-wide shadow-xl">
               Find your treatment
             </a>
           </div>
@@ -177,7 +177,7 @@
                   <span class="block"><%= d.length %> min &middot; <%= formatPrice(d.price) %></span>
                   <% }); %>
                 </p>
-                <a href="<%= waLink(t.title) %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= t.id %>', '<%= t.title %>', <%= t.durations[0].price %>, 'signature_card')" class="inline-block text-xs uppercase tracking-[0.2em] font-bold text-[#c66f54] border-b border-[#c66f54] pb-1 hover:text-stone-800 hover:border-stone-800 transition-colors">
+                <a href="<%= waLink(t.title) %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= t.id %>', '<%= t.title %>', <%= t.durations.length === 1 ? t.durations[0].price : 0 %>, 'signature_card')" class="inline-block text-xs uppercase tracking-[0.2em] font-bold text-[#c66f54] border-b border-[#c66f54] pb-1 hover:text-stone-800 hover:border-stone-800 transition-colors">
                   Book this treatment &rarr;
                 </a>
               </article>
@@ -221,7 +221,7 @@
                     <span class="block"><%= d.length %> min &middot; <%= formatPrice(d.price) %></span>
                     <% }); %>
                   </p>
-                  <a href="<%= waLink(t.title) %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= t.id %>', '<%= t.title %>', <%= t.durations[0].price %>, 'tier2_row')" class="inline-block text-xs uppercase tracking-[0.2em] font-bold text-stone-400 hover:text-[#c66f54] transition-colors">
+                  <a href="<%= waLink(t.title) %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= t.id %>', '<%= t.title %>', <%= t.durations.length === 1 ? t.durations[0].price : 0 %>, 'tier2_row')" class="inline-block text-xs uppercase tracking-[0.2em] font-bold text-stone-400 hover:text-[#c66f54] transition-colors">
                     Book &rarr;
                   </a>
                 </div>
@@ -266,7 +266,7 @@
                       <span class="block"><%= d.length %> min &middot; <%= formatPrice(d.price) %></span>
                       <% }); %>
                     </p>
-                    <a href="<%= waLink(t.title) %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= t.id %>', '<%= t.title %>', <%= t.durations[0].price %>, 'combination')" class="inline-block text-xs uppercase tracking-[0.2em] font-bold text-stone-400 hover:text-[#c66f54] transition-colors">
+                    <a href="<%= waLink(t.title) %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= t.id %>', '<%= t.title %>', <%= t.durations.length === 1 ? t.durations[0].price : 0 %>, 'combination')" class="inline-block text-xs uppercase tracking-[0.2em] font-bold text-stone-400 hover:text-[#c66f54] transition-colors">
                       Book &rarr;
                     </a>
                   </div>
@@ -290,7 +290,7 @@
                   <% }); %>
                 </p>
                 <div class="pt-2">
-                  <a href="<%= waHref("Hi LUMA, I'd like to book a consultation with the Ayurvedic doctor. My preferred time is: ") %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= consultation.id %>', '<%= consultation.title %>', <%= consultation.durations[0].price %>, 'doctor')" class="btn btn-primary btn-lg rounded-full px-10 font-bold shadow-xl">
+                  <a href="<%= waHref("Hi LUMA, I'd like to book a consultation with the Ayurvedic doctor. My preferred time is: ") %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= consultation.id %>', '<%= consultation.title %>', <%= consultation.durations.length === 1 ? consultation.durations[0].price : 0 %>, 'doctor')" class="btn btn-primary btn-lg rounded-full px-10 font-bold shadow-xl">
                     Book a consultation
                   </a>
                 </div>

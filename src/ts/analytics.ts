@@ -56,3 +56,12 @@ export function trackTreatmentEnquiry(
 export function trackIntentFilter(intent: string): void {
   push({ event: "intent_filter", intent });
 }
+
+/**
+ * A navigation CTA pointing at the treatment finder (the hero button).
+ * Deliberately NOT a `treatment_enquiry`/Pixel `Lead` — it measures
+ * engagement, not booking intent.
+ */
+export function trackFindTreatment(location: CtaLocation): void {
+  push({ event: "find_treatment", cta_location: location });
+}

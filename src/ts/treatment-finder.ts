@@ -1,5 +1,6 @@
 import type Alpine from "alpinejs";
 import {
+  trackFindTreatment,
   trackIntentFilter,
   trackTreatmentEnquiry,
   type CtaLocation,
@@ -41,10 +42,13 @@ export function registerTreatmentFinderComponents(alpine: typeof Alpine) {
       }
     },
 
+    // The candidate comes from the URL hash — compare against the pills'
+    // data-intent values rather than interpolating it into a selector,
+    // where a crafted hash would throw and kill init.
     isKnownIntent(intent: string): boolean {
-      return Boolean(
-        this.$root.querySelector(`button[data-intent="${intent}"]`),
-      );
+      return Array.from(
+        this.$root.querySelectorAll<HTMLElement>("button[data-intent]"),
+      ).some((button) => button.dataset.intent === intent);
     },
 
     isActive(intent: string): boolean {
@@ -124,6 +128,9 @@ export function registerTreatmentFinderComponents(alpine: typeof Alpine) {
   alpine.data("enquiryTracking", () => ({
     track(id: string, title: string, price: number, location: CtaLocation) {
       trackTreatmentEnquiry(id, title, price, location);
+    },
+    trackFind(location: CtaLocation) {
+      trackFindTreatment(location);
     },
   }));
 }

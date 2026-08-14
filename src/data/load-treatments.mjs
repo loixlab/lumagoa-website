@@ -197,16 +197,23 @@ function buildSchema(treatments) {
     hasOfferCatalog: {
       "@type": "OfferCatalog",
       name: "Ayurvedic Treatments and Therapies",
-      itemListElement: treatments.map((t) => ({
-        "@type": "Offer",
-        price: t.durations[0].price,
-        priceCurrency: "INR",
-        itemOffered: {
-          "@type": "Service",
-          name: t.title,
-          description: t.description,
-        },
-      })),
+      // One Offer per duration — a multi-duration treatment (Foot Massage)
+      // has genuinely distinct prices, not one price.
+      itemListElement: treatments.flatMap((t) =>
+        t.durations.map((d) => ({
+          "@type": "Offer",
+          price: d.price,
+          priceCurrency: "INR",
+          itemOffered: {
+            "@type": "Service",
+            name:
+              t.durations.length === 1
+                ? t.title
+                : `${t.title} (${d.length} min)`,
+            description: t.description,
+          },
+        })),
+      ),
     },
   };
 }
