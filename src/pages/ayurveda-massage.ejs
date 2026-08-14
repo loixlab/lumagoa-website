@@ -4,7 +4,7 @@
   title: 'Ayurvedic Massage Palolem South Goa | LUMA Goa Treatment Centre',
   description: 'Traditional Ayurvedic massage and therapies in Palolem, South Goa. Abhyangam, Podikizhi, Elakizhi and more, from ₹1,400. Open daily 200 m from Palolem Beach. Walk-ins welcome.',
   ogTitle: 'LUMA Goa | Ayurvedic Treatment Centre, Palolem',
-  ogDescription: 'Twenty-five traditional Ayurvedic therapies, two hundred metres from Palolem Beach.',
+  ogDescription: `${therapyCountWord} traditional Ayurvedic therapies, two hundred metres from Palolem Beach.`,
   extraMeta: `<meta property="og:url" content="${siteUrl}/ayurveda-massage">
     <meta property="og:image" content="/img/luma_flower_hut.jpg">
     <meta name="twitter:url" content="${siteUrl}/ayurveda-massage">
@@ -41,7 +41,7 @@
           </h1>
 
           <p class="text-lg md:text-xl text-stone-200 leading-relaxed max-w-2xl mx-auto">
-            Twenty-five traditional Ayurvedic therapies, two hundred metres from Palolem Beach. Warm herbal oils, experienced therapists, and treatments drawn from a lineage that predates every spa on this coast.
+            <%= therapyCountWord %> traditional Ayurvedic therapies, two hundred metres from Palolem Beach. Warm herbal oils, experienced therapists, and treatments drawn from a lineage that predates every spa on this coast.
           </p>
 
           <div class="pt-8">
@@ -102,7 +102,7 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3c-4.97 4-7 7.5-7 11a7 7 0 0014 0c0-3.5-2.03-7-7-11z" />
               </svg>
             </div>
-            <p class="text-stone-700 font-medium">25 traditional therapies</p>
+            <p class="text-stone-700 font-medium"><%= therapyCount %> traditional therapies</p>
           </div>
           <div class="flex flex-col items-center text-center space-y-4">
             <div class="w-20 h-20 bg-stone-200 rounded-full flex items-center justify-center">
@@ -141,7 +141,7 @@
           </div>
 
           <p class="mt-8 text-xs uppercase tracking-widest text-emerald-800 font-bold" aria-live="polite" x-text="visibleCount + (visibleCount === 1 ? ' treatment' : ' treatments')">
-            <%= signature.items.length + tierTwo.reduce(function (n, c) { return n + c.items.length; }, 0) %> treatments
+            <%= therapyCount %> treatments
           </p>
         </div>
       </section>
@@ -238,72 +238,72 @@
           <% }); %>
         </div>
       </section>
-    </div>
 
-    <!-- 5. Combinations & the doctor -->
-    <section class="py-16 md:py-24 bg-stone-50">
-      <div class="container mx-auto px-6 max-w-6xl">
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
+      <!-- 5. Combinations & the doctor (combos are part of the intent filter) -->
+      <section class="py-16 md:py-24 bg-stone-50">
+        <div class="container mx-auto px-6 max-w-6xl">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
 
-          <div class="space-y-8">
-            <div>
-              <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Go Deeper</span>
-              <h2 class="mt-4 text-2xl font-serif text-stone-800"><%= combos.name %></h2>
-              <p class="mt-4 text-stone-600 text-lg leading-relaxed">
-                When an hour isn't enough. Abhyangam opens the body; the second therapy goes deeper.
-              </p>
+            <div class="space-y-8" data-category-group="combo">
+              <div>
+                <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Go Deeper</span>
+                <h2 class="mt-4 text-2xl font-serif text-stone-800"><%= combos.name %></h2>
+                <p class="mt-4 text-stone-600 text-lg leading-relaxed">
+                  When an hour isn't enough. Abhyangam opens the body; the second therapy goes deeper.
+                </p>
+              </div>
+
+              <ul class="divide-y divide-stone-200 border-y border-stone-200">
+                <% combos.items.forEach(function (t) { %>
+                <li id="<%= t.id %>" data-intents="<%= t.intents.join(' ') %>" class="py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div>
+                    <h3 class="font-display text-lg text-stone-800"><%= t.title %></h3>
+                    <p class="text-stone-600 text-sm leading-relaxed max-w-md"><%= t.description %></p>
+                  </div>
+                  <div class="sm:text-right shrink-0 space-y-2">
+                    <p class="text-xs uppercase tracking-widest text-emerald-800 font-bold">
+                      <% t.durations.forEach(function (d) { %>
+                      <span class="block"><%= d.length %> min &middot; <%= formatPrice(d.price) %></span>
+                      <% }); %>
+                    </p>
+                    <a href="<%= waLink(t.title) %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= t.id %>', '<%= t.title %>', <%= t.durations[0].price %>, 'combination')" class="inline-block text-xs uppercase tracking-[0.2em] font-bold text-stone-400 hover:text-[#c66f54] transition-colors">
+                      Book &rarr;
+                    </a>
+                  </div>
+                </li>
+                <% }); %>
+              </ul>
             </div>
 
-            <ul class="divide-y divide-stone-200 border-y border-stone-200">
-              <% combos.items.forEach(function (t) { %>
-              <li id="<%= t.id %>" class="py-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                <div>
-                  <h3 class="font-display text-lg text-stone-800"><%= t.title %></h3>
-                  <p class="text-stone-600 text-sm leading-relaxed max-w-md"><%= t.description %></p>
-                </div>
-                <div class="sm:text-right shrink-0 space-y-2">
-                  <p class="text-xs uppercase tracking-widest text-emerald-800 font-bold">
-                    <% t.durations.forEach(function (d) { %>
-                    <span class="block"><%= d.length %> min &middot; <%= formatPrice(d.price) %></span>
-                    <% }); %>
-                  </p>
-                  <a href="<%= waLink(t.title) %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= t.id %>', '<%= t.title %>', <%= t.durations[0].price %>, 'combination')" class="inline-block text-xs uppercase tracking-[0.2em] font-bold text-stone-400 hover:text-[#c66f54] transition-colors">
-                    Book &rarr;
+            <div id="doctor-consultation" class="card rounded-xl border-l-4 border-[#c66f54] bg-white shadow-lg scroll-mt-[75px] md:scroll-mt-[102px]">
+              <div class="card-body gap-6 p-8 md:p-10">
+                <h2 class="card-title text-2xl font-serif font-normal text-stone-800">Meet the Ayurvedic doctor</h2>
+                <p class="text-stone-600 text-lg leading-relaxed">
+                  Ayurveda begins with constitution &mdash; your dosha, your history, the season you're in. A consultation gives you a treatment plan built for your body rather than a choice made from a menu.
+                </p>
+                <p class="text-stone-600 leading-relaxed">
+                  Recommended if you're staying a week or longer, or if you're managing a specific condition.
+                </p>
+                <p class="text-xs uppercase tracking-widest text-emerald-800 font-bold">
+                  <% consultation.durations.forEach(function (d) { %>
+                  <span class="block"><%= d.length %> min &middot; <%= formatPrice(d.price) %></span>
+                  <% }); %>
+                </p>
+                <div class="pt-2">
+                  <a href="<%= waHref("Hi LUMA, I'd like to book a consultation with the Ayurvedic doctor. My preferred time is: ") %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= consultation.id %>', '<%= consultation.title %>', <%= consultation.durations[0].price %>, 'doctor')" class="btn btn-primary btn-lg rounded-full px-10 font-bold shadow-xl">
+                    Book a consultation
                   </a>
                 </div>
-              </li>
-              <% }); %>
-            </ul>
-          </div>
-
-          <div id="doctor-consultation" class="card rounded-xl border-l-4 border-[#c66f54] bg-white shadow-lg scroll-mt-[75px] md:scroll-mt-[102px]">
-            <div class="card-body gap-6 p-8 md:p-10">
-              <h2 class="card-title text-2xl font-serif font-normal text-stone-800">Meet the Ayurvedic doctor</h2>
-              <p class="text-stone-600 text-lg leading-relaxed">
-                Ayurveda begins with constitution &mdash; your dosha, your history, the season you're in. A consultation gives you a treatment plan built for your body rather than a choice made from a menu.
-              </p>
-              <p class="text-stone-600 leading-relaxed">
-                Recommended if you're staying a week or longer, or if you're managing a specific condition.
-              </p>
-              <p class="text-xs uppercase tracking-widest text-emerald-800 font-bold">
-                <% consultation.durations.forEach(function (d) { %>
-                <span class="block"><%= d.length %> min &middot; <%= formatPrice(d.price) %></span>
-                <% }); %>
-              </p>
-              <div class="pt-2">
-                <a href="<%= waHref("Hi LUMA, I'd like to book a consultation with the Ayurvedic doctor. My preferred time is: ") %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= consultation.id %>', '<%= consultation.title %>', <%= consultation.durations[0].price %>, 'doctor')" class="btn btn-primary btn-lg rounded-full px-10 font-bold shadow-xl">
-                  Book a consultation
-                </a>
+                <p class="text-sm text-stone-500">
+                  Included in the 7-night Immersion package <a href="/packages" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">&rarr;</a>
+                </p>
               </div>
-              <p class="text-sm text-stone-500">
-                Included in the 7-night Immersion package <a href="/packages" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">&rarr;</a>
-              </p>
             </div>
-          </div>
 
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
 
     <!-- 6. Gallery — enable once /img/ayurveda/gallery/{large,524}/NN.jpg exist
          and the metadata JSON is generated (see scripts/CLAUDE.md).

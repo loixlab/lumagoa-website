@@ -7,6 +7,7 @@
 // dependency and auto-restarts the dev server when it changes.
 import rawTreatments from "./treatments.json" with { type: "json" };
 import { EMAIL, PHONE_DISPLAY, SITE_URL, waHref } from "./site.mjs";
+import { numberToWord } from "./utils.mjs";
 
 const CATEGORY_ORDER = [
   "signature",
@@ -61,6 +62,10 @@ const INTENTS = [
 ];
 
 const PACKAGE_ELIGIBLE_COUNT = 7;
+
+// Records that are offered but are not therapies — excluded from the
+// "N traditional therapies" count in the page copy.
+const NON_TREATMENT_IDS = ["doctor-consultation"];
 
 /** Throws (failing the build) rather than silently dropping a record. */
 function validate(raw) {
@@ -225,7 +230,21 @@ export function loadTreatmentPageData() {
     items: treatments.filter((t) => t.category === key),
   }));
 
+  const unknownNonTreatment = NON_TREATMENT_IDS.filter(
+    (id) => !rawTreatments.some((t) => t.id === id),
+  );
+  if (unknownNonTreatment.length > 0) {
+    throw new Error(
+      `NON_TREATMENT_IDS lists unknown ids: ${unknownNonTreatment.join(", ")}`,
+    );
+  }
+  const therapyCount = treatments.filter(
+    (t) => !NON_TREATMENT_IDS.includes(t.id),
+  ).length;
+
   return {
+    therapyCount,
+    therapyCountWord: numberToWord(therapyCount),
     treatments,
     // The two-tier menu (Section 5.4): signature is tier 1, the rest are
     // tier-2 rows. Combos and the consultation render in their own section.
