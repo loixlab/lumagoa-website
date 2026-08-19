@@ -17,7 +17,12 @@ interface BookingData {
 /** e.g. "Friday March 6th 2026". */
 function formatHumanDate(dateStr: string): string {
   if (!dateStr) return "...";
-  const date = new Date(dateStr);
+  // A bare ISO date parses as UTC midnight, which is the previous local
+  // day for viewers west of UTC — force local parsing so the rendered
+  // date can't be off by one. Non-ISO sheet formats parse as before.
+  const date = /^\d{4}-\d{2}-\d{2}$/.test(dateStr)
+    ? new Date(`${dateStr}T00:00:00`)
+    : new Date(dateStr);
   const months = [
     "January",
     "February",

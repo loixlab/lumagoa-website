@@ -56,7 +56,10 @@ export function registerReviewsComponents(alpine: typeof Alpine) {
     init() {
       this.picked = pickRandom(REVIEWS, Number(count)).map((review) => ({
         ...review,
-        dateLabel: MONTH_YEAR.format(new Date(review.date)),
+        // T00:00:00 forces local-time parsing — a bare ISO date parses as
+        // UTC midnight, which renders as the previous month for viewers
+        // west of UTC on first-of-month dates.
+        dateLabel: MONTH_YEAR.format(new Date(`${review.date}T00:00:00`)),
       }));
     },
   }));
