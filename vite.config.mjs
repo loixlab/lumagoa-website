@@ -6,6 +6,13 @@ import { loadTreatmentPageData } from "./src/data/load-treatments.mjs";
 import { loadYogaHolidaysPageData } from "./src/data/load-yoga-holidays.mjs";
 import { sitePageData } from "./src/data/site.mjs";
 
+// Netlify sets CONTEXT for every build ("production", "deploy-preview",
+// "branch-deploy"); it is unset locally. Analytics (GTM + Meta Pixel) is only
+// emitted when this is true — see src/partials/head.ejs. Kept here rather than
+// in site.mjs because that module is also imported by the client bundle, where
+// `process` does not exist.
+const isProduction = process.env.CONTEXT === "production";
+
 export default defineConfig({
   plugins: [
     {
@@ -91,7 +98,12 @@ export default defineConfig({
           template: resolve(__dirname, "src/pages/privacy-policy.ejs"),
           filename: "privacy-policy.html",
         },
-      ].map((page) => ({ ...page, data: { ...sitePageData, ...page.data } })),
+        // `isProduction` is spread last so no page's `data` can override it —
+        // analytics must never be switchable per page.
+      ].map((page) => ({
+        ...page,
+        data: { ...sitePageData, ...page.data, isProduction },
+      })),
       htmlMinify: true,
       watchOptions: {
         include: "**/*.ejs", // Watch all .ejs files in the project

@@ -1,7 +1,13 @@
 <head>
+  <% if (typeof isProduction !== 'undefined' && isProduction) { %>
   <!-- Google Tag Manager -->
+  <!-- Skipped on *.netlify.app hosts: the production build is also served from
+       Netlify deploy URLs (deploy permalinks, branch/PR previews), and those
+       visits must not pollute analytics. -->
   <script>
     (function(w, d, s, l, i) {
+      var h = w.location.hostname;
+      if (h === 'netlify.app' || h.endsWith('.netlify.app')) return;
       w[l] = w[l] || [];
       w[l].push({
         'gtm.start': new Date().getTime(),
@@ -17,6 +23,7 @@
     })(window, document, 'script', 'dataLayer', 'GTM-KFRQ57PP');
   </script>
   <!-- End Google Tag Manager -->
+  <% } %>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><%= title %></title>
@@ -38,29 +45,37 @@
       <%- typeof schemaData !== 'undefined' ? JSON.stringify(schemaData) : '' %>
     ]
   </script>
+  <% if (typeof isProduction !== 'undefined' && isProduction) { %>
   <!-- Meta Pixel Code -->
+  <!-- Same *.netlify.app guard as GTM above. The vendor snippet and the two
+       fbq() calls share one wrapper so the early return also skips the calls —
+       `fbq` does not exist when the loader is skipped. -->
   <script>
-    ! function(f, b, e, v, n, t, s) {
-      if (f.fbq) return;
-      n = f.fbq = function() {
-        n.callMethod ?
-          n.callMethod.apply(n, arguments) : n.queue.push(arguments)
-      };
-      if (!f._fbq) f._fbq = n;
-      n.push = n;
-      n.loaded = !0;
-      n.version = '2.0';
-      n.queue = [];
-      t = b.createElement(e);
-      t.async = !0;
-      t.src = v;
-      s = b.getElementsByTagName(e)[0];
-      s.parentNode.insertBefore(t, s)
-    }(window, document, 'script',
-      'https://connect.facebook.net/en_US/fbevents.js');
-    fbq('init', '1880026422823419');
-    fbq('track', 'PageView');
+    (function() {
+      var h = window.location.hostname;
+      if (h === 'netlify.app' || h.endsWith('.netlify.app')) return;
+      ! function(f, b, e, v, n, t, s) {
+        if (f.fbq) return;
+        n = f.fbq = function() {
+          n.callMethod ?
+            n.callMethod.apply(n, arguments) : n.queue.push(arguments)
+        };
+        if (!f._fbq) f._fbq = n;
+        n.push = n;
+        n.loaded = !0;
+        n.version = '2.0';
+        n.queue = [];
+        t = b.createElement(e);
+        t.async = !0;
+        t.src = v;
+        s = b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t, s)
+      }(window, document, 'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+      fbq('init', '1880026422823419');
+      fbq('track', 'PageView');
+    })();
   </script>
   <!-- End Meta Pixel Code -->
+  <% } %>
 </head>
-<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1880026422823419&ev=PageView&noscript=1" /></noscript>
