@@ -98,9 +98,11 @@ export default defineConfig({
           template: resolve(__dirname, "src/pages/privacy-policy.ejs"),
           filename: "privacy-policy.html",
         },
+        // `isProduction` is spread last so no page's `data` can override it —
+        // analytics must never be switchable per page.
       ].map((page) => ({
         ...page,
-        data: { ...sitePageData, isProduction, ...page.data },
+        data: { ...sitePageData, ...page.data, isProduction },
       })),
       htmlMinify: true,
       watchOptions: {

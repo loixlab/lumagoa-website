@@ -1,0 +1,15 @@
+<!-- Analytics fallbacks for JS-disabled visitors. Include as the first thing
+     inside <body> on every page — these are body-only tags, which is why they
+     don't live in head.ejs alongside the loader snippets.
+
+     Build-time guard only: unlike the script snippets in head.ejs, a <noscript>
+     cannot skip *.netlify.app hosts at runtime, so deploy-preview visits with
+     JS disabled are the one gap left. -->
+<% if (typeof isProduction !== 'undefined' && isProduction) { %>
+<!-- Google Tag Manager (noscript) -->
+<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KFRQ57PP" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<!-- End Google Tag Manager (noscript) -->
+<!-- Meta Pixel (noscript) -->
+<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=1880026422823419&ev=PageView&noscript=1" /></noscript>
+<!-- End Meta Pixel (noscript) -->
+<% } %>

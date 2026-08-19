@@ -30,9 +30,7 @@ The site is a Vite multi-page app built with `vite-plugin-virtual-mpa`. EJS temp
   <html lang="en" data-theme="pastel">
   <%- include('./src/partials/head.ejs', { title: '…', description: '…' }) %>
   <body class="…">
-    <% if (typeof isProduction !== 'undefined' && isProduction) { %>
-    <!-- GTM noscript iframe -->
-    <% } %>
+    <%- include('./src/partials/analytics-noscript.ejs') %>
     <%- include('./src/partials/header.ejs') %>
     <main>…</main>
     <%- include('./src/partials/footer.ejs') %>
@@ -57,7 +55,7 @@ The site is a Vite multi-page app built with `vite-plugin-virtual-mpa`. EJS temp
 | `schemaData`               | JSON-LD, `JSON.stringify`'d into the page                             |
 
 - **`schemaData` must be a single object.** `head.ejs` already wraps the output in a JSON-LD array (`[ … ]`), so passing an array emits a nested `[[…]]` and the whole block becomes invalid.
-- **GTM and the Meta Pixel only load in production**, behind two layers: `head.ejs` emits both snippets only when the `isProduction` local is true (`process.env.CONTEXT === "production"`, set in `vite.config.mjs` and injected into every page), and each snippet returns early on `*.netlify.app` hostnames — the production build is also served from Netlify deploy URLs (deploy permalinks, branch/PR previews) and those visits must not pollute analytics. `yarn dev` and a plain local `yarn build` therefore ship no analytics at all. The GTM `<noscript>` iframe in each page's `<body>` carries the same `isProduction` guard (it can't do the hostname check).
+- **GTM and the Meta Pixel only load in production**, behind two layers: `head.ejs` emits both snippets only when the `isProduction` local is true (`process.env.CONTEXT === "production"`, set in `vite.config.mjs` and injected into every page), and each snippet returns early on `*.netlify.app` hostnames — the production build is also served from Netlify deploy URLs (deploy permalinks, branch/PR previews) and those visits must not pollute analytics. `yarn dev` and a plain local `yarn build` therefore ship no analytics at all. The matching `<noscript>` fallbacks live in `src/partials/analytics-noscript.ejs`, included as the first thing inside every page's `<body>` — they are body-only tags, so they cannot live in `head.ejs`, and they carry the build-time guard only (a `<noscript>` can't check the hostname). That partial is also the single home for the GTM container id and the pixel id outside `head.ejs`; don't paste either into a page.
 - **Keep the Meta Pixel's `fbq('init')`/`fbq('track')` calls inside the hostname wrapper** in `head.ejs` — `fbq` doesn't exist when the loader is skipped, so a call left outside throws a `ReferenceError` on every Netlify-hosted page view.
 
 ## Styling (Tailwind v4 + DaisyUI 5)
@@ -113,7 +111,7 @@ The site is a Vite multi-page app built with `vite-plugin-virtual-mpa`. EJS temp
 ## Verification checklist
 
 - [ ] New page in `src/pages/`, partials in `src/partials/`, registered in `vite.config.mjs`.
-- [ ] Page includes `head.ejs` (with `title` + `description`), the `isProduction`-guarded GTM noscript, header/footer, and the `main.ts` module script.
+- [ ] Page includes `head.ejs` (with `title` + `description`), `analytics-noscript.ejs` as the first thing in `<body>`, header/footer, and the `main.ts` module script.
 - [ ] `schemaData` passed as a single object; canonical link via `extraContent`; page added to `public/sitemap.xml`.
 - [ ] DaisyUI-first, mobile-first responsive.
 - [ ] Client logic in `src/ts` as a registered Alpine component; `x-cloak` on anything `x-show`n; endpoints under `/api/*`.

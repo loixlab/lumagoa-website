@@ -8,6 +8,7 @@
 }) %>
 
 <body class="pt-[var(--header-height-mobile)] md:pt-[var(--header-height-desktop)]">
+  <%- include('./src/partials/analytics-noscript.ejs') %>
   <%- include('./src/partials/header.ejs') %>
 
   <main x-data="paymentSuccess" class="min-h-[calc(100vh-var(--header-height-mobile))] md:min-h-[calc(100vh-var(--header-height-desktop))] flex flex-col items-center justify-center p-6 bg-stone-50 text-center">

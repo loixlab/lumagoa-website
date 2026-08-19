@@ -3,11 +3,7 @@
 <%- include('./src/partials/head.ejs', { title: 'Book a room: Luma', description: 'Book your stay at Luma Goa and experience the tranquility of our A-Frame huts.' }) %>
 
 <body class="bg-white font-sans text-gray-900 antialiased">
-  <% if (typeof isProduction !== 'undefined' && isProduction) { %>
-  <!-- Google Tag Manager (noscript) -->
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KFRQ57PP" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <!-- End Google Tag Manager (noscript) -->
-  <% } %>
+  <%- include('./src/partials/analytics-noscript.ejs') %>
 
   <main class="flex-grow">
     <iframe src="https://bookingengine.stayflexi.com/?hotel_id=31402" style="width: 100%; height: 100vh; border: none; overflow: hidden;" title="Booking Engine" allowfullscreen></iframe>
