@@ -21,7 +21,7 @@ Layout / sync contract for these files: [docs/INSTRUCTION_FILES.md](docs/INSTRUC
 - **Gallery:** PhotoSwipe (lightbox) + Masonry + imagesLoaded. **Maps:** Google Maps JS API (`marker` library, Advanced Markers).
 - **Backend:** Netlify Functions in `netlify/functions/` — **TypeScript ESM, V2 format**.
 - **Payments:** Razorpay (INR). **Booking data:** a published Google Sheet read as CSV. **Booking engine:** Stayflexi, embedded as an iframe on `/booking`.
-- **Analytics:** Google Tag Manager + Meta Pixel, both inlined in `src/partials/head.ejs`.
+- **Analytics:** Google Tag Manager + Meta Pixel, both inlined in `src/partials/head.ejs` — emitted in production builds only (`process.env.CONTEXT === "production"`), and skipped at runtime on `*.netlify.app` hosts.
 - **Tooling scripts:** Python 3 (Pillow, pillow-heif, requests, python-dotenv) in `scripts/`.
 - **Package manager:** `yarn`. **No test suite** in this repo.
 

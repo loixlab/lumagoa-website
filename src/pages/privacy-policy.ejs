@@ -3,9 +3,11 @@
 <%- include('./src/partials/head.ejs', { title: 'Privacy policy: Luma', description: 'Review the privacy policy for your stay at Luma Goa.' }) %>
 
 <body class="bg-white pt-25 font-sans text-gray-900 antialiased md:pt-25">
+  <% if (typeof isProduction !== 'undefined' && isProduction) { %>
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KFRQ57PP" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- End Google Tag Manager (noscript) -->
+  <% } %>
 
   <!-- Header -->
   <%- include('./src/partials/header.ejs') %>

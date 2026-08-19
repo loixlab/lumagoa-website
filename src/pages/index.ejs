@@ -59,9 +59,11 @@
 }) %>
 
 <body class="bg-white pt-[75px] text-gray-900 antialiased md:pt-[102px]">
+  <% if (typeof isProduction !== 'undefined' && isProduction) { %>
   <!-- Google Tag Manager (noscript) -->
   <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KFRQ57PP" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
   <!-- End Google Tag Manager (noscript) -->
+  <% } %>
 
   <!-- Header -->
   <%- include('./src/partials/header.ejs') %>

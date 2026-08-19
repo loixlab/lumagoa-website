@@ -18,7 +18,7 @@ The site is a Vite multi-page app built with `vite-plugin-virtual-mpa`. EJS temp
 - **EJS includes are resolved from the project root**, not from the including file — always `<%- include('./src/partials/…') %>`, never `../partials/`.
 - **`src/data/treatments.json` is owner-approved content.** Apparent inconsistencies with the printed treatment menu (missing therapies, rewritten descriptions, a facial that isn't `holidayEligible`) are deliberate decisions — read [docs/ayurveda-massage-notes.md](../docs/ayurveda-massage-notes.md) before changing the data. `load-treatments.mjs` validates it at build time and fails the build on malformed records or `DRAFT` descriptions.
 - **`src/data/reviews.json` feeds the reviews partial.** Entries whose `name` starts with `PLACEHOLDER —` are fabricated stand-ins for layout work — swap in real guest reviews (and drop the prefix) before the section ships; never let placeholder reviews render as genuine testimonials.
-- **Every page receives shared build-time locals from `src/data/site.mjs`** (`siteUrl`, `email`, `phone.display`, `phone.tel`, `phone.wa`, `waHref(message)`, `prices.*` for guest-facing prices used on more than one page), merged into each page's `data` by the `.map()` at the end of the `pages` array in `vite.config.mjs`. Use them instead of hardcoding the domain, contact email, phone number, cross-page prices or `wa.me` URLs — `footer.ejs` relies on them, so a page rendered without them fails to build. `email` is for JSON-LD schemas (deliberately public); visible email links must keep using the `emailLink` Alpine component, which assembles the address at runtime from the same `EMAIL_PARTS` constant.
+- **Every page receives shared build-time locals from `src/data/site.mjs`** (`siteUrl`, `email`, `phone.display`, `phone.tel`, `phone.wa`, `waHref(message)`, `prices.*` for guest-facing prices used on more than one page), merged into each page's `data` by the `.map()` at the end of the `pages` array in `vite.config.mjs`. Use them instead of hardcoding the domain, contact email, phone number, cross-page prices or `wa.me` URLs — `footer.ejs` relies on them, so a page rendered without them fails to build. `email` is for JSON-LD schemas (deliberately public); visible email links must keep using the `emailLink` Alpine component, which assembles the address at runtime from the same `EMAIL_PARTS` constant. The same `.map()` also injects `isProduction` (see the analytics rule below); it lives in `vite.config.mjs` rather than `site.mjs` because `site.mjs` is imported by the client bundle, where `process` doesn't exist.
 - **There is no layout partial.** Every page repeats the same skeleton itself, so copy an existing page rather than assembling one from scratch:
 
   ```ejs
@@ -26,7 +26,9 @@ The site is a Vite multi-page app built with `vite-plugin-virtual-mpa`. EJS temp
   <html lang="en" data-theme="pastel">
   <%- include('./src/partials/head.ejs', { title: '…', description: '…' }) %>
   <body class="…">
+    <% if (typeof isProduction !== 'undefined' && isProduction) { %>
     <!-- GTM noscript iframe -->
+    <% } %>
     <%- include('./src/partials/header.ejs') %>
     <main>…</main>
     <%- include('./src/partials/footer.ejs') %>
@@ -51,7 +53,8 @@ The site is a Vite multi-page app built with `vite-plugin-virtual-mpa`. EJS temp
 | `schemaData`               | JSON-LD, `JSON.stringify`'d into the page                             |
 
 - **`schemaData` must be a single object.** `head.ejs` already wraps the output in a JSON-LD array (`[ … ]`), so passing an array emits a nested `[[…]]` and the whole block becomes invalid.
-- **GTM and the Meta Pixel load unconditionally** from `head.ejs` — in dev, in Netlify preview deploys, and in production alike. There is no environment guard, so local page views land in real analytics; keep that in mind before doing repetitive testing on an instrumented page.
+- **GTM and the Meta Pixel only load in production**, behind two layers: `head.ejs` emits both snippets only when the `isProduction` local is true (`process.env.CONTEXT === "production"`, set in `vite.config.mjs` and injected into every page), and each snippet returns early on `*.netlify.app` hostnames — the production build is also served from Netlify deploy URLs (deploy permalinks, branch/PR previews) and those visits must not pollute analytics. `yarn dev` and a plain local `yarn build` therefore ship no analytics at all. The GTM `<noscript>` iframe in each page's `<body>` carries the same `isProduction` guard (it can't do the hostname check).
+- **Keep the Meta Pixel's `fbq('init')`/`fbq('track')` calls inside the hostname wrapper** in `head.ejs` — `fbq` doesn't exist when the loader is skipped, so a call left outside throws a `ReferenceError` on every Netlify-hosted page view.
 
 ## Styling (Tailwind v4 + DaisyUI 5)
 
@@ -106,7 +109,7 @@ The site is a Vite multi-page app built with `vite-plugin-virtual-mpa`. EJS temp
 ## Verification checklist
 
 - [ ] New page in `src/pages/`, partials in `src/partials/`, registered in `vite.config.mjs`.
-- [ ] Page includes `head.ejs` (with `title` + `description`), the GTM noscript, header/footer, and the `main.ts` module script.
+- [ ] Page includes `head.ejs` (with `title` + `description`), the `isProduction`-guarded GTM noscript, header/footer, and the `main.ts` module script.
 - [ ] `schemaData` passed as a single object; canonical link via `extraContent`; page added to `public/sitemap.xml`.
 - [ ] DaisyUI-first, mobile-first responsive.
 - [ ] Client logic in `src/ts` as a registered Alpine component; `x-cloak` on anything `x-show`n; endpoints under `/api/*`.
