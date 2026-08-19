@@ -307,7 +307,11 @@
       </div>
     </section>
 
-    <!-- 6. How booking works -->
+    <!-- 6. Guest reviews — dark band (data-theme="dim" via the partial's
+         theme param), so it contrasts with both light neighbours -->
+    <%- include('./src/partials/reviews.ejs', { bg: 'bg-brand-cream' }) %>
+
+    <!-- 7. How booking works -->
     <section class="py-20 md:py-32 bg-white">
       <div class="container mx-auto px-6 max-w-6xl">
         <div class="text-center max-w-3xl mx-auto mb-16">
@@ -342,7 +346,7 @@
       </div>
     </section>
 
-    <!-- 7. Good to know -->
+    <!-- 8. Good to know -->
     <section class="py-16 md:py-24 bg-stone-50">
       <div class="container mx-auto px-6 max-w-6xl">
         <div class="text-center max-w-3xl mx-auto mb-12">
@@ -404,7 +408,7 @@
       </div>
     </section>
 
-    <!-- 8. Final CTA -->
+    <!-- 9. Final CTA -->
     <section class="bg-base-100 py-20 md:py-32 text-white border-b-1 border-stone-800" data-theme="dim">
       <div class="container mx-auto px-6 max-w-6xl text-center space-y-8">
         <h2 class="text-4xl md:text-5xl font-display text-white leading-tight">

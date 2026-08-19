@@ -33,6 +33,13 @@
 
 @theme {
   --font-display: "Libertinus Serif", serif; /* For headings */
+
+  /* Brand palette — theme-stable constants (unlike primary/secondary,
+     these keep their value inside data-theme="dim" subtrees). Usable as
+     any color utility: bg-brand-cream, bg-brand-gold, text-brand-gold,
+     border-brand-cream, from-brand-gold, … */
+  --color-brand-cream: #f8ebe4; /* very light blush */
+  --color-brand-gold: #dba848; /* light orange / gold */
 }
 
 @layer base {
