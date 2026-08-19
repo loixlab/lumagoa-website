@@ -13,7 +13,7 @@ import rawTreatments from "./treatments.json" with { type: "json" };
 import { EMAIL, PHONE_DISPLAY, SITE_URL, waHref } from "./site.mjs";
 import { formatPrice, numberToWord } from "./utils.mjs";
 
-// Also imported by load-packages.mjs to sort the included-treatments list —
+// Also imported by load-yoga-holidays.mjs to sort the included-treatments list —
 // exporting it keeps the two pages' category order in lockstep.
 export const CATEGORY_ORDER = [
   "signature",
@@ -67,7 +67,7 @@ const INTENTS = [
   { key: "head", label: "Head & sinus" },
 ];
 
-const PACKAGE_ELIGIBLE_COUNT = 7;
+const HOLIDAY_ELIGIBLE_COUNT = 7;
 
 // Records that are offered but are not therapies — excluded from the
 // "N traditional therapies" count in the page copy.
@@ -131,8 +131,8 @@ function validate(raw) {
     ) {
       throw new Error(`treatments.json: invalid intents on ${label}`);
     }
-    if (typeof t.packageEligible !== "boolean") {
-      throw new Error(`treatments.json: missing packageEligible on ${label}`);
+    if (typeof t.holidayEligible !== "boolean") {
+      throw new Error(`treatments.json: missing holidayEligible on ${label}`);
     }
     if (t.image !== null && (typeof t.image !== "string" || t.image === "")) {
       throw new Error(`treatments.json: invalid image on ${label}`);
@@ -144,10 +144,10 @@ function validate(raw) {
 
   // Dataset-level invariants, over the records that will actually render.
   const active = raw.filter((t) => t.active !== false);
-  const eligible = active.filter((t) => t.packageEligible);
-  if (eligible.length !== PACKAGE_ELIGIBLE_COUNT) {
+  const eligible = active.filter((t) => t.holidayEligible);
+  if (eligible.length !== HOLIDAY_ELIGIBLE_COUNT) {
     throw new Error(
-      `treatments.json: expected exactly ${PACKAGE_ELIGIBLE_COUNT} packageEligible treatments, found ${eligible.length} (${eligible.map((t) => t.id).join(", ")})`,
+      `treatments.json: expected exactly ${HOLIDAY_ELIGIBLE_COUNT} holidayEligible treatments, found ${eligible.length} (${eligible.map((t) => t.id).join(", ")})`,
     );
   }
   const emptyCategories = CATEGORY_ORDER.filter(

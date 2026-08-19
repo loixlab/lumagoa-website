@@ -27,7 +27,7 @@ export function waHref(message) {
 // Guest-facing prices referenced on more than one page (INR) — one source
 // so a seasonal price change can't leave a stale copy behind. The
 // sound-bath price renders on /yoga-shala (visible block + JSON-LD) and in
-// the /packages "What's not included" accordion.
+// the /yoga-holidays "What's not included" accordion.
 export const PRICES = { soundBath: 800 };
 
 /** EJS locals injected into every page. */

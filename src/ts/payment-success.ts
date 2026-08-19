@@ -14,7 +14,12 @@ export function registerPaymentSuccessComponents(alpine: typeof Alpine) {
 
     let countdown = "";
     if (arrivalStr) {
-      const arrivalDate = new Date(arrivalStr);
+      // Same ISO/UTC guard as deposit-payment's formatHumanDate — a bare
+      // ISO date parses as UTC midnight and shifts a day west of UTC,
+      // which would put the arrival countdown off by one.
+      const arrivalDate = /^\d{4}-\d{2}-\d{2}$/.test(arrivalStr)
+        ? new Date(`${arrivalStr}T00:00:00`)
+        : new Date(arrivalStr);
       const today = new Date();
 
       // Reset hours to compare only calendar days

@@ -1,7 +1,8 @@
-// Season calendar for /packages — the one source of truth for which dates
-// fall in which season. Imported at build time by load-packages.mjs (price
-// derivation, coverage validation) and bundled client-side via
-// src/ts/packages.ts (the season selector's default), so a calendar change
+// Season calendar for /yoga-holidays — the one source of truth for which
+// dates fall in which season. Imported at build time by
+// load-yoga-holidays.mjs (price derivation, coverage validation) and bundled
+// client-side via src/ts/yoga-holidays.ts (the season selector's default),
+// so a calendar change
 // can never desync the rendered prices from the client's preselected season.
 //
 // Deliberately dependency-free and free of any rate/price data — this module
@@ -19,8 +20,8 @@ export const SEASON_RULES = [
   { season: "high", from: "12-15", to: "01-15" },
   { season: "mid", from: "12-01", to: "02-29" },
   { season: "mid", from: "03-01", to: "03-31" },
-  { season: "low", from: "11-01", to: "11-30" },
-  { season: "low", from: "04-01", to: "05-31" },
+  { season: "low", from: "11-15", to: "11-30" },
+  { season: "low", from: "04-01", to: "04-30" },
 ];
 
 // "MM-DD" → comparable month/day ordinal, parsed once at module load.
@@ -37,8 +38,8 @@ const PARSED_RULES = SEASON_RULES.map((rule) => {
 });
 
 /**
- * The season containing `date`, or null outside the packages window
- * (June–October — packages start 1 November).
+ * The season containing `date`, or null outside the yoga-holidays window
+ * (1 May – 14 November — yoga holidays run 15 November – 30 April).
  */
 export function resolveSeason(date) {
   const value = (date.getMonth() + 1) * 100 + date.getDate();

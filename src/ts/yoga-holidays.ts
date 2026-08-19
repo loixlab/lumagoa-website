@@ -1,10 +1,10 @@
 import type Alpine from "alpinejs";
 import { resolveSeason, SEASON_LABELS } from "../data/season.mjs";
 import {
-  trackPackageEnquiry,
+  trackHolidayEnquiry,
   trackSeasonSelect,
-  trackViewPackages,
-  type PackageCtaLocation,
+  trackViewHolidays,
+  type HolidayCtaLocation,
 } from "./analytics";
 
 const SEASON_IDS = ["low", "mid", "high"] as const;
@@ -14,8 +14,10 @@ function isSeasonId(value: string | null): value is SeasonId {
   return value !== null && (SEASON_IDS as readonly string[]).includes(value);
 }
 
-/** Per-package payload built by load-packages.mjs and passed via x-data. */
-interface PackageCardData {
+/**
+ * Per-holiday payload built by load-yoga-holidays.mjs and passed via x-data.
+ */
+interface HolidayCardData {
   /** Formatted price strings per season — no formatting in the browser. */
   prices: Record<SeasonId, { solo: string; double: string }>;
   /** Raw two-sharing prices per season, for analytics values. */
@@ -25,7 +27,7 @@ interface PackageCardData {
 }
 
 /**
- * Registers the Alpine components behind the /packages page.
+ * Registers the Alpine components behind the /yoga-holidays page.
  *
  * `seasonSelector` holds the selected season for the pricing section. The
  * default is the season containing today (from the shared calendar in
@@ -35,19 +37,19 @@ interface PackageCardData {
  * section. Cards render the Low-season prices server-side, so the page
  * degrades to a plain Low-season price list without JS.
  *
- * `packageCard` carries one card's per-season payload; its bindings read
+ * `holidayCard` carries one card's per-season payload; its bindings read
  * `season` from the enclosing `seasonSelector` scope.
  *
- * `packagesAccordion` drives the "Good to know" accordion: real `<button>`
+ * `holidaysAccordion` drives the "Good to know" accordion: real `<button>`
  * elements toggling `aria-expanded`, one panel open at a time. The panels
  * are plain `x-show`s, so there is no animation to guard for
  * `prefers-reduced-motion`.
  *
- * `packageTracking` is placed on individual CTA anchors to fire the
- * `package_enquiry` / `view_packages` analytics events without inline
- * scripts.
+ * `holidayTracking` is placed on individual CTA anchors to fire the
+ * `yoga_holiday_enquiry` / `view_yoga_holidays` analytics events without
+ * inline scripts.
  */
-export function registerPackagesComponents(alpine: typeof Alpine) {
+export function registerYogaHolidaysComponents(alpine: typeof Alpine) {
   alpine.data("seasonSelector", () => ({
     season: "low" as SeasonId,
     // Populates the aria-live region — set only on user selection so
@@ -60,7 +62,7 @@ export function registerPackagesComponents(alpine: typeof Alpine) {
       );
       if (isSeasonId(fromHash)) {
         this.season = fromHash;
-        this.scrollToPackages();
+        this.scrollToHolidays();
       } else {
         const resolved = resolveSeason(new Date());
         this.season = isSeasonId(resolved) ? resolved : "low";
@@ -81,8 +83,8 @@ export function registerPackagesComponents(alpine: typeof Alpine) {
 
     // The `#season=` hash matches no element id, so the browser won't
     // scroll on its own when a shared link is opened.
-    scrollToPackages() {
-      const target = document.querySelector("#packages");
+    scrollToHolidays() {
+      const target = document.querySelector("#holidays");
       const reducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)",
       ).matches;
@@ -90,11 +92,11 @@ export function registerPackagesComponents(alpine: typeof Alpine) {
     },
   }));
 
-  alpine.data("packageCard", (card) => ({
-    card: card as PackageCardData,
+  alpine.data("holidayCard", (card) => ({
+    card: card as HolidayCardData,
   }));
 
-  alpine.data("packagesAccordion", () => ({
+  alpine.data("holidaysAccordion", () => ({
     open: null as number | null,
 
     toggle(index: number) {
@@ -106,18 +108,18 @@ export function registerPackagesComponents(alpine: typeof Alpine) {
     },
   }));
 
-  alpine.data("packageTracking", () => ({
+  alpine.data("holidayTracking", () => ({
     track(
       id: string,
       name: string,
       value: number,
-      location: PackageCtaLocation,
+      location: HolidayCtaLocation,
       season?: SeasonId,
     ) {
-      trackPackageEnquiry(id, name, value, location, season);
+      trackHolidayEnquiry(id, name, value, location, season);
     },
-    trackView(location: PackageCtaLocation) {
-      trackViewPackages(location);
+    trackView(location: HolidayCtaLocation) {
+      trackViewHolidays(location);
     },
   }));
 }

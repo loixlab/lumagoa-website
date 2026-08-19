@@ -4,6 +4,20 @@
   to = "/.netlify/functions/:splat"
   status = 200
 
+# /packages was renamed to /yoga-holidays (Aug 2026) — keep the old URL alive
+# for links shared while it was live.
+[[redirects]]
+  from = "/packages"
+  to = "/yoga-holidays"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/packages.html"
+  to = "/yoga-holidays"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/winter-renewal"
   to = "/"

@@ -1,0 +1,54 @@
+<!-- Guest reviews — a self-contained section, includable on any page:
+       <%%- include('./src/partials/reviews.ejs') %%>
+     Optional locals:
+       { count: 3 }          how many reviews to show (default 4)
+       { theme: 'dark' }     dark section — stamps data-theme="dim" on the
+                             <section>, which activates every dark: class
+                             below (the variant is keyed to [data-theme=dim]
+                             in styles.css). Default 'light'.
+       { bg: 'bg-white' }    section background, to fit the including page's
+                             rhythm (default bg-stone-50; bg-base-100 — the
+                             footer's warm dark brown — when theme is dark).
+     Dark accents use `secondary` (identical in both themes), never
+     `primary` — the dim theme doesn't override daisyUI's primary, so
+     primary inside data-theme="dim" is not the brand terracotta. The data
+     lives in src/data/reviews.json; the `reviews` Alpine component
+     (src/ts/reviews.ts) picks that many at random on every page load, so
+     nothing here is rendered at build time. On small screens the cards
+     form one horizontal scroll row (deliberately never stacked); from lg
+     up they flex to share the container width and the row stops being a
+     scroll container entirely (lg:overflow-x-visible) — otherwise subpixel
+     rounding can leave it 1px scrollable and OSes with always-visible
+     scrollbars draw a bar under a row that doesn't move. -->
+<% var reviewCount = typeof count !== 'undefined' ? count : 4; %>
+<% var reviewDark = typeof theme !== 'undefined' && theme === 'dark'; %>
+<% var reviewBg = typeof bg !== 'undefined' ? bg : (reviewDark ? 'bg-base-100' : 'bg-stone-50'); %>
+<section class="py-16 md:py-24 <%= reviewBg %>"<%- reviewDark ? ' data-theme="dim"' : '' %>>
+  <div class="container mx-auto px-6 max-w-6xl">
+    <div class="text-center max-w-3xl mx-auto mb-12 md:mb-16">
+      <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold dark:text-secondary">Guest Stories</span>
+      <h2 class="mt-4 text-4xl md:text-5xl font-display text-stone-800 leading-tight dark:text-white">
+        In their <span class="italic text-primary dark:text-secondary">own words</span>
+      </h2>
+    </div>
+
+    <ul x-data="reviews(<%= reviewCount %>)" role="list" tabindex="0" aria-label="Guest reviews" class="-mx-6 flex snap-x snap-mandatory gap-6 overflow-x-auto px-6 pb-4 scroll-px-6 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700 lg:overflow-x-visible lg:pb-0 dark:focus-visible:outline-secondary">
+      <template x-for="review in picked" :key="review.name">
+        <li class="card w-72 shrink-0 snap-start rounded-xl border border-stone-100 bg-white shadow-lg lg:w-auto lg:flex-1 dark:border-stone-800 dark:bg-stone-900">
+          <div class="card-body gap-4 p-8">
+            <div class="rating rating-sm" role="img" :aria-label="`Rated ${review.rating} out of 5`">
+              <template x-for="n in 5">
+                <div class="mask mask-star-2" :class="n <= review.rating ? 'bg-primary dark:bg-amber-400' : 'bg-stone-300 dark:bg-stone-700'" aria-hidden="true"></div>
+              </template>
+            </div>
+            <blockquote class="grow text-stone-600 leading-relaxed dark:text-stone-300" x-text="review.text"></blockquote>
+            <footer class="flex items-baseline justify-between gap-2">
+              <cite class="font-serif text-lg not-italic text-stone-800 dark:text-white" x-text="review.name"></cite>
+              <!-- <span class="text-sm text-stone-400" x-text="review.dateLabel"></span> -->
+            </footer>
+          </div>
+        </li>
+      </template>
+    </ul>
+  </div>
+</section>
