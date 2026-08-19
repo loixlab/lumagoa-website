@@ -1,15 +1,15 @@
 <!doctype html>
 <html lang="en" data-theme="pastel">
 <%- include('./src/partials/head.ejs', {
-  title: 'Yoga & Wellness Packages Palolem South Goa | LUMA Goa',
-  description: `All-inclusive yoga packages in Palolem, South Goa. 3, 5 or 7 nights in a boutique A-frame hut with unlimited daily yoga, plant-based breakfast and Ayurvedic massage included. From ${fromPrice}.`,
-  ogTitle: 'LUMA Goa | All-Inclusive Yoga & Wellness Packages',
+  title: 'Yoga Holidays Palolem South Goa | LUMA Goa',
+  description: `Yoga holidays in Palolem, South Goa. 3, 5 or 7 nights in a boutique A-frame hut with unlimited daily yoga, plant-based breakfast and Ayurvedic massage included. From ${fromPrice}.`,
+  ogTitle: 'LUMA Goa | Yoga Holidays in Palolem, South Goa',
   ogDescription: 'Stay, practice and restore. Three, five or seven nights in South Goa with yoga, breakfast and Ayurvedic massage included.',
-  extraMeta: `<meta property="og:url" content="${siteUrl}/packages">
-    <meta property="og:image" content="${siteUrl}/img/packages-hero_og.jpg">
-    <meta name="twitter:url" content="${siteUrl}/packages">
-    <meta name="twitter:image" content="${siteUrl}/img/packages-hero_twitter.jpg">`,
-  extraContent: `<link rel="canonical" href="${siteUrl}/packages" />`,
+  extraMeta: `<meta property="og:url" content="${siteUrl}/yoga-holidays">
+    <meta property="og:image" content="${siteUrl}/img/yoga-holidays-hero_og.jpg">
+    <meta name="twitter:url" content="${siteUrl}/yoga-holidays">
+    <meta name="twitter:image" content="${siteUrl}/img/yoga-holidays-hero_twitter.jpg">`,
+  extraContent: `<link rel="canonical" href="${siteUrl}/yoga-holidays" />`,
   schemaData: schemaData
 }) %>
 
@@ -25,14 +25,14 @@
     <!-- 1. Hero -->
     <section class="relative min-h-[70vh] flex items-center justify-center py-20 overflow-hidden bg-stone-900">
       <div class="absolute inset-0 z-0">
-        <img src="/img/packages-hero.jpg" alt="The A-frame huts and tropical gardens of LUMA Goa, Palolem" class="w-full h-full object-cover opacity-60" />
-        <div class="absolute inset-0 bg-linear-to-b from-stone-900/90 via-transparent to-stone-900/70"></div>
+        <img src="/img/yoga-holidays-hero.jpg" alt="The A-frame huts and tropical gardens of LUMA Goa, Palolem" class="w-full h-full object-cover opacity-60" />
+        <div class="absolute inset-0 bg-linear-to-b from-stone-900/70  to-stone-900/40"></div>
       </div>
 
       <div class="container mx-auto px-6 max-w-5xl relative z-1 text-center">
         <div class="space-y-6">
           <h2 class="text-xs uppercase tracking-[0.4em] text-secondary font-bold">
-            All-Inclusive Stays &bull; Palolem, South Goa
+            Yoga, Breakfast &amp; Massage Included &bull; Palolem, South Goa
           </h2>
 
           <h1 class="text-5xl md:text-7xl font-display text-white leading-tight">
@@ -44,8 +44,8 @@
           </p>
 
           <div class="pt-8">
-            <a href="#packages" x-data="packageTracking" @click="trackView('hero')" class="btn btn-primary btn-lg rounded-full px-10 font-bold tracking-wide shadow-xl">
-              View the packages
+            <a href="#holidays" x-data="holidayTracking" @click="trackView('hero')" class="btn btn-primary btn-lg rounded-full px-10 font-bold tracking-wide shadow-xl">
+              View the yoga holidays
             </a>
           </div>
 
@@ -60,7 +60,7 @@
     <section class="py-20 md:py-32 bg-white">
       <div class="container mx-auto px-6 max-w-6xl">
         <div class="text-center max-w-3xl mx-auto mb-16 md:mb-20">
-          <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Every Package</span>
+          <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Every Holiday</span>
           <h2 class="mt-4 text-4xl md:text-5xl font-display text-stone-800 leading-tight">
             Everything you need, <span class="italic text-primary">already included</span>
           </h2>
@@ -110,8 +110,8 @@
       </div>
     </section>
 
-    <!-- 3. The three packages -->
-    <section id="packages" class="py-20 md:py-32 bg-stone-50 scroll-mt-[75px] md:scroll-mt-[102px]">
+    <!-- 3. The three yoga holidays -->
+    <section id="holidays" class="py-20 md:py-32 bg-stone-50 scroll-mt-[75px] md:scroll-mt-[102px]">
       <div class="container mx-auto px-6 max-w-6xl" x-data="seasonSelector">
         <div class="text-center max-w-3xl mx-auto mb-12 md:mb-16">
           <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Choose Your Stay</span>
@@ -136,7 +136,7 @@
           <div class="mx-auto mt-6 max-w-2xl rounded-xl border border-stone-200 border-l-4 border-l-[#c66f54] bg-white p-5 text-left shadow-sm">
             <p class="text-sm text-stone-600 leading-relaxed">
               <span class="font-bold text-stone-800">Booking across seasons?</span>
-              Prices shown are for stays within one season. Stays crossing a season boundary are quoted per night at the applicable rate &mdash; <a href="<%= waHref("Hi LUMA, I'd like a quote for a stay that crosses seasons. My dates are: ") %>" target="_blank" rel="noopener" x-data="packageTracking" @click="track('cross-season', 'Cross-Season Stay', 0, 'package_card')" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">just ask</a>.
+              Prices shown are for stays within one season. Stays crossing a season boundary are quoted per night at the applicable rate &mdash; <a href="<%= waHref("Hi LUMA, I'd like a quote for a stay that crosses seasons. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('cross-season', 'Cross-Season Stay', 0, 'holiday_card')" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">just ask</a>.
             </p>
           </div>
           <!-- Without JS the pills are inert and the cards keep their
@@ -150,8 +150,8 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:items-stretch">
-          <% packages.forEach(function (p) { %>
-          <article x-data="packageCard(<%= JSON.stringify(p.client) %>)" class="card rounded-xl bg-white shadow-lg <%= p.featured ? 'relative border-2 border-primary md:scale-105 order-first md:order-none' : 'border border-stone-100' %>">
+          <% holidays.forEach(function (p) { %>
+          <article x-data="holidayCard(<%= JSON.stringify(p.client) %>)" class="card rounded-xl bg-white shadow-lg <%= p.featured ? 'relative border-2 border-primary md:scale-105 order-first md:order-none' : 'border border-stone-100' %>">
             <% if (p.featured) { %>
             <span class="badge badge-primary absolute -top-3 left-1/2 -translate-x-1/2 px-4 text-xs font-bold uppercase tracking-widest">Most popular</span>
             <% } %>
@@ -208,11 +208,11 @@
               </div>
 
               <div class="card-actions mt-6">
-                <a href="<%= p.client.wa.low %>" :href="card.wa[season]" target="_blank" rel="noopener" x-data="packageTracking" @click="track('<%= p.id %>', '<%= p.name %>', card.values[season], 'package_card', season)" class="btn btn-primary btn-block rounded-full font-bold shadow-xl">
+                <a href="<%= p.client.wa.low %>" :href="card.wa[season]" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('<%= p.id %>', '<%= p.name %>', card.values[season], 'holiday_card', season)" class="btn btn-primary btn-block rounded-full font-bold shadow-xl">
                   Enquire on WhatsApp
                 </a>
-                <p class="mt-2 w-full text-center text-sm text-stone-500" x-data="packageTracking">
-                  or <a x-data="emailLink" :href="href" @click="track('<%= p.id %>', '<%= p.name %>', card.values[season], 'package_card', season)" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">enquire by email</a>
+                <p class="mt-2 w-full text-center text-sm text-stone-500" x-data="holidayTracking">
+                  or <a x-data="emailLink" :href="href" @click="track('<%= p.id %>', '<%= p.name %>', card.values[season], 'holiday_card', season)" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">enquire by email</a>
                 </p>
               </div>
             </div>
@@ -221,10 +221,10 @@
         </div>
 
         <div class="mt-10 text-center text-sm text-stone-500 space-y-2">
-          <p>All prices in INR, per stay.</p>
+          <p>All prices in INR.</p>
           <p>
             Staying longer, or for four or six nights? We'll build it around you &mdash;
-            <a href="<%= waHref("Hi LUMA, I'd like to enquire about a custom-length package stay. My dates are: ") %>" target="_blank" rel="noopener" x-data="packageTracking" @click="track('custom', 'Custom Package', 0, 'package_card')" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">just ask</a>.
+            <a href="<%= waHref("Hi LUMA, I'd like to enquire about a custom-length yoga holiday. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('custom', 'Custom Yoga Holiday', 0, 'holiday_card')" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">just ask</a>.
           </p>
         </div>
       </div>
@@ -268,7 +268,7 @@
               Choose your <span class="italic text-primary">treatment</span>
             </h2>
             <p class="text-stone-600 text-lg leading-relaxed">
-              Your package includes a 60-minute full-body signature treatment for each person &mdash; yours to choose from <%= includedCountWord %> of our most-loved therapies.
+              Your yoga holiday includes a 60-minute full-body signature treatment for each person &mdash; yours to choose from <%= includedCountWord %> of our most-loved therapies.
             </p>
             <p class="text-stone-600 text-lg leading-relaxed">
               Staying five or seven nights? Take a different treatment each time. Our therapists will suggest a sequence: Abhyangam to ground and open, Marma to restore energy flow, Podikizhi to release and detoxify.
@@ -321,7 +321,7 @@
           <li class="flex flex-col items-center text-center space-y-4">
             <span class="w-12 h-12 rounded-full bg-stone-800 text-white flex items-center justify-center font-display text-xl">1</span>
             <h3 class="font-serif text-xl text-stone-800">Send us a message</h3>
-            <p class="text-stone-600 leading-relaxed">Tell us your dates, which package, and how many of you.</p>
+            <p class="text-stone-600 leading-relaxed">Tell us your dates, which holiday, and how many of you.</p>
           </li>
           <li class="flex flex-col items-center text-center space-y-4">
             <span class="w-12 h-12 rounded-full bg-stone-800 text-white flex items-center justify-center font-display text-xl">2</span>
@@ -360,7 +360,7 @@
         var goodToKnow = [
           {
             title: "What's not included",
-            body: `Lunch, dinner, airport transfer, and treatments beyond those listed. Sound baths are ${formatPrice(prices.soundBath)}.`,
+            body: `Lunch, dinner, airport transfer, treatments beyond those listed, and any special activity happening at LUMA.`,
           },
           {
             title: "Yoga schedule",
@@ -380,11 +380,11 @@
           },
           {
             title: "Season",
-            body: `Packages are available ${season.display}.`,
+            body: `Yoga holidays are available ${season.display}.`,
           },
         ];
         %>
-        <div x-data="packagesAccordion" class="mx-auto max-w-3xl divide-y divide-stone-200 border-y border-stone-200">
+        <div x-data="holidaysAccordion" class="mx-auto max-w-3xl divide-y divide-stone-200 border-y border-stone-200">
           <% goodToKnow.forEach(function (item, i) { %>
           <div>
             <h3>
@@ -414,7 +414,7 @@
           Nine huts, and they fill early in season. Tell us your dates and we'll hold one for you.
         </p>
         <div class="flex flex-col sm:flex-row justify-center gap-6 pt-4">
-          <a href="<%= waHref("Hi LUMA, I'd like to enquire about a package stay. My dates are: ") %>" target="_blank" rel="noopener" x-data="packageTracking" @click="track('general', 'LUMA Package', 0, 'final_cta')" class="btn btn-primary btn-lg rounded-full px-10 font-bold shadow-xl">
+          <a href="<%= waHref("Hi LUMA, I'd like to enquire about a yoga holiday. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('general', 'LUMA Yoga Holiday', 0, 'final_cta')" class="btn btn-primary btn-lg rounded-full px-10 font-bold shadow-xl">
             Enquire on WhatsApp
           </a>
           <a x-data="emailLink" :href="href" class="btn btn-outline btn-lg rounded-full border-stone-300 px-8 font-bold text-stone-100 hover:border-stone-300 hover:bg-white/10 hover:text-white">
@@ -428,7 +428,7 @@
   <!-- Footer -->
   <%- include('./src/partials/footer.ejs') %>
 
-  <a href="<%= waHref("Hi LUMA, I'd like to enquire about a package stay. My dates are: ") %>" target="_blank" rel="noopener" x-data="packageTracking" @click="track('general', 'LUMA Package', 0, 'whatsapp_float')" aria-label="Enquire about a package on WhatsApp" class="fixed bottom-8 right-8 z-50 flex items-center justify-center w-16 h-16 rounded-full shadow-2xl transition-transform hover:scale-110 active:scale-95 bg-[#c66f54]">
+  <a href="<%= waHref("Hi LUMA, I'd like to enquire about a yoga holiday. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('general', 'LUMA Yoga Holiday', 0, 'whatsapp_float')" aria-label="Enquire about a yoga holiday on WhatsApp" class="fixed bottom-8 right-8 z-50 flex items-center justify-center w-16 h-16 rounded-full shadow-2xl transition-transform hover:scale-110 active:scale-95 bg-[#c66f54]">
     <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
       <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
     </svg>

@@ -6,3 +6,9 @@ dist/
 .env
 # Local Netlify folder
 .netlify
+
+# Internal pricing, margin and staffing notes. This repo is PUBLIC — these
+# spell out the embedded massage value and the staff pay grid, neither of
+# which may ship. Keep them local; never git add them.
+docs/yoga-holidays-discounts-notes.md
+docs/yoga-teaching-cost-model.md

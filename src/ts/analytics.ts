@@ -25,12 +25,12 @@ const TREATMENT_CTA_LOCATIONS = [
 ] as const;
 export type TreatmentCtaLocation = (typeof TREATMENT_CTA_LOCATIONS)[number];
 
-/** Where a booking CTA lives on /packages. */
-const PACKAGE_CTA_LOCATIONS = [
+/** Where a booking CTA lives on /yoga-holidays. */
+const HOLIDAY_CTA_LOCATIONS = [
   ...SHARED_CTA_LOCATIONS,
-  "package_card",
+  "holiday_card",
 ] as const;
-export type PackageCtaLocation = (typeof PACKAGE_CTA_LOCATIONS)[number];
+export type HolidayCtaLocation = (typeof HOLIDAY_CTA_LOCATIONS)[number];
 
 function push(event: Record<string, unknown>): void {
   window.dataLayer = window.dataLayer || [];
@@ -78,25 +78,25 @@ export function trackFindTreatment(location: TreatmentCtaLocation): void {
 }
 
 /**
- * A package-enquiry CTA click on /packages (WhatsApp). Also reports a Meta
- * Pixel `Lead`. Generic CTAs (final CTA, float) pass value 0 — the
+ * A holiday-enquiry CTA click on /yoga-holidays (WhatsApp). Also reports a
+ * Meta Pixel `Lead`. Generic CTAs (final CTA, float) pass value 0 — the
  * value/price fields are then omitted rather than sent as 0. Card CTAs pass
  * the selected season's two-sharing price as the Lead value, plus the
  * season id, so conversions are attributed at the right seasonal value.
  */
-export function trackPackageEnquiry(
+export function trackHolidayEnquiry(
   id: string,
   name: string,
   value: number,
-  location: PackageCtaLocation,
+  location: HolidayCtaLocation,
   season?: string,
 ): void {
   push({
-    event: "package_enquiry",
-    package_id: id,
+    event: "yoga_holiday_enquiry",
+    holiday_id: id,
     cta_location: location,
     ...(season ? { season } : {}),
-    ...(value > 0 ? { package_value: value } : {}),
+    ...(value > 0 ? { holiday_value: value } : {}),
   });
   window.fbq?.("track", "Lead", {
     content_name: name,
@@ -105,17 +105,17 @@ export function trackPackageEnquiry(
 }
 
 /**
- * A season pill activated on the /packages selector — tells the owner which
- * season browsers are actually shopping for.
+ * A season pill activated on the /yoga-holidays selector — tells the owner
+ * which season browsers are actually shopping for.
  */
 export function trackSeasonSelect(season: string): void {
   push({ event: "season_select", season });
 }
 
 /**
- * A navigation CTA pointing at the package cards (the /packages hero
+ * A navigation CTA pointing at the holiday cards (the /yoga-holidays hero
  * button). Engagement, not booking intent — no Pixel `Lead`.
  */
-export function trackViewPackages(location: PackageCtaLocation): void {
-  push({ event: "view_packages", cta_location: location });
+export function trackViewHolidays(location: HolidayCtaLocation): void {
+  push({ event: "view_yoga_holidays", cta_location: location });
 }

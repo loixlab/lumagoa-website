@@ -13,7 +13,7 @@
       }
     ],
     "intents": ["tension", "rest", "energy"],
-    "packageEligible": true,
+    "holidayEligible": true,
     "image": "img/massages/abhyangam-massage.jpg",
     "active": true
   },
@@ -31,7 +31,7 @@
       }
     ],
     "intents": ["tension", "detox"],
-    "packageEligible": true,
+    "holidayEligible": true,
     "image": "img/massages/podikizhi-massage.jpg",
     "active": true
   },
@@ -49,7 +49,7 @@
       }
     ],
     "intents": ["tension", "detox"],
-    "packageEligible": true,
+    "holidayEligible": true,
     "image": "img/massages/elakizhi-massage.jpg",
     "active": true
   },
@@ -67,7 +67,7 @@
       }
     ],
     "intents": ["energy", "rest"],
-    "packageEligible": true,
+    "holidayEligible": true,
     "image": "img/massages/marma-massage.jpg",
     "active": true
   },
@@ -85,7 +85,7 @@
       }
     ],
     "intents": ["detox", "energy"],
-    "packageEligible": true,
+    "holidayEligible": true,
     "image": "img/massages/udwarthanam-massage.jpg",
     "active": true
   },
@@ -103,7 +103,7 @@
       }
     ],
     "intents": ["detox", "skin"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/ayurvedic-body-scrub.jpg",
     "active": true
   },
@@ -121,7 +121,7 @@
       }
     ],
     "intents": ["skin", "rest"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/mukhalepam-mukhabhyangam.jpg",
     "active": true
   },
@@ -139,7 +139,7 @@
       }
     ],
     "intents": ["head", "rest", "tension"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/head-massage.jpg",
     "active": true
   },
@@ -157,7 +157,7 @@
       }
     ],
     "intents": ["tension"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/head-neck-shoulder-massage.jpg",
     "active": true
   },
@@ -179,7 +179,7 @@
       }
     ],
     "intents": ["energy", "rest"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/foot-massage.jpg",
     "active": true
   },
@@ -197,7 +197,7 @@
       }
     ],
     "intents": ["tension"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/back-massage.jpg",
     "active": true
   },
@@ -215,7 +215,7 @@
       }
     ],
     "intents": ["head"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/netra-tarpanam.jpg",
     "active": true
   },
@@ -233,7 +233,7 @@
       }
     ],
     "intents": ["tension", "detox"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/kadikizhi-massage.jpg",
     "active": true
   },
@@ -251,7 +251,7 @@
       }
     ],
     "intents": ["head", "rest"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/talapothichil-massage.jpg",
     "active": true
   },
@@ -269,7 +269,7 @@
       }
     ],
     "intents": ["skin"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/njavara-facial.jpg",
     "active": true
   },
@@ -287,7 +287,7 @@
       }
     ],
     "intents": ["detox", "tension"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/njavarakizhi-massage.jpg",
     "active": true
   },
@@ -305,7 +305,7 @@
       }
     ],
     "intents": ["tension"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/kati-vasti-massage.jpg",
     "active": true
   },
@@ -323,7 +323,7 @@
       }
     ],
     "intents": ["tension"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/janu-vasti-massage.jpg",
     "active": true
   },
@@ -341,7 +341,7 @@
       }
     ],
     "intents": ["tension"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/greeva-vasti-massage.jpg",
     "active": true
   },
@@ -359,7 +359,7 @@
       }
     ],
     "intents": ["head"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": "img/massages/nasyam-dhoomapanam.jpg",
     "active": true
   },
@@ -377,7 +377,7 @@
       }
     ],
     "intents": ["tension"],
-    "packageEligible": true,
+    "holidayEligible": true,
     "image": "img/massages/deep-tissue-massage.jpg",
     "active": true
   },
@@ -395,7 +395,7 @@
       }
     ],
     "intents": ["rest", "tension"],
-    "packageEligible": true,
+    "holidayEligible": true,
     "image": "img/massages/swedish-massage.jpg",
     "active": true
   },
@@ -413,7 +413,7 @@
       }
     ],
     "intents": ["tension", "detox"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": null,
     "active": true
   },
@@ -431,7 +431,7 @@
       }
     ],
     "intents": ["tension", "rest"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": null,
     "active": true
   },
@@ -449,7 +449,7 @@
       }
     ],
     "intents": ["tension", "detox"],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": null,
     "active": true
   },
@@ -467,7 +467,7 @@
       }
     ],
     "intents": [],
-    "packageEligible": false,
+    "holidayEligible": false,
     "image": null,
     "active": true
   }

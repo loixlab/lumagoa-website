@@ -1,8 +1,8 @@
 # Ayurveda & Massage page — open items and data decisions
 
 What remains relevant after implementing the massage page spec (the spec
-document itself has been deleted; `/packages` guidance moved with the
-packages spec).
+document itself has been deleted; `/yoga-holidays` guidance moved with the
+yoga-holidays spec).
 
 ## Gallery section — built but disabled
 
@@ -33,7 +33,7 @@ inconsistencies with the printed menu PDF are deliberate:
   to remove named medical conditions and implausible claims; Abhyangam ends
   "restore the body's natural balance" rather than "electrochemical
   balance". Do not "correct" them back to match the PDF.
-- **Njavara Facial is `packageEligible: false` on purpose** — it sits in the
+- **Njavara Facial is `holidayEligible: false` on purpose** — it sits in the
   same price band as the full-body signature treatments but is a facial.
 - **The three combo descriptions are owner-approved.** The build fails on
   any description starting with `DRAFT` (see `load-treatments.mjs`), so a
@@ -45,4 +45,4 @@ inconsistencies with the printed menu PDF are deliberate:
 
 - **Walk-in vs in-house pricing** is currently identical. Worth considering
   a small preferential rate for in-house guests — it would strengthen the
-  packages proposition. Never decided; raise with the owner.
+  yoga-holidays proposition. Never decided; raise with the owner.
