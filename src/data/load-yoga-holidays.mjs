@@ -70,7 +70,7 @@ const TIMELINE = [
   {
     time: "08:00",
     title: "Morning practice",
-    text: "Dynamic Hatha or Vinyasa in the open-air shala.",
+    text: "Dynamic Hatha or Vinyasa in the shaded yoga shala equipped with high quality mats and props.",
   },
   {
     time: "09:15",

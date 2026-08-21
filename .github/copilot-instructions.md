@@ -1,6 +1,6 @@
 # LUMA Goa Website — Project Guidelines
 
-This repo is the **marketing website** for LUMA Goa, a boutique yoga resort in Palolem, South Goa (A-frame huts, an open-air yoga shala, and the Roots & Bloom plant-based café). It is a static multi-page site plus two serverless functions that power the **booking-deposit payment** flow. Room bookings themselves go through an embedded third-party engine (Stayflexi) on `/booking`, not through this repo.
+This repo is the **marketing website** for LUMA Goa, a boutique yoga resort in Palolem, South Goa (A-frame huts, a shaded yoga shala, and the Roots & Bloom plant-based café). It is a static multi-page site plus two serverless functions that power the **booking-deposit payment** flow. Room bookings themselves go through an embedded third-party engine (Stayflexi) on `/booking`, not through this repo.
 
 This is the universal Copilot file (mirror of the root `CLAUDE.md`). Path-scoped rules live in `.github/instructions/*.instructions.md` (matched by `applyTo:` globs).
 
