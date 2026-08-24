@@ -14,7 +14,7 @@ import rawTreatments from "./treatments.json" with { type: "json" };
 import { CATEGORY_ORDER } from "./load-treatments.mjs";
 import { resolveSeason } from "./season.mjs";
 import { SITE_URL, waHref } from "./site.mjs";
-import { formatPrice, numberToWord } from "./utils.mjs";
+import { eurAmount, formatEur, numberToWord, toEur } from "./utils.mjs";
 
 // Yoga holidays are available 15 November – 30 April. (The resort itself
 // re-opens in October, but stays before 15 November are not sold as yoga
@@ -37,19 +37,19 @@ const SEASONS = [
     id: "low",
     label: "Low",
     window: "15 - 30 Nov · Apr",
-    room: { hol: 5000, std: 5500 },
+    room: { hol: 4700, std: 5200 },
   },
   {
     id: "mid",
     label: "Mid",
     window: "1 - 14 Dec · 16 Jan - Mar",
-    room: { hol: 7000, std: 7500 },
+    room: { hol: 6500, std: 7000 },
   },
   {
     id: "high",
     label: "High",
     window: "15 Dec - 15 Jan",
-    room: { hol: 9000, std: 9500 },
+    room: { hol: 8500, std: 9000 },
   },
 ];
 
@@ -58,7 +58,7 @@ const RATES = {
   massage: 2500, // embedded massage value
   alcPerPersonDay: 1750, // à-la-carte: 2 × ₹600 yoga + ₹550 breakfast
   alcMassage: 2900, // à-la-carte: Abhyangam, cheapest holiday-eligible
-  lengthDiscount: { 3: 0, 5: 2000, 7: 4000 }, // lump sum, season-independent
+  lengthDiscount: { 3: 0, 5: 0, 7: 3000 }, // lump sum, season-independent
   roomDiscountPerNight: 500,
 };
 
@@ -299,11 +299,16 @@ function deriveHoliday(p) {
     prices,
     saving,
     // Consumed by the holidayCard Alpine component (client-side season
-    // switching); formatting happens here so none happens in the browser.
+    // switching). Prices are quoted to guests in EUR, so only the converted
+    // figures are shipped — conversion and formatting happen here, never in
+    // the browser. The bare number is what ships: the card markup renders the
+    // "EUR" unit beside it, in its own smaller type. `values` stays in INR: it
+    // feeds the analytics events, which report revenue in the currency
+    // actually charged.
     client: {
       prices: bySeason((s) => ({
-        solo: formatPrice(prices[s.id].solo),
-        double: formatPrice(prices[s.id].double),
+        solo: eurAmount(prices[s.id].solo),
+        double: eurAmount(prices[s.id].double),
       })),
       values: bySeason((s) => prices[s.id].double),
       wa: bySeason((s) =>
@@ -333,10 +338,12 @@ function buildSchema(holidays) {
         "@type": "AggregateOffer",
         name: `${p.name} (${p.nights} nights, ${key === "solo" ? "solo" : "two sharing"})`,
         description: p.tagline,
-        lowPrice: p.prices.low[key],
-        highPrice: p.prices.high[key],
+        lowPrice: toEur(p.prices.low[key]),
+        highPrice: toEur(p.prices.high[key]),
         offerCount: SEASONS.length,
-        priceCurrency: "INR",
+        // EUR, matching the figures on the page — structured data that
+        // contradicts the visible price is worse than none.
+        priceCurrency: "EUR",
         availabilityStarts: SEASON.start,
         availabilityEnds: SEASON.end,
         seller,
@@ -363,8 +370,8 @@ export function loadYogaHolidaysPageData() {
     timeline: TIMELINE,
     includedTreatments: included,
     includedCountWord: numberToWord(included.length, false),
-    fromPrice: formatPrice(fromPrice),
-    formatPrice,
+    // Plain text in the meta description, so it carries its own unit.
+    fromPrice: formatEur(fromPrice),
     schemaData: buildSchema(holidays),
   };
 }

@@ -8,6 +8,7 @@ import { registerDepositPaymentComponents } from "./ts/deposit-payment";
 import { registerTreatmentFinderComponents } from "./ts/treatment-finder";
 import { registerYogaHolidaysComponents } from "./ts/yoga-holidays";
 import { registerReviewsComponents } from "./ts/reviews";
+import { registerWhatsappEnquiryComponents } from "./ts/whatsapp-enquiry";
 
 // Components must be registered before start(). Each component no-ops on pages
 // that don't reference it, so there is no per-page routing here.
@@ -21,4 +22,5 @@ registerDepositPaymentComponents(Alpine);
 registerTreatmentFinderComponents(Alpine);
 registerYogaHolidaysComponents(Alpine);
 registerReviewsComponents(Alpine);
+registerWhatsappEnquiryComponents(Alpine);
 Alpine.start();

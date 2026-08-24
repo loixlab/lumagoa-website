@@ -21,7 +21,7 @@
 
   <main>
     <!-- 1. Hero -->
-    <section class="relative min-h-[70vh] flex items-center justify-center py-20 overflow-hidden bg-stone-900">
+    <section class="relative min-h-[70vh] flex items-center justify-center py-16 overflow-hidden bg-stone-900">
       <div class="absolute inset-0 z-0">
         <img src="/img/yoga-holidays-hero.jpg" alt="The A-frame huts and tropical gardens of LUMA Goa, Palolem" class="w-full h-full object-cover opacity-60" />
         <div class="absolute inset-0 bg-linear-to-b from-stone-900/70  to-stone-900/40"></div>
@@ -55,10 +55,10 @@
     </section>
 
     <!-- 2. What's included -->
-    <section class="py-20 md:py-32 bg-white">
+    <section class="py-16 md:py-32 bg-white">
       <div class="container mx-auto px-6 max-w-6xl">
         <div class="text-center max-w-3xl mx-auto mb-16 md:mb-20">
-          <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Every Holiday</span>
+          <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">Every Holiday</span>
           <h2 class="mt-4 text-4xl md:text-5xl font-display text-stone-800 leading-tight">
             Everything you need, <span class="italic text-primary">already included</span>
           </h2>
@@ -109,10 +109,10 @@
     </section>
 
     <!-- 3. The three yoga holidays -->
-    <section id="holidays" class="py-20 md:py-32 bg-stone-50 scroll-mt-[75px] md:scroll-mt-[102px]">
+    <section id="holidays" class="py-16 md:py-32 bg-stone-50 scroll-mt-[75px] md:scroll-mt-[102px]">
       <div class="container mx-auto px-6 max-w-6xl" x-data="seasonSelector">
         <div class="text-center max-w-3xl mx-auto mb-12 md:mb-16">
-          <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Choose Your Stay</span>
+          <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">Choose Your Stay</span>
           <h2 class="mt-4 text-4xl md:text-5xl font-display text-stone-800 leading-tight">
             Three, five or seven nights
           </h2>
@@ -121,10 +121,10 @@
         <!-- Season selector — server renders Low-season prices; without JS the
              page stays a plain Low-season price list. -->
         <div class="mb-12 md:mb-16 text-center">
-          <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Choose your season</span>
+          <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">Choose your season</span>
           <div role="group" aria-label="Season" class="mt-5 flex flex-wrap justify-center gap-3 md:gap-4">
             <% seasons.forEach(function (s) { %>
-            <button type="button" @click="select('<%= s.id %>')" aria-pressed="false" :aria-pressed="isActive('<%= s.id %>').toString()" class="btn btn-lg h-auto rounded-full px-6 py-2 flex-col gap-0 font-medium" :class="isActive('<%= s.id %>') ? 'btn-primary' : 'btn-outline border-stone-300 text-stone-600 hover:border-emerald-700 hover:bg-transparent hover:text-stone-600'">
+            <button type="button" @click="select('<%= s.id %>')" aria-pressed="false" :aria-pressed="isActive('<%= s.id %>').toString()" class="btn btn-lg h-auto rounded-full px-6 py-2 flex-col gap-0 font-medium" :class="isActive('<%= s.id %>') ? 'btn-primary' : 'btn-outline border-stone-300 text-stone-600 hover:border-brand-brown hover:bg-transparent hover:text-stone-600'">
               <span class="text-base"><%= s.label %></span>
               <span class="text-xs font-normal opacity-80"><%= s.window %></span>
             </button>
@@ -134,7 +134,7 @@
           <div class="mx-auto mt-6 max-w-2xl rounded-xl border border-stone-200 border-l-4 border-l-[#c66f54] bg-white p-5 text-left shadow-sm">
             <p class="text-sm text-stone-600 leading-relaxed">
               <span class="font-bold text-stone-800">Booking across seasons?</span>
-              Prices shown are for stays within one season. Stays crossing a season boundary are quoted per night at the applicable rate &mdash; <a href="<%= waHref("Hi LUMA, I'd like a quote for a stay that crosses seasons. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('cross-season', 'Cross-Season Stay', 0, 'holiday_card')" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">just ask</a>.
+              Prices shown are for stays within one season. Stays crossing a season boundary are quoted per night at the applicable rate &mdash; <a href="<%= waHref("Hi LUMA, I'd like a quote for a stay that crosses seasons. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('cross-season', 'Cross-Season Stay', 0, 'holiday_card')" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary">just ask</a>.
             </p>
           </div>
           <!-- Without JS the pills are inert and the cards keep their
@@ -155,31 +155,35 @@
             <% } %>
             <div class="card-body p-8">
               <h3 class="font-display text-2xl text-stone-800"><%= p.name %></h3>
-              <p class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold"><%= p.nights %> nights</p>
+              <p class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold"><%= p.nights %> nights</p>
               <p class="mt-1 font-serif italic text-stone-500"><%= p.tagline %></p>
 
               <hr class="my-5 border-stone-200" />
 
               <ul class="space-y-3 text-stone-700">
                 <li class="flex items-start gap-3">
-                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-emerald-700 rounded-full"></span>
+                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
                   <span><%= p.nights %> nights in an A-frame hut</span>
                 </li>
                 <li class="flex items-start gap-3">
-                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-emerald-700 rounded-full"></span>
+                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
+                  <span>1 King size bed</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
                   <span>Unlimited daily yoga</span>
                 </li>
                 <li class="flex items-start gap-3">
-                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-emerald-700 rounded-full"></span>
+                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
                   <span>Breakfast daily</span>
                 </li>
                 <li class="flex items-start gap-3">
-                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-emerald-700 rounded-full"></span>
+                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
                   <span><%= p.massages %> &times; 60-min Ayurvedic massage<%= p.massages > 1 ? "s" : "" %></span>
                 </li>
                 <% if (p.consultation) { %>
                 <li class="flex items-start gap-3">
-                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-emerald-700 rounded-full"></span>
+                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
                   <span>Ayurvedic doctor consultation</span>
                 </li>
                 <% } %>
@@ -191,17 +195,14 @@
                 <div>
                   <p class="flex items-baseline justify-between gap-2">
                     <span class="text-stone-600">Solo</span>
-                    <span class="text-2xl font-display text-stone-800" x-text="card.prices[season].solo"><%= p.client.prices.low.solo %></span>
+                    <span><span class="text-2xl font-display text-stone-800" x-text="card.prices[season].solo"><%= p.client.prices.low.solo %></span> <span class="text-sm font-sans text-stone-500">EUR</span></span>
                   </p>
-                  <!-- The saving is season-independent (flat ₹500/night room discount) — no binding needed. -->
-                  <p class="text-right text-sm text-emerald-800 font-bold">Save <%= formatPrice(p.saving.solo) %> vs booking separately</p>
                 </div>
                 <div>
                   <p class="flex items-baseline justify-between gap-2">
                     <span class="text-stone-600">Two sharing</span>
-                    <span class="text-2xl font-display text-stone-800"><span x-text="card.prices[season].double"><%= p.client.prices.low.double %></span> <span class="text-sm font-sans text-stone-500">total</span></span>
+                    <span><span class="text-2xl font-display text-stone-800" x-text="card.prices[season].double"><%= p.client.prices.low.double %></span> <span class="text-sm font-sans text-stone-500">EUR</span></span>
                   </p>
-                  <p class="text-right text-sm text-emerald-800 font-bold">Save <%= formatPrice(p.saving.double) %> vs booking separately</p>
                 </div>
               </div>
 
@@ -210,7 +211,7 @@
                   Enquire on WhatsApp
                 </a>
                 <p class="mt-2 w-full text-center text-sm text-stone-500" x-data="holidayTracking">
-                  or <a x-data="emailLink" :href="href" @click="track('<%= p.id %>', '<%= p.name %>', card.values[season], 'holiday_card', season)" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">enquire by email</a>
+                  or <a x-data="emailLink" :href="href" @click="track('<%= p.id %>', '<%= p.name %>', card.values[season], 'holiday_card', season)" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary">enquire by email</a>
                 </p>
               </div>
             </div>
@@ -219,30 +220,30 @@
         </div>
 
         <div class="mt-10 text-center text-sm text-stone-500 space-y-2">
-          <p>All prices in INR.</p>
+          <p>All prices in EUR. Payment is taken in Indian rupees at the current exchange rate.</p>
           <p>
             Staying longer, or for four or six nights? We'll build it around you &mdash;
-            <a href="<%= waHref("Hi LUMA, I'd like to enquire about a custom-length yoga holiday. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('custom', 'Custom Yoga Holiday', 0, 'holiday_card')" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">just ask</a>.
+            <a href="<%= waHref("Hi LUMA, I'd like to enquire about a custom-length yoga holiday. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('custom', 'Custom Yoga Holiday', 0, 'holiday_card')" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary">just ask</a>.
           </p>
         </div>
       </div>
     </section>
 
     <!-- 4. A day at LUMA -->
-    <section class="py-20 md:py-32 bg-white">
+    <section class="py-16 md:py-32 bg-white">
       <div class="container mx-auto px-6 max-w-6xl">
         <div class="text-center max-w-3xl mx-auto mb-16">
-          <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Daily Rhythm</span>
+          <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">Daily Rhythm</span>
           <h2 class="mt-4 text-4xl md:text-5xl font-display text-stone-800 leading-tight">
-            A day at <span class="italic text-primary">LUMA</span>
+            A typical day at <span class="italic text-primary">LUMA</span>
           </h2>
         </div>
 
         <ol class="relative mx-auto max-w-2xl space-y-10 border-s-2 border-stone-200 ps-8">
           <% timeline.forEach(function (item) { %>
           <li class="relative">
-            <span class="absolute -start-[39px] top-1.5 h-3 w-3 rounded-full bg-emerald-700"></span>
-            <p class="text-xs uppercase tracking-widest text-emerald-800 font-bold"><%= item.time %></p>
+            <span class="absolute -start-[39px] top-1.5 h-3 w-3 rounded-full bg-brand-gold"></span>
+            <p class="text-xs uppercase tracking-widest text-brand-brown font-bold"><%= item.time %></p>
             <h3 class="mt-1 font-serif text-xl text-stone-800"><%= item.title %></h3>
             <p class="mt-1 text-stone-600 leading-relaxed"><%= item.text %></p>
           </li>
@@ -255,13 +256,64 @@
       </div>
     </section>
 
+    <!-- 4b. Beyond the Resort -->
+    <section class="py-16 md:py-24 bg-stone-100">
+      <div class="container mx-auto px-6 max-w-6xl">
+        <div class="flex flex-col md:flex-row gap-12 lg:gap-16 items-center">
+
+          <div class="w-full md:w-1/2 space-y-6">
+            <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">Beyond the Shala</span>
+            <h2 class="text-3xl md:text-4xl font-display text-stone-800 leading-tight">
+              The rest of the day <span class="italic text-primary">is yours</span>
+            </h2>
+            <p class="text-stone-600 text-lg leading-relaxed">
+              Your yoga holiday covers your practice, breakfast, and treatments. How you spend the hours in between is entirely up to you.
+            </p>
+            <p class="text-stone-600 leading-relaxed">
+              Find quiet moments on the porch of your A-frame hut, or wander our tropical gardens doing very little. When you're ready to explore South Goa, the walk over to Patnem beach takes about 20 minutes and is best timed for sunset. You can kayak the nearby backwater lagoon early in the morning and see more birds than people.
+            </p>
+            <p class="text-stone-600 leading-relaxed">
+              For gentle surf breaks, Agonda beach is just a 30-minute ride up the coast, offering surf schools that are perfect for complete beginners.
+            </p>
+
+            <div class="bg-white p-6 border-l-4 border-primary shadow-sm mt-8 rounded-r-lg">
+              <div class="flex items-start gap-4">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-primary shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                <div>
+                  <h4 class="font-bold text-stone-800 mb-1">Getting Around</h4>
+                  <p class="text-stone-600 text-sm">
+                    Our reception team will happily arrange a local tuk-tuk or taxi whenever you need one. If you prefer to come and go on your own schedule, we can also organize a scooter rental for you to explore Palolem and beyond.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="w-full md:w-1/2">
+            <div class="relative group">
+              <div class="aspect-[4/5] object-cover rounded-2xl shadow-xl overflow-hidden bg-stone-200">
+                <img src="/img/palolem-beach.jpg" alt="Palolem beach in South Goa" class="w-full h-full object-cover transition-transform duration-700 hover:scale-105" />
+              </div>
+              <div class="absolute -bottom-8 -left-8 w-40 h-40 hidden lg:block rounded-full overflow-hidden border-8 border-stone-100 shadow-lg bg-stone-200 z-10 transition-transform duration-500 group-hover:scale-105 group-hover:rotate-3">
+                <img src="/img/agonda-beach-surf.jpg" alt="Surf on Agonda beach in South Goa" class="w-full h-full object-cover" />
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
     <!-- 5. The massage inclusion — the treatment menu itself lives on /ayurveda-massage (one source of truth) -->
     <section class="py-16 md:py-24 bg-stone-50">
       <div class="container mx-auto px-6 max-w-6xl">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start">
 
           <div class="space-y-6">
-            <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">The Massage Inclusion</span>
+            <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">The Massage Inclusion</span>
             <h2 class="text-4xl md:text-5xl font-display text-stone-800 leading-tight">
               Choose your <span class="italic text-primary">treatment</span>
             </h2>
@@ -282,7 +334,7 @@
               <ul class="space-y-3 text-stone-700">
                 <% includedTreatments.forEach(function (t) { %>
                 <li class="flex items-center gap-3">
-                  <span class="w-1.5 h-1.5 shrink-0 bg-emerald-700 rounded-full"></span>
+                  <span class="w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
                   <span><%= t.title %></span>
                 </li>
                 <% }); %>
@@ -291,7 +343,7 @@
                 Every treatment, with its story, duration and price, lives on our treatment centre page.
               </p>
               <div>
-                <a href="/ayurveda-massage" class="btn btn-outline rounded-full border-stone-800 px-8 font-bold text-stone-800 hover:border-stone-800 hover:bg-stone-100 hover:text-stone-800">
+                <a href="/ayurveda-massage" class="btn btn-outline rounded-full border-brand-brown px-8 font-bold text-stone-800 hover:border-brand-brown hover:bg-stone-100 hover:text-stone-800">
                   Explore the treatments &rarr;
                 </a>
               </div>
@@ -300,7 +352,7 @@
         </div>
 
         <p class="mt-12 max-w-3xl text-sm text-stone-500 leading-relaxed">
-          Head, foot, face and back treatments, and doctor-prescribed therapies, are available from our <a href="/ayurveda-massage" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">full menu</a> as add-ons. One treatment per day, ideally 48 hours apart, as Ayurvedic practice recommends.
+          Head, foot, face and back treatments, and doctor-prescribed therapies, are available from our <a href="/ayurveda-massage" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary">full menu</a> as add-ons. One treatment per day, ideally 48 hours apart, as Ayurvedic practice recommends.
         </p>
       </div>
     </section>
@@ -310,10 +362,10 @@
     <%- include('./src/partials/reviews.ejs', { bg: 'bg-brand-cream' }) %>
 
     <!-- 7. How booking works -->
-    <section class="py-20 md:py-32 bg-white">
+    <section class="py-16 md:py-32 bg-white">
       <div class="container mx-auto px-6 max-w-6xl">
         <div class="text-center max-w-3xl mx-auto mb-16">
-          <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Simple By Design</span>
+          <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">Simple By Design</span>
           <h2 class="mt-4 text-4xl md:text-5xl font-display text-stone-800 leading-tight">
             How booking <span class="italic text-primary">works</span>
           </h2>
@@ -321,22 +373,22 @@
 
         <ol class="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8">
           <li class="flex flex-col items-center text-center space-y-4">
-            <span class="w-12 h-12 rounded-full bg-stone-800 text-white flex items-center justify-center font-display text-xl">1</span>
+            <span class="w-12 h-12 rounded-full bg-brand-brown text-white flex items-center justify-center font-display text-xl">1</span>
             <h3 class="font-serif text-xl text-stone-800">Send us a message</h3>
             <p class="text-stone-600 leading-relaxed">Tell us your dates, which holiday, and how many of you.</p>
           </li>
           <li class="flex flex-col items-center text-center space-y-4">
-            <span class="w-12 h-12 rounded-full bg-stone-800 text-white flex items-center justify-center font-display text-xl">2</span>
+            <span class="w-12 h-12 rounded-full bg-brand-brown text-white flex items-center justify-center font-display text-xl">2</span>
             <h3 class="font-serif text-xl text-stone-800">We confirm</h3>
             <p class="text-stone-600 leading-relaxed">We check the hut and reply, usually within a few hours.</p>
           </li>
           <li class="flex flex-col items-center text-center space-y-4">
-            <span class="w-12 h-12 rounded-full bg-stone-800 text-white flex items-center justify-center font-display text-xl">3</span>
+            <span class="w-12 h-12 rounded-full bg-brand-brown text-white flex items-center justify-center font-display text-xl">3</span>
             <h3 class="font-serif text-xl text-stone-800">Secure with a deposit</h3>
             <p class="text-stone-600 leading-relaxed">A 50% deposit confirms your dates.</p>
           </li>
           <li class="flex flex-col items-center text-center space-y-4">
-            <span class="w-12 h-12 rounded-full bg-stone-800 text-white flex items-center justify-center font-display text-xl">4</span>
+            <span class="w-12 h-12 rounded-full bg-brand-brown text-white flex items-center justify-center font-display text-xl">4</span>
             <h3 class="font-serif text-xl text-stone-800">Settle on arrival</h3>
             <p class="text-stone-600 leading-relaxed">The balance is due at check-in. Nothing else to think about.</p>
           </li>
@@ -348,7 +400,7 @@
     <section class="py-16 md:py-24 bg-stone-50">
       <div class="container mx-auto px-6 max-w-6xl">
         <div class="text-center max-w-3xl mx-auto mb-12">
-          <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">The Details</span>
+          <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">The Details</span>
           <h2 class="mt-4 text-4xl md:text-5xl font-display text-stone-800 leading-tight">
             Good to <span class="italic text-primary">know</span>
           </h2>
@@ -357,7 +409,7 @@
         <%
         // The accordion items as data — one markup block below renders them
         // all, so chrome tweaks happen once and indices can't drift.
-        var accordionLink = "text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800";
+        var accordionLink = "text-brand-brown underline decoration-primary/30 hover:decoration-primary";
         var highSeason = seasons.find(function (s) { return s.id === "high"; });
         var goodToKnow = [
           {
@@ -390,7 +442,7 @@
           <% goodToKnow.forEach(function (item, i) { %>
           <div>
             <h3>
-              <button type="button" @click="toggle(<%= i %>)" aria-expanded="false" :aria-expanded="isOpen(<%= i %>).toString()" aria-controls="good-to-know-<%= i %>" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-emerald-800">
+              <button type="button" @click="toggle(<%= i %>)" aria-expanded="false" :aria-expanded="isOpen(<%= i %>).toString()" aria-controls="good-to-know-<%= i %>" class="flex w-full cursor-pointer items-center justify-between gap-4 py-5 text-left font-serif text-lg text-stone-800 transition-colors hover:text-brand-brown">
                 <%= item.title %>
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 shrink-0 text-stone-400 motion-safe:transition-transform" :class="isOpen(<%= i %>) ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 9l-7 7-7-7" />
@@ -407,7 +459,7 @@
     </section>
 
     <!-- 9. Final CTA -->
-    <section class="bg-base-100 py-20 md:py-32 text-white border-b-1 border-stone-800" data-theme="dim">
+    <section class="bg-base-100 py-16 md:py-32 text-white" data-theme="dim">
       <div class="container mx-auto px-6 max-w-6xl text-center space-y-8">
         <h2 class="text-4xl md:text-5xl font-display text-white leading-tight">
           Your week starts whenever you're ready.
@@ -430,11 +482,12 @@
   <!-- Footer -->
   <%- include('./src/partials/footer.ejs') %>
 
-  <a href="<%= waHref("Hi LUMA, I'd like to enquire about a yoga holiday. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('general', 'LUMA Yoga Holiday', 0, 'whatsapp_float')" aria-label="Enquire about a yoga holiday on WhatsApp" class="fixed bottom-8 right-8 z-50 flex items-center justify-center w-16 h-16 rounded-full shadow-2xl transition-transform hover:scale-110 active:scale-95 bg-[#c66f54]">
-    <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
-      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-    </svg>
-  </a>
+  <%- include('./src/partials/whatsapp-float.ejs', {
+        message: "Hi LUMA, I'd like to enquire about a yoga holiday. My dates are: ",
+        label: 'Enquire about a yoga holiday on WhatsApp',
+        component: 'holidayTracking',
+        track: "track('general', 'LUMA Yoga Holiday', 0, 'whatsapp_float')",
+      }) %>
 
   <script type="module" src="/src/main.ts"></script>
 </body>

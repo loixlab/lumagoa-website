@@ -23,16 +23,16 @@
 <% var reviewCount = typeof count !== 'undefined' ? count : 4; %>
 <% var reviewDark = typeof theme !== 'undefined' && theme === 'dark'; %>
 <% var reviewBg = typeof bg !== 'undefined' ? bg : (reviewDark ? 'bg-base-100' : 'bg-stone-50'); %>
-<section class="py-16 md:py-24 <%= reviewBg %>"<%- reviewDark ? ' data-theme="dim"' : '' %>>
+<section class="py-16 md:py-24 <%= reviewBg %>" <%- reviewDark ? ' data-theme="dim"' : '' %>>
   <div class="container mx-auto px-6 max-w-6xl">
     <div class="text-center max-w-3xl mx-auto mb-12 md:mb-16">
-      <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold dark:text-secondary">Guest Stories</span>
+      <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold dark:text-secondary">Guest Stories</span>
       <h2 class="mt-4 text-4xl md:text-5xl font-display text-stone-800 leading-tight dark:text-white">
         In their <span class="italic text-primary dark:text-secondary">own words</span>
       </h2>
     </div>
 
-    <ul x-data="reviews(<%= reviewCount %>)" role="list" tabindex="0" aria-label="Guest reviews" class="-mx-6 flex snap-x snap-mandatory gap-6 overflow-x-auto px-6 pb-4 scroll-px-6 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-emerald-700 lg:overflow-x-visible lg:pb-0 dark:focus-visible:outline-secondary">
+    <ul x-data="reviews(<%= reviewCount %>)" role="list" tabindex="0" aria-label="Guest reviews" class="-mx-6 flex snap-x snap-mandatory gap-6 overflow-x-auto px-6 pb-4 scroll-px-6 focus-visible:outline-2 focus-visible:outline-offset-4 lg:overflow-x-visible lg:pb-0 dark:focus-visible:outline-secondary">
       <template x-for="review in picked" :key="review.name">
         <li class="card w-72 shrink-0 snap-start rounded-xl border border-stone-100 bg-white shadow-lg lg:w-auto lg:flex-1 dark:border-stone-800 dark:bg-stone-900">
           <div class="card-body gap-4 p-8">

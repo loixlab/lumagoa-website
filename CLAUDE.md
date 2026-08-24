@@ -28,7 +28,7 @@ Layout / sync contract for these files: [docs/INSTRUCTION_FILES.md](docs/INSTRUC
 ## Project structure
 
 - `src/pages/*.ejs` — one file per page; **every page must be registered in `vite.config.mjs`**.
-- `src/partials/` — `head.ejs`, `header.ejs`, `footer.ejs`, `analytics-noscript.ejs` (the GTM + Meta Pixel `<noscript>` fallbacks, first thing in every page's `<body>`), plus `reviews.ejs` (a self-contained guest-reviews section any page can include, parameterised via EJS locals). There is **no layout wrapper** — each page assembles them itself.
+- `src/partials/` — `head.ejs`, `header.ejs`, `footer.ejs`, `analytics-noscript.ejs` (the GTM + Meta Pixel `<noscript>` fallbacks, first thing in every page's `<body>`), plus `reviews.ejs` (a self-contained guest-reviews section any page can include, parameterised via EJS locals) and `whatsapp-float.ejs` (the floating WhatsApp button every guest-facing page includes after its footer). There is **no layout wrapper** — each page assembles them itself.
 - `src/main.ts` — the single client entry; `src/ts/` — one file per Alpine component; `src/types/global.d.ts` — ambient types.
 - `src/styles.css` — Tailwind entry, DaisyUI theme definitions, and the gallery / Google-Maps overrides.
 - `netlify/functions/` — `create-order.ts` (Razorpay order) and `get-booking.ts` (booking lookup); `netlify/tsconfig.json` — their own TS project.

@@ -40,6 +40,7 @@
      border-brand-cream, from-brand-gold, … */
   --color-brand-cream: #f8ebe4; /* very light blush */
   --color-brand-gold: #dba848; /* light orange / gold */
+  --color-brand-brown: #5c2e24; /* deep terracotta brown */
 }
 
 @layer base {

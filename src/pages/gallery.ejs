@@ -21,7 +21,7 @@
 
   <main class="pb-24" id="gallery-container">
     <header class="text-center py-16 px-6">
-      <h1 class="text-xs uppercase tracking-[0.4em] text-emerald-800 font-bold mb-4">Atmosphere</h1>
+      <h1 class="text-xs uppercase tracking-[0.4em] text-brand-brown font-bold mb-4">Atmosphere</h1>
       <p class="text-4xl md:text-5xl font-display text-stone-800 italic leading-tight">The Rhythm of LUMA</p>
     </header>
 
@@ -158,6 +158,13 @@
   </main>
 
   <%- include('./src/partials/footer.ejs') %>
+
+  <%- include('./src/partials/whatsapp-float.ejs', {
+        message: "Hi LUMA, I'd like to know more about LUMA Goa. My dates are: ",
+        label: 'Message LUMA Goa on WhatsApp',
+        component: 'whatsappTracking',
+        track: "track('gallery', 'whatsapp_float')",
+      }) %>
 
   <script type="module" src="/src/main.ts"></script>
 </body>
