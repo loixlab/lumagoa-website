@@ -167,6 +167,10 @@
                 </li>
                 <li class="flex items-start gap-3">
                   <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
+                  <span>1 King size bed</span>
+                </li>
+                <li class="flex items-start gap-3">
+                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
                   <span>Unlimited daily yoga</span>
                 </li>
                 <li class="flex items-start gap-3">
@@ -191,17 +195,14 @@
                 <div>
                   <p class="flex items-baseline justify-between gap-2">
                     <span class="text-stone-600">Solo</span>
-                    <span class="text-2xl font-display text-stone-800" x-text="card.prices[season].solo"><%= p.client.prices.low.solo %></span>
+                    <span><span class="text-2xl font-display text-stone-800" x-text="card.prices[season].solo"><%= p.client.prices.low.solo %></span> EUR</span>
                   </p>
-                  <!-- The saving is season-independent (flat ₹500/night room discount) — no binding needed. -->
-                  <p class="text-right text-sm text-brand-brown font-bold">Save <%= formatPrice(p.saving.solo) %> vs booking separately</p>
                 </div>
                 <div>
                   <p class="flex items-baseline justify-between gap-2">
                     <span class="text-stone-600">Two sharing</span>
-                    <span class="text-2xl font-display text-stone-800"><span x-text="card.prices[season].double"><%= p.client.prices.low.double %></span> <span class="text-sm font-sans text-stone-500">total</span></span>
+                    <span><span class="text-2xl font-display text-stone-800" x-text="card.prices[season].double"><%= p.client.prices.low.double %></span> EUR</span>
                   </p>
-                  <p class="text-right text-sm text-brand-brown font-bold">Save <%= formatPrice(p.saving.double) %> vs booking separately</p>
                 </div>
               </div>
 
@@ -219,7 +220,7 @@
         </div>
 
         <div class="mt-10 text-center text-sm text-stone-500 space-y-2">
-          <p>All prices in INR.</p>
+          <p>All prices in EUR. Payment is taken in Indian rupees at the current exchange rate.</p>
           <p>
             Staying longer, or for four or six nights? We'll build it around you &mdash;
             <a href="<%= waHref("Hi LUMA, I'd like to enquire about a custom-length yoga holiday. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('custom', 'Custom Yoga Holiday', 0, 'holiday_card')" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary">just ask</a>.

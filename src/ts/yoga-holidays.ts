@@ -18,9 +18,12 @@ function isSeasonId(value: string | null): value is SeasonId {
  * Per-holiday payload built by load-yoga-holidays.mjs and passed via x-data.
  */
 interface HolidayCardData {
-  /** Formatted price strings per season — no formatting in the browser. */
+  /**
+   * Formatted EUR price strings per season — the conversion and the
+   * formatting both happen at build time, never in the browser.
+   */
   prices: Record<SeasonId, { solo: string; double: string }>;
-  /** Raw two-sharing prices per season, for analytics values. */
+  /** Raw two-sharing INR prices per season, for analytics values. */
   values: Record<SeasonId, number>;
   /** Season-aware WhatsApp hrefs. */
   wa: Record<SeasonId, string>;

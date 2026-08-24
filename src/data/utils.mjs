@@ -5,6 +5,21 @@ export function formatPrice(price) {
   return `₹${price.toLocaleString("en-IN")}`;
 }
 
+// INR → EUR rate behind the indicative euro figures on /yoga-holidays.
+// Everything is priced and charged in INR; this is a hand-maintained
+// convenience rate — update it here when it drifts, nowhere else.
+export const INR_TO_EUR = 0.0089;
+
+/** INR converted to EUR, rounded to the nearest 5: 26000 → 230. */
+export function toEur(price) {
+  return Math.round((price * INR_TO_EUR) / 5) * 5;
+}
+
+/** Guest-facing EUR price string: 26000 → "€230". */
+export function formatEur(price) {
+  return `${toEur(price).toLocaleString("en-IE")}`;
+}
+
 const ONES = [
   "zero",
   "one",
