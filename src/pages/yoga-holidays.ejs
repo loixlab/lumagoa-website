@@ -124,7 +124,7 @@
           <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">Choose your season</span>
           <div role="group" aria-label="Season" class="mt-5 flex flex-wrap justify-center gap-3 md:gap-4">
             <% seasons.forEach(function (s) { %>
-            <button type="button" @click="select('<%= s.id %>')" aria-pressed="false" :aria-pressed="isActive('<%= s.id %>').toString()" class="btn btn-lg h-auto rounded-full px-6 py-2 flex-col gap-0 font-medium" :class="isActive('<%= s.id %>') ? 'btn-primary' : 'btn-outline border-stone-300 text-stone-600 hover:border-emerald-700 hover:bg-transparent hover:text-stone-600'">
+            <button type="button" @click="select('<%= s.id %>')" aria-pressed="false" :aria-pressed="isActive('<%= s.id %>').toString()" class="btn btn-lg h-auto rounded-full px-6 py-2 flex-col gap-0 font-medium" :class="isActive('<%= s.id %>') ? 'btn-primary' : 'btn-outline border-stone-300 text-stone-600 hover:border-brand-brown hover:bg-transparent hover:text-stone-600'">
               <span class="text-base"><%= s.label %></span>
               <span class="text-xs font-normal opacity-80"><%= s.window %></span>
             </button>
@@ -134,7 +134,7 @@
           <div class="mx-auto mt-6 max-w-2xl rounded-xl border border-stone-200 border-l-4 border-l-[#c66f54] bg-white p-5 text-left shadow-sm">
             <p class="text-sm text-stone-600 leading-relaxed">
               <span class="font-bold text-stone-800">Booking across seasons?</span>
-              Prices shown are for stays within one season. Stays crossing a season boundary are quoted per night at the applicable rate &mdash; <a href="<%= waHref("Hi LUMA, I'd like a quote for a stay that crosses seasons. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('cross-season', 'Cross-Season Stay', 0, 'holiday_card')" class="text-brand-brown underline decoration-emerald-800/30 hover:decoration-emerald-800">just ask</a>.
+              Prices shown are for stays within one season. Stays crossing a season boundary are quoted per night at the applicable rate &mdash; <a href="<%= waHref("Hi LUMA, I'd like a quote for a stay that crosses seasons. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('cross-season', 'Cross-Season Stay', 0, 'holiday_card')" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary">just ask</a>.
             </p>
           </div>
           <!-- Without JS the pills are inert and the cards keep their
@@ -162,24 +162,24 @@
 
               <ul class="space-y-3 text-stone-700">
                 <li class="flex items-start gap-3">
-                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-emerald-700 rounded-full"></span>
+                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
                   <span><%= p.nights %> nights in an A-frame hut</span>
                 </li>
                 <li class="flex items-start gap-3">
-                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-emerald-700 rounded-full"></span>
+                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
                   <span>Unlimited daily yoga</span>
                 </li>
                 <li class="flex items-start gap-3">
-                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-emerald-700 rounded-full"></span>
+                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
                   <span>Breakfast daily</span>
                 </li>
                 <li class="flex items-start gap-3">
-                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-emerald-700 rounded-full"></span>
+                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
                   <span><%= p.massages %> &times; 60-min Ayurvedic massage<%= p.massages > 1 ? "s" : "" %></span>
                 </li>
                 <% if (p.consultation) { %>
                 <li class="flex items-start gap-3">
-                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-emerald-700 rounded-full"></span>
+                  <span class="mt-2 w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
                   <span>Ayurvedic doctor consultation</span>
                 </li>
                 <% } %>
@@ -210,7 +210,7 @@
                   Enquire on WhatsApp
                 </a>
                 <p class="mt-2 w-full text-center text-sm text-stone-500" x-data="holidayTracking">
-                  or <a x-data="emailLink" :href="href" @click="track('<%= p.id %>', '<%= p.name %>', card.values[season], 'holiday_card', season)" class="text-brand-brown underline decoration-emerald-800/30 hover:decoration-emerald-800">enquire by email</a>
+                  or <a x-data="emailLink" :href="href" @click="track('<%= p.id %>', '<%= p.name %>', card.values[season], 'holiday_card', season)" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary">enquire by email</a>
                 </p>
               </div>
             </div>
@@ -222,7 +222,7 @@
           <p>All prices in INR.</p>
           <p>
             Staying longer, or for four or six nights? We'll build it around you &mdash;
-            <a href="<%= waHref("Hi LUMA, I'd like to enquire about a custom-length yoga holiday. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('custom', 'Custom Yoga Holiday', 0, 'holiday_card')" class="text-brand-brown underline decoration-emerald-800/30 hover:decoration-emerald-800">just ask</a>.
+            <a href="<%= waHref("Hi LUMA, I'd like to enquire about a custom-length yoga holiday. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('custom', 'Custom Yoga Holiday', 0, 'holiday_card')" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary">just ask</a>.
           </p>
         </div>
       </div>
@@ -241,7 +241,7 @@
         <ol class="relative mx-auto max-w-2xl space-y-10 border-s-2 border-stone-200 ps-8">
           <% timeline.forEach(function (item) { %>
           <li class="relative">
-            <span class="absolute -start-[39px] top-1.5 h-3 w-3 rounded-full bg-emerald-700"></span>
+            <span class="absolute -start-[39px] top-1.5 h-3 w-3 rounded-full bg-brand-gold"></span>
             <p class="text-xs uppercase tracking-widest text-brand-brown font-bold"><%= item.time %></p>
             <h3 class="mt-1 font-serif text-xl text-stone-800"><%= item.title %></h3>
             <p class="mt-1 text-stone-600 leading-relaxed"><%= item.text %></p>
@@ -282,7 +282,7 @@
               <ul class="space-y-3 text-stone-700">
                 <% includedTreatments.forEach(function (t) { %>
                 <li class="flex items-center gap-3">
-                  <span class="w-1.5 h-1.5 shrink-0 bg-emerald-700 rounded-full"></span>
+                  <span class="w-1.5 h-1.5 shrink-0 bg-brand-gold rounded-full"></span>
                   <span><%= t.title %></span>
                 </li>
                 <% }); %>
@@ -300,7 +300,7 @@
         </div>
 
         <p class="mt-12 max-w-3xl text-sm text-stone-500 leading-relaxed">
-          Head, foot, face and back treatments, and doctor-prescribed therapies, are available from our <a href="/ayurveda-massage" class="text-brand-brown underline decoration-emerald-800/30 hover:decoration-emerald-800">full menu</a> as add-ons. One treatment per day, ideally 48 hours apart, as Ayurvedic practice recommends.
+          Head, foot, face and back treatments, and doctor-prescribed therapies, are available from our <a href="/ayurveda-massage" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary">full menu</a> as add-ons. One treatment per day, ideally 48 hours apart, as Ayurvedic practice recommends.
         </p>
       </div>
     </section>
@@ -357,7 +357,7 @@
         <%
         // The accordion items as data — one markup block below renders them
         // all, so chrome tweaks happen once and indices can't drift.
-        var accordionLink = "text-brand-brown underline decoration-emerald-800/30 hover:decoration-emerald-800";
+        var accordionLink = "text-brand-brown underline decoration-primary/30 hover:decoration-primary";
         var highSeason = seasons.find(function (s) { return s.id === "high"; });
         var goodToKnow = [
           {

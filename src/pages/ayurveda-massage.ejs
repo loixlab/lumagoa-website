@@ -124,16 +124,16 @@
             What does your body <span class="italic text-primary">need?</span>
           </h2>
           <p class="mt-6 text-stone-600 text-lg leading-relaxed max-w-2xl mx-auto">
-            Tell us how you feel and we'll show you where to begin. Not sure? Our therapists will guide you, or <a href="#doctor-consultation" class="text-brand-brown underline decoration-emerald-800/30 hover:decoration-emerald-800">book a doctor consultation</a>.
+            Tell us how you feel and we'll show you where to begin. Not sure? Our therapists will guide you, or <a href="#doctor-consultation" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary">book a doctor consultation</a>.
           </p>
 
           <div class="mt-10 flex flex-wrap justify-center gap-3 md:gap-4">
             <% intents.forEach(function (intent) { %>
-            <button type="button" data-intent="<%= intent.key %>" @click="toggle('<%= intent.key %>')" aria-pressed="false" :aria-pressed="isActive('<%= intent.key %>').toString()" class="btn btn-lg rounded-full px-6 text-base font-medium" :class="isActive('<%= intent.key %>') ? 'btn-primary' : 'btn-outline border-stone-300 text-stone-600 hover:border-emerald-700 hover:bg-transparent hover:text-stone-600'">
+            <button type="button" data-intent="<%= intent.key %>" @click="toggle('<%= intent.key %>')" aria-pressed="false" :aria-pressed="isActive('<%= intent.key %>').toString()" class="btn btn-lg rounded-full px-6 text-base font-medium" :class="isActive('<%= intent.key %>') ? 'btn-primary' : 'btn-outline border-stone-300 text-stone-600 hover:border-primary hover:bg-transparent hover:text-stone-600'">
               <%= intent.label %>
             </button>
             <% }); %>
-            <button type="button" @click="reset()" aria-pressed="true" :aria-pressed="(active.length === 0).toString()" class="btn btn-lg rounded-full px-6 text-base font-medium" :class="active.length === 0 ? 'btn-primary' : 'btn-outline border-stone-300 text-stone-600 hover:border-emerald-700 hover:bg-transparent hover:text-stone-600'">
+            <button type="button" @click="reset()" aria-pressed="true" :aria-pressed="(active.length === 0).toString()" class="btn btn-lg rounded-full px-6 text-base font-medium" :class="active.length === 0 ? 'btn-primary' : 'btn-outline border-stone-300 text-stone-600 hover:border-primary hover:bg-transparent hover:text-stone-600'">
               Show all
             </button>
           </div>
@@ -293,7 +293,7 @@
                   </a>
                 </div>
                 <p class="text-sm text-stone-500">
-                  Included in the <a href="/yoga-holidays" class="text-brand-brown underline decoration-emerald-800/30 hover:decoration-emerald-800">7-night Immersion holiday &rarr;</a>
+                  Included in the <a href="/yoga-holidays" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary">7-night Immersion holiday &rarr;</a>
                 </p>
               </div>
             </div>
