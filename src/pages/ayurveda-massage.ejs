@@ -60,7 +60,7 @@
       <div class="container mx-auto px-6 max-w-8xl">
         <div class="flex flex-col md:flex-row items-center gap-12 lg:gap-20">
           <div class="w-full md:w-1/2 space-y-6">
-            <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">The Centre</span>
+            <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">The Centre</span>
             <h2 class="text-4xl md:text-5xl font-display text-stone-800 leading-tight">
               A room built for <span class="italic text-primary">letting go</span>
             </h2>
@@ -119,12 +119,12 @@
       <!-- 3. Signature element: "What does your body need?" -->
       <section id="find" class="py-16 md:py-24 bg-stone-50 scroll-mt-[75px] md:scroll-mt-[102px]">
         <div class="container mx-auto px-6 max-w-6xl text-center">
-          <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Start Here</span>
+          <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">Start Here</span>
           <h2 class="mt-4 text-4xl md:text-5xl font-display text-stone-800 leading-tight">
             What does your body <span class="italic text-primary">need?</span>
           </h2>
           <p class="mt-6 text-stone-600 text-lg leading-relaxed max-w-2xl mx-auto">
-            Tell us how you feel and we'll show you where to begin. Not sure? Our therapists will guide you, or <a href="#doctor-consultation" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">book a doctor consultation</a>.
+            Tell us how you feel and we'll show you where to begin. Not sure? Our therapists will guide you, or <a href="#doctor-consultation" class="text-brand-brown underline decoration-emerald-800/30 hover:decoration-emerald-800">book a doctor consultation</a>.
           </p>
 
           <div class="mt-10 flex flex-wrap justify-center gap-3 md:gap-4">
@@ -138,7 +138,7 @@
             </button>
           </div>
 
-          <p class="mt-8 text-xs uppercase tracking-widest text-emerald-800 font-bold" aria-live="polite" x-text="visibleCount + (visibleCount === 1 ? ' treatment' : ' treatments')">
+          <p class="mt-8 text-xs uppercase tracking-widest text-brand-brown font-bold" aria-live="polite" x-text="visibleCount + (visibleCount === 1 ? ' treatment' : ' treatments')">
             <%= therapyCount %> treatments
           </p>
         </div>
@@ -151,7 +151,7 @@
           <!-- Tier 1: Signature Ayurvedic Massages -->
           <div data-category-group="signature">
             <div class="max-w-3xl mb-12">
-              <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">The Menu</span>
+              <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">The Menu</span>
               <h2 class="mt-4 text-4xl md:text-5xl font-display text-stone-800 leading-tight"><%= signature.name %></h2>
             </div>
 
@@ -170,7 +170,7 @@
                 <p class="font-serif italic text-stone-500 -mt-3"><%= t.subtitle %></p>
                 <% } %>
                 <p class="text-stone-600 leading-relaxed"><%= t.description %></p>
-                <p class="text-xs uppercase tracking-widest text-emerald-800 font-bold">
+                <p class="text-xs uppercase tracking-widest text-brand-brown font-bold">
                   <% t.durations.forEach(function (d) { %>
                   <span class="block"><%= d.length %> min &middot; <%= formatPrice(d.price) %></span>
                   <% }); %>
@@ -214,7 +214,7 @@
                   <p class="mt-1 text-stone-600 leading-relaxed"><%= t.description %></p>
                 </div>
                 <div class="md:text-right shrink-0 space-y-2">
-                  <p class="text-xs uppercase tracking-widest text-emerald-800 font-bold">
+                  <p class="text-xs uppercase tracking-widest text-brand-brown font-bold">
                     <% t.durations.forEach(function (d) { %>
                     <span class="block"><%= d.length %> min &middot; <%= formatPrice(d.price) %></span>
                     <% }); %>
@@ -244,7 +244,7 @@
 
             <div class="space-y-8" data-category-group="combo">
               <div>
-                <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Go Deeper</span>
+                <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">Go Deeper</span>
                 <h2 class="mt-4 text-2xl font-serif text-stone-800"><%= combos.name %></h2>
                 <p class="mt-4 text-stone-600 text-lg leading-relaxed">
                   When an hour isn't enough. Abhyangam opens the body; the second therapy goes deeper.
@@ -259,7 +259,7 @@
                     <p class="text-stone-600 text-sm leading-relaxed max-w-md"><%= t.description %></p>
                   </div>
                   <div class="sm:text-right shrink-0 space-y-2">
-                    <p class="text-xs uppercase tracking-widest text-emerald-800 font-bold">
+                    <p class="text-xs uppercase tracking-widest text-brand-brown font-bold">
                       <% t.durations.forEach(function (d) { %>
                       <span class="block"><%= d.length %> min &middot; <%= formatPrice(d.price) %></span>
                       <% }); %>
@@ -282,7 +282,7 @@
                 <p class="text-stone-600 leading-relaxed">
                   Recommended if you're staying a week or longer, or if you're managing a specific condition.
                 </p>
-                <p class="text-xs uppercase tracking-widest text-emerald-800 font-bold">
+                <p class="text-xs uppercase tracking-widest text-brand-brown font-bold">
                   <% consultation.durations.forEach(function (d) { %>
                   <span class="block"><%= d.length %> min &middot; <%= formatPrice(d.price) %></span>
                   <% }); %>
@@ -293,7 +293,7 @@
                   </a>
                 </div>
                 <p class="text-sm text-stone-500">
-                  Included in the <a href="/yoga-holidays" class="text-emerald-800 underline decoration-emerald-800/30 hover:decoration-emerald-800">7-night Immersion holiday &rarr;</a>
+                  Included in the <a href="/yoga-holidays" class="text-brand-brown underline decoration-emerald-800/30 hover:decoration-emerald-800">7-night Immersion holiday &rarr;</a>
                 </p>
               </div>
             </div>
@@ -327,7 +327,7 @@
     <section class="py-20 md:py-32 bg-white">
       <div class="container mx-auto px-6 max-w-6xl">
         <div class="max-w-3xl mb-12">
-          <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Good To Know</span>
+          <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">Good To Know</span>
           <h2 class="mt-4 text-4xl md:text-5xl font-display text-stone-800 leading-tight">
             Preparing for <span class="italic text-primary">your visit</span>
           </h2>
@@ -389,7 +389,7 @@
     <!-- 8. Included in your stay -->
     <section class="py-16 md:py-24 bg-stone-50">
       <div class="container mx-auto px-6 max-w-6xl text-center">
-        <span class="text-xs uppercase tracking-[0.3em] text-emerald-800 font-bold">Staying With Us</span>
+        <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">Staying With Us</span>
         <h2 class="mt-4 text-4xl md:text-5xl font-display text-stone-800 leading-tight">
           Every LUMA yoga holiday includes <span class="italic text-primary">Ayurvedic treatment</span>
         </h2>
