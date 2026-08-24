@@ -159,6 +159,13 @@
 
   <%- include('./src/partials/footer.ejs') %>
 
+  <%- include('./src/partials/whatsapp-float.ejs', {
+        message: "Hi LUMA, I'd like to know more about LUMA Goa. My dates are: ",
+        label: 'Message LUMA Goa on WhatsApp',
+        component: 'whatsappTracking',
+        track: "track('gallery', 'whatsapp_float')",
+      }) %>
+
   <script type="module" src="/src/main.ts"></script>
 </body>
 

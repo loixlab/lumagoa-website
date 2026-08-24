@@ -422,6 +422,13 @@
   <!-- Footer -->
   <%- include('./src/partials/footer.ejs') %>
 
+  <%- include('./src/partials/whatsapp-float.ejs', {
+        message: "Hi LUMA, I'd like to ask about the Roots & Bloom cafe.",
+        label: 'Message Roots & Bloom on WhatsApp',
+        component: 'whatsappTracking',
+        track: "track('cafe', 'whatsapp_float')",
+      }) %>
+
   <script type="module" src="/src/main.ts"></script>
 </body>
 

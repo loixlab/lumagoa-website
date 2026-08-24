@@ -14,6 +14,23 @@
  * report a location belonging to the other page's funnel.
  */
 const SHARED_CTA_LOCATIONS = ["hero", "final_cta", "whatsapp_float"] as const;
+export type SharedCtaLocation = (typeof SHARED_CTA_LOCATIONS)[number];
+
+/**
+ * Pages that report the generic `whatsapp_enquiry` event — the ones with no
+ * funnel of their own, so the owner can still tell where a WhatsApp click
+ * came from. Pages with a funnel (/ayurveda-massage, /yoga-holidays) use
+ * their own event instead; never add them here.
+ */
+const ENQUIRY_SOURCES = ["home", "cafe", "gallery"] as const;
+export type EnquirySource = (typeof ENQUIRY_SOURCES)[number];
+
+/** Pixel `content_name` per source — the Lead needs a human-readable name. */
+const ENQUIRY_LEAD_NAMES: Record<EnquirySource, string> = {
+  home: "LUMA Goa Stay",
+  cafe: "Roots & Bloom Cafe",
+  gallery: "LUMA Goa Stay",
+};
 
 /** Where a booking CTA lives on /ayurveda-massage. */
 const TREATMENT_CTA_LOCATIONS = [
@@ -118,4 +135,23 @@ export function trackSeasonSelect(season: string): void {
  */
 export function trackViewHolidays(location: HolidayCtaLocation): void {
   push({ event: "view_yoga_holidays", cta_location: location });
+}
+
+/**
+ * A WhatsApp enquiry from a page with no funnel of its own (/, /cafe-restaurant,
+ * /gallery) — currently only their floating button. Also reports a Meta Pixel
+ * `Lead`, like the two funnel enquiries; there is no value to attach, so the
+ * Lead carries `content_name` only. `enquiry_source` is what separates the
+ * pages in GTM, since `cta_location` is the same slot on all of them.
+ */
+export function trackWhatsappEnquiry(
+  source: EnquirySource,
+  location: SharedCtaLocation,
+): void {
+  push({
+    event: "whatsapp_enquiry",
+    enquiry_source: source,
+    cta_location: location,
+  });
+  window.fbq?.("track", "Lead", { content_name: ENQUIRY_LEAD_NAMES[source] });
 }

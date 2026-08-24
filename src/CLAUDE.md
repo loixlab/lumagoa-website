@@ -30,11 +30,13 @@ The site is a Vite multi-page app built with `vite-plugin-virtual-mpa`. EJS temp
     <%- include('./src/partials/header.ejs') %>
     <main>…</main>
     <%- include('./src/partials/footer.ejs') %>
+    <%- include('./src/partials/whatsapp-float.ejs', { message: '…', label: '…' }) %>
     <script type="module" src="/src/main.ts"></script>
   </body>
   </html>
   ```
 
+- **The WhatsApp float is a partial** (`src/partials/whatsapp-float.ejs`) — the round button pinned bottom-right, included after the footer on every main guest-facing page (`/`, `/yoga-shala`, `/yoga-holidays`, `/ayurveda-massage`, `/cafe-restaurant`, `/gallery`). Required locals: `message` (the plain prefilled sentence; the partial runs it through `waHref()`) and `label` (its `aria-label` — the button carries no visible text). Every float also passes `component` (the Alpine tracking component) and `track` (the `@click` expression), keeping the `whatsapp_float` cta_location so all of them report the same slot: `/ayurveda-massage` and `/yoga-holidays` use their own funnel components, the rest use `whatsappTracking` (the generic `whatsapp_enquiry` event). `/yoga-shala` is the one float that reports nothing — it has neither a funnel of its own nor an `enquiry_source`. Never paste the markup inline again. The transactional and legal pages (`/booking`, `/deposit-payment`, `/payment-success`, `/terms-and-services`, `/privacy-policy`) have no float, and neither does the `/winter-renewal` promo page.
 - **Forgetting `<script type="module" src="/src/main.ts">` silently kills Alpine on that page.** Nothing injects it — the page is just inert, with no build error.
 - **Add every new public page to `public/sitemap.xml`** (hand-maintained), and to `public/robots.txt` if it should be excluded — `/deposit-payment` and `/payment-success` are `Disallow`ed there.
 
@@ -76,6 +78,7 @@ The site is a Vite multi-page app built with `vite-plugin-virtual-mpa`. EJS temp
 - **Ambient types go in `src/types/global.d.ts`** — that's the single home for `Window.Alpine` and `Window.Razorpay` (the latter comes from Razorpay's `checkout.js`, loaded by a plain script tag on the deposit-payment page only).
 - **Call functions at `/api/<name>`**, never `/.netlify/functions/…`. Those calls need `yarn dev:netlify`; plain `yarn dev` doesn't serve functions.
 - **Analytics events go through the typed helpers in `src/ts/analytics.ts`** — never push to `window.dataLayer` or call `window.fbq` directly from a component. New events get a typed helper there.
+- **A page with its own funnel gets its own event; everything else uses `whatsapp_enquiry`.** `/ayurveda-massage` reports `treatment_enquiry` and `/yoga-holidays` reports `yoga_holiday_enquiry`, each with its own id and value fields; the pages without a funnel report the generic `whatsapp_enquiry` with an `enquiry_source` from the `ENQUIRY_SOURCES` union in `analytics.ts`. Adding a page to that union also means adding its Pixel `content_name` to `ENQUIRY_LEAD_NAMES` — the `Record<EnquirySource, string>` type fails the build if you forget.
 
 ### The registered components
 
@@ -94,6 +97,7 @@ The site is a Vite multi-page app built with `vite-plugin-virtual-mpa`. EJS temp
 | `holidaysAccordion`                 | `yoga-holidays.ts`    | The "Good to know" accordion on `/yoga-holidays` — real `<button>`s with `aria-expanded`, one panel open at a time.                                                                                                                                                                                                                                                                        |
 | `holidayTracking`                   | `yoga-holidays.ts`    | Placed on `/yoga-holidays` CTA anchors to push `yoga_holiday_enquiry` / `view_yoga_holidays` events, carrying the selected season.                                                                                                                                                                                                                                                         |
 | `reviews(<count>)`                  | `reviews.ts`          | Behind the reusable guest-reviews partial (`src/partials/reviews.ejs`, includable on any page). Picks `count` (default 4) random entries from `src/data/reviews.json` per page load; the cards form one horizontal snap-scroll row on mobile (never stacked) and flex to fit from `lg` up. Partial EJS locals: `count`, `bg`, `theme` (`'dark'` stamps `data-theme="dim"` on the section). |
+| `whatsappTracking`                  | `whatsapp-enquiry.ts` | Placed on the WhatsApp floats of the pages with no funnel of their own (`/`, `/cafe-restaurant`, `/gallery`) to push the generic `whatsapp_enquiry` event (GTM + Meta Pixel `Lead`), carrying an `enquiry_source` (`home` / `cafe` / `gallery`) so the pages stay distinguishable.                                                                                                         |
 
 - **Use `emailLink` for contact-email links** rather than writing the address into markup — that's the whole point of the component (scraper obfuscation).
 - **Render URL-supplied values with `x-text`, never `x-html`.** `paymentSuccess` takes the guest name straight from the query string; `x-text` is what stops that from injecting markup.
