@@ -14,7 +14,7 @@ import rawTreatments from "./treatments.json" with { type: "json" };
 import { CATEGORY_ORDER } from "./load-treatments.mjs";
 import { resolveSeason } from "./season.mjs";
 import { SITE_URL, waHref } from "./site.mjs";
-import { formatEur, numberToWord, toEur } from "./utils.mjs";
+import { eurAmount, formatEur, numberToWord, toEur } from "./utils.mjs";
 
 // Yoga holidays are available 15 November – 30 April. (The resort itself
 // re-opens in October, but stays before 15 November are not sold as yoga
@@ -300,13 +300,15 @@ function deriveHoliday(p) {
     saving,
     // Consumed by the holidayCard Alpine component (client-side season
     // switching). Prices are quoted to guests in EUR, so only the converted
-    // strings are shipped — conversion and formatting happen here, never in
-    // the browser. `values` stays in INR: it feeds the analytics events,
-    // which report revenue in the currency actually charged.
+    // figures are shipped — conversion and formatting happen here, never in
+    // the browser. The bare number is what ships: the card markup renders the
+    // "EUR" unit beside it, in its own smaller type. `values` stays in INR: it
+    // feeds the analytics events, which report revenue in the currency
+    // actually charged.
     client: {
       prices: bySeason((s) => ({
-        solo: formatEur(prices[s.id].solo),
-        double: formatEur(prices[s.id].double),
+        solo: eurAmount(prices[s.id].solo),
+        double: eurAmount(prices[s.id].double),
       })),
       values: bySeason((s) => prices[s.id].double),
       wa: bySeason((s) =>
@@ -368,6 +370,7 @@ export function loadYogaHolidaysPageData() {
     timeline: TIMELINE,
     includedTreatments: included,
     includedCountWord: numberToWord(included.length, false),
+    // Plain text in the meta description, so it carries its own unit.
     fromPrice: formatEur(fromPrice),
     schemaData: buildSchema(holidays),
   };
