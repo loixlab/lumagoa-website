@@ -175,7 +175,7 @@
                   <span class="block"><%= d.length %> min &middot; <%= formatPrice(d.price) %></span>
                   <% }); %>
                 </p>
-                <a href="<%= waLink(t.title) %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= t.id %>', '<%= t.title %>', <%= t.durations.length === 1 ? t.durations[0].price : 0 %>, 'signature_card')" class="inline-block text-xs uppercase tracking-[0.2em] font-bold text-[#c66f54] border-b border-[#c66f54] pb-1 hover:text-stone-800 hover:border-stone-800 transition-colors">
+                <a href="<%= waLink(t.title) %>" target="_blank" rel="noopener" x-data="enquiryTracking" @click="track('<%= t.id %>', '<%= t.title %>', <%= t.durations.length === 1 ? t.durations[0].price : 0 %>, 'signature_card')" class="inline-block text-xs uppercase tracking-[0.2em] font-bold text-[#c66f54] border-b border-[#c66f54] pb-1 hover:text-stone-800 hover:border-brand-brown transition-colors">
                   Book this treatment &rarr;
                 </a>
               </article>
@@ -397,7 +397,7 @@
           Book three, five or seven nights and a 60-minute signature massage is included &mdash; one, two or three of them, alongside unlimited daily yoga and breakfast at Roots &amp; Bloom.
         </p>
         <div class="mt-10">
-          <a href="/yoga-holidays" class="btn btn-outline btn-lg rounded-full border-stone-800 px-8 font-bold text-stone-800 hover:border-stone-800 hover:bg-stone-100 hover:text-stone-800">
+          <a href="/yoga-holidays" class="btn btn-outline btn-lg rounded-full border-brand-brown px-8 font-bold text-stone-800 hover:border-brand-brown hover:bg-stone-100 hover:text-stone-800">
             View the yoga holidays &rarr;
           </a>
         </div>
@@ -405,7 +405,7 @@
     </section>
 
     <!-- 9. Booking CTA -->
-    <section class="bg-base-100 py-20 md:py-32 text-white border-b-1 border-stone-800" data-theme="dim">
+    <section class="bg-base-100 py-20 md:py-32 text-white" data-theme="dim">
       <div class="container mx-auto px-6 max-w-6xl text-center space-y-8">
         <h2 class="text-4xl md:text-5xl font-display text-white leading-tight">
           Book your treatment
