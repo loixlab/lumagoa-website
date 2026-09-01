@@ -118,8 +118,8 @@
           </h2>
         </div>
 
-        <!-- Season selector — server renders Low-season prices; without JS the
-             page stays a plain Low-season price list. -->
+        <!-- Season selector — the server renders the cheapest season's
+             prices; without JS the page stays a plain price list for it. -->
         <div class="mb-12 md:mb-16 text-center">
           <span class="text-xs uppercase tracking-[0.3em] text-brand-brown font-bold">Choose your season</span>
           <div role="group" aria-label="Season" class="mt-5 flex flex-wrap justify-center gap-3 md:gap-4">
@@ -138,11 +138,10 @@
             </p>
           </div>
           <!-- Without JS the pills are inert and the cards keep their
-               server-rendered Low-season prices — say so. -->
+               server-rendered prices — say which season they are. -->
           <noscript>
-            <% var lowSeason = seasons.find(function (s) { return s.id === "low"; }); %>
             <p class="mt-4 text-center text-sm text-stone-500">
-              Prices shown are for low season (<%= lowSeason.window %>). For stays in December &ndash; March, message us for the seasonal rate.
+              Prices shown are for <%= defaultSeason.label.toLowerCase() %> season (<%= defaultSeason.window %>). For stays in any other season, message us for the seasonal rate.
             </p>
           </noscript>
         </div>
@@ -195,19 +194,19 @@
                 <div>
                   <p class="flex items-baseline justify-between gap-2">
                     <span class="text-stone-600">Solo</span>
-                    <span><span class="text-2xl font-display text-stone-800" x-text="card.prices[season].solo"><%= p.client.prices.low.solo %></span> <span class="text-sm font-sans text-stone-500">EUR</span></span>
+                    <span><span class="text-2xl font-display text-stone-800" x-text="card.prices[season].solo"><%= p.client.prices[defaultSeason.id].solo %></span> <span class="text-sm font-sans text-stone-500">EUR</span></span>
                   </p>
                 </div>
                 <div>
                   <p class="flex items-baseline justify-between gap-2">
                     <span class="text-stone-600">Two sharing</span>
-                    <span><span class="text-2xl font-display text-stone-800" x-text="card.prices[season].double"><%= p.client.prices.low.double %></span> <span class="text-sm font-sans text-stone-500">EUR</span></span>
+                    <span><span class="text-2xl font-display text-stone-800" x-text="card.prices[season].double"><%= p.client.prices[defaultSeason.id].double %></span> <span class="text-sm font-sans text-stone-500">EUR</span></span>
                   </p>
                 </div>
               </div>
 
               <div class="card-actions mt-6">
-                <a href="<%= p.client.wa.low %>" :href="card.wa[season]" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('<%= p.id %>', '<%= p.name %>', card.values[season], 'holiday_card', season)" class="btn btn-primary btn-block rounded-full font-bold shadow-xl">
+                <a href="<%= p.client.wa[defaultSeason.id] %>" :href="card.wa[season]" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('<%= p.id %>', '<%= p.name %>', card.values[season], 'holiday_card', season)" class="btn btn-primary btn-block rounded-full font-bold shadow-xl">
                   Enquire on WhatsApp
                 </a>
                 <p class="mt-2 w-full text-center text-sm text-stone-500" x-data="holidayTracking">
@@ -220,7 +219,7 @@
         </div>
 
         <div class="mt-10 text-center text-sm text-stone-500 space-y-2">
-          <p>All prices in EUR. Payment is taken in Indian rupees at the current exchange rate.</p>
+          <p>All prices in EUR. Payment is taken in Indian rupees at the current exchange rate. <br>Prices are exclusive of taxes and fees (GST)</p>
           <p>
             Staying longer, or for four or six nights? We'll build it around you &mdash;
             <a href="<%= waHref("Hi LUMA, I'd like to enquire about a custom-length yoga holiday. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('custom', 'Custom Yoga Holiday', 0, 'holiday_card')" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary">just ask</a>.
@@ -380,7 +379,7 @@
           <li class="flex flex-col items-center text-center space-y-4">
             <span class="w-12 h-12 rounded-full bg-brand-brown text-white flex items-center justify-center font-display text-xl">2</span>
             <h3 class="font-serif text-xl text-stone-800">We confirm</h3>
-            <p class="text-stone-600 leading-relaxed">We check the hut and reply, usually within a few hours.</p>
+            <p class="text-stone-600 leading-relaxed">We confirm availability and get back to you, usually within 48 hours.</p>
           </li>
           <li class="flex flex-col items-center text-center space-y-4">
             <span class="w-12 h-12 rounded-full bg-brand-brown text-white flex items-center justify-center font-display text-xl">3</span>
@@ -410,7 +409,6 @@
         // The accordion items as data — one markup block below renders them
         // all, so chrome tweaks happen once and indices can't drift.
         var accordionLink = "text-brand-brown underline decoration-primary/30 hover:decoration-primary";
-        var highSeason = seasons.find(function (s) { return s.id === "high"; });
         var goodToKnow = [
           {
             title: "What's not included",
@@ -430,7 +428,7 @@
           },
           {
             title: "Deposits and changes",
-            body: `A 50% deposit confirms your booking. It's fully refundable up to 15 days before arrival &mdash; 30 days during high season (${highSeason.window}) &mdash; and the balance is due at check-in. Full details in our <a href="/terms-and-services" class="${accordionLink}">Terms of Service</a>.`,
+            body: `A 50% deposit confirms your booking. It's fully refundable up to 15 days before arrival &mdash; 30 days during ${highestSeason.label.toLowerCase()} season (${highestSeason.window}) &mdash; and the balance is due at check-in. Full details in our <a href="/terms-and-services" class="${accordionLink}">Terms of Service</a>.`,
           },
           {
             title: "Season",
@@ -468,7 +466,7 @@
           Nine huts, and they fill early in season. Tell us your dates and we'll hold one for you.
         </p>
         <div class="flex flex-col sm:flex-row justify-center gap-6 pt-4">
-          <a href="<%= waHref("Hi LUMA, I'd like to enquire about a yoga holiday. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('general', 'LUMA Yoga Holiday', 0, 'final_cta')" class="btn btn-primary btn-lg rounded-full px-10 font-bold shadow-xl">
+          <a href="<%= waHref("Hi LUMA, I'd like to enquire about a yoga holiday. My dates are: ") %>" target="_blank" rel="noopener" x-data="holidayTracking" @click="track('general', 'LUMA Yoga Holiday', 0, 'final_cta')" class="btn bg-brand-cream text-black btn-lg rounded-full px-10 font-bold shadow-xl">
             Enquire on WhatsApp
           </a>
           <a x-data="emailLink" :href="href" class="btn btn-outline btn-lg rounded-full border-stone-300 px-8 font-bold text-stone-100 hover:border-stone-300 hover:bg-white/10 hover:text-white">

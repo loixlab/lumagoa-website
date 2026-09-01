@@ -1,5 +1,10 @@
 import type Alpine from "alpinejs";
-import { resolveSeason, SEASON_LABELS } from "../data/season.mjs";
+import {
+  DEFAULT_SEASON_ID,
+  resolveSeason,
+  SEASON_IDS,
+  SEASON_LABELS,
+} from "../data/season.mjs";
 import {
   trackHolidayEnquiry,
   trackSeasonSelect,
@@ -7,7 +12,6 @@ import {
   type HolidayCtaLocation,
 } from "./analytics";
 
-const SEASON_IDS = ["low", "mid", "high"] as const;
 export type SeasonId = (typeof SEASON_IDS)[number];
 
 function isSeasonId(value: string | null): value is SeasonId {
@@ -36,10 +40,10 @@ interface HolidayCardData {
  * `seasonSelector` holds the selected season for the pricing section. The
  * default is the season containing today (from the shared calendar in
  * src/data/season.mjs — computed client-side, since the static build can't
- * know when it is being viewed), falling back to Low out of season. A
- * `#season=` hash restores a shared view and scrolls to the pricing
- * section. Cards render the Low-season prices server-side, so the page
- * degrades to a plain Low-season price list without JS.
+ * know when it is being viewed), falling back out of season to the cheapest
+ * one. A `#season=` hash restores a shared view and scrolls to the pricing
+ * section. Cards render that same cheapest season server-side, so the page
+ * degrades to a plain one-season price list without JS.
  *
  * `holidayCard` carries one card's per-season payload; its bindings read
  * `season` from the enclosing `seasonSelector` scope.
@@ -55,7 +59,7 @@ interface HolidayCardData {
  */
 export function registerYogaHolidaysComponents(alpine: typeof Alpine) {
   alpine.data("seasonSelector", () => ({
-    season: "low" as SeasonId,
+    season: DEFAULT_SEASON_ID as SeasonId,
     // Populates the aria-live region — set only on user selection so
     // nothing is announced on page load.
     announcement: "",
@@ -69,14 +73,14 @@ export function registerYogaHolidaysComponents(alpine: typeof Alpine) {
         this.scrollToHolidays();
       } else {
         const resolved = resolveSeason(new Date());
-        this.season = isSeasonId(resolved) ? resolved : "low";
+        this.season = isSeasonId(resolved) ? resolved : DEFAULT_SEASON_ID;
       }
     },
 
     select(id: SeasonId) {
       if (id === this.season) return;
       this.season = id;
-      this.announcement = `${SEASON_LABELS[id]} season prices shown`;
+      this.announcement = `${SEASON_LABELS[id] ?? id} season prices shown`;
       history.replaceState(null, "", `#season=${id}`);
       trackSeasonSelect(id);
     },

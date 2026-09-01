@@ -25,8 +25,9 @@
 
 @plugin "daisyui/theme" {
   name: "dim";
-  --color-base-100: #281611;
+  --color-primary: #c66f54;
   --color-secondary: #e7c5b6;
+  --color-base-100: #281611;
 }
 
 @custom-variant dark (&:where([data-theme=dim], [data-theme=dim] *));
