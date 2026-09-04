@@ -1,0 +1,18 @@
+{
+  "//": "Yoga-holiday prices in EUR — the only file to edit when prices change. Keyed nights → season id → occupancy; 'shared' is the TOTAL for two people sharing, not per person. Season ids must match src/data/season.mjs; seasons not in SEASONS there (currently high) are ignored at build time, so a parked season keeps its prices here.",
+  "3": {
+    "low": { "solo": 180, "shared": 225 },
+    "mid": { "solo": 240, "shared": 285 },
+    "high": { "solo": 275, "shared": 325 }
+  },
+  "5": {
+    "low": { "solo": 300, "shared": 385 },
+    "mid": { "solo": 400, "shared": 480 },
+    "high": { "solo": 465, "shared": 555 }
+  },
+  "7": {
+    "low": { "solo": 450, "shared": 585 },
+    "mid": { "solo": 595, "shared": 730 },
+    "high": { "solo": 630, "shared": 760 }
+  }
+}

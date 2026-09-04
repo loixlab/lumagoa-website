@@ -6,7 +6,7 @@
 // rendered prices from the client's preselected season.
 //
 // Deliberately dependency-free and free of any rate/price data — this module
-// ships to the browser. The room rates live in load-yoga-holidays.mjs,
+// ships to the browser. The prices live in yoga-holiday-prices.json,
 // keyed by the season ids below.
 
 // The outer window yoga holidays are sold in. (The resort itself re-opens
@@ -25,8 +25,8 @@ export const SEASON = {
 // price — and the last the most expensive, which is what the price
 // invariants and the JSON-LD highPrice derive from. Everything downstream
 // (pills, price table, validation, schema) is derived from this list, so
-// adding or dropping a season is one edit here plus its ROOM_RATES entry in
-// load-yoga-holidays.mjs.
+// adding or dropping a season is one edit here plus its entry in
+// yoga-holiday-prices.json.
 //
 // `window` is the guest-facing pill label and must describe the same dates
 // as SEASON_RULES below — note Mid excludes 15 Dec – 15 Jan, which is closed
