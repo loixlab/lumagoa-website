@@ -5,31 +5,21 @@ export function formatPrice(price) {
   return `₹${price.toLocaleString("en-IN")}`;
 }
 
-// INR → EUR rate behind the indicative euro figures on /yoga-holidays.
-// Everything is priced and charged in INR; this is a hand-maintained
-// convenience rate — update it here when it drifts, nowhere else.
-export const INR_TO_EUR = 0.0089;
-
-/** INR converted to EUR, rounded to the nearest 5: 26000 → 230. */
-export function toEur(price) {
-  return Math.round((price * INR_TO_EUR) / 5) * 5;
-}
-
 /**
- * The EUR figure on its own, grouped: 26000 → "230". For markup that renders
+ * The EUR figure on its own, grouped: 1075 → "1,075". For markup that renders
  * the "EUR" unit itself, in smaller type beside the number — the price cards
  * on /yoga-holidays do exactly that.
  */
-export function eurAmount(price) {
-  return toEur(price).toLocaleString("en-IE");
+export function eurAmount(eur) {
+  return eur.toLocaleString("en-IE");
 }
 
 /**
- * Guest-facing EUR price string, unit included: 26000 → "230 EUR". For plain
+ * Guest-facing EUR price string, unit included: 230 → "230 EUR". For plain
  * text with nowhere to hang a unit of its own — meta descriptions, prose.
  */
-export function formatEur(price) {
-  return `${eurAmount(price)} EUR`;
+export function formatEur(eur) {
+  return `${eurAmount(eur)} EUR`;
 }
 
 const ONES = [

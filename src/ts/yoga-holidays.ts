@@ -23,12 +23,12 @@ function isSeasonId(value: string | null): value is SeasonId {
  */
 interface HolidayCardData {
   /**
-   * Formatted EUR figures per season — the conversion and the formatting both
-   * happen at build time, never in the browser. The number only: the card
-   * markup renders the "EUR" unit beside it.
+   * Formatted EUR figures per season — the formatting happens at build time,
+   * never in the browser. The number only: the card markup renders the "EUR"
+   * unit beside it.
    */
-  prices: Record<SeasonId, { solo: string; double: string }>;
-  /** Raw two-sharing INR prices per season, for analytics values. */
+  prices: Record<SeasonId, { solo: string; shared: string }>;
+  /** Raw two-sharing EUR prices per season, for analytics values. */
   values: Record<SeasonId, number>;
   /** Season-aware WhatsApp hrefs. */
   wa: Record<SeasonId, string>;

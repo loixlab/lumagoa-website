@@ -1,19 +1,13 @@
 // Build-time loader for the /yoga-holidays page. Imported by vite.config.mjs
-// only — never shipped to the client. Derives one price set per season in
-// src/data/season.mjs from the rate model below (holiday total = room rate +
-// per-person daily inclusions + embedded massage value − length discount;
-// saving = the gap to booking the same stay à la carte), validates them
+// only — never shipped to the client. Reads the guest-facing EUR price list
+// from yoga-holiday-prices.json (nights → season → solo/shared), validates it
 // against build-time invariants, and shapes everything the EJS template needs
 // (JSON-LD, WhatsApp links, the included-treatments list).
 //
 // Which seasons exist, what they are called and which dates they cover all
-// live in season.mjs; this file only adds the rates, because season.mjs is
-// bundled into the client and must never carry them.
-//
-// Never render the room rates, the ₹1,000 per-person/day or ₹2,500 massage
-// components, or any breakdown, in guest-facing output — the embedded
-// massage value only stays below the cheapest eligible treatment while it
-// stays internal.
+// live in season.mjs; the prices live in yoga-holiday-prices.json — that is
+// the only file to touch when they change.
+import rawPrices from "./yoga-holiday-prices.json" with { type: "json" };
 import rawTreatments from "./treatments.json" with { type: "json" };
 import { CATEGORY_ORDER } from "./load-treatments.mjs";
 import {
@@ -24,28 +18,7 @@ import {
   SEASONS,
 } from "./season.mjs";
 import { SITE_URL, waHref } from "./site.mjs";
-import { eurAmount, formatEur, numberToWord, toEur } from "./utils.mjs";
-
-// Rack (std) vs yoga-holiday (hol) room rates per season id — a flat
-// discount per night in every season (asserted below against
-// RATES.roomDiscountPerNight), which is what keeps the savings figure
-// season-independent. Every season in SEASONS needs an entry here; extra
-// entries are ignored, so a season can be parked by commenting it out of
-// SEASONS alone.
-const ROOM_RATES = {
-  low: { hol: 4700, std: 5200 },
-  mid: { hol: 6500, std: 7000 },
-  high: { hol: 8500, std: 9000 },
-};
-
-const RATES = {
-  perPersonDay: 1000, // ₹450 yoga + ₹550 breakfast, pp/day
-  massage: 2500, // embedded massage value
-  alcPerPersonDay: 1750, // à-la-carte: 2 × ₹600 yoga + ₹550 breakfast
-  alcMassage: 2900, // à-la-carte: Abhyangam, cheapest holiday-eligible
-  lengthDiscount: { 3: 0, 5: 0, 7: 3000 }, // lump sum, season-independent
-  roomDiscountPerNight: 500,
-};
+import { eurAmount, formatEur, numberToWord } from "./utils.mjs";
 
 const STAY = { checkIn: "14:00", checkOut: "11:00" };
 
@@ -104,41 +77,19 @@ const HOLIDAYS = [
   },
 ];
 
-const OCCUPANCIES = [
-  { key: "solo", people: 1 },
-  { key: "double", people: 2 },
-];
+// "shared" is the total for two people sharing, not a per-person figure —
+// both in the price JSON and everywhere downstream.
+const OCCUPANCIES = ["solo", "shared"];
 
-/** The two room rates for a season — throws if the season has none. */
-function roomRate(seasonId) {
-  const rate = ROOM_RATES[seasonId];
-  if (!rate) {
+/** A holiday's per-season EUR price table — throws if the JSON has none. */
+function priceTable(holiday) {
+  const table = rawPrices[holiday.nights];
+  if (!table) {
     throw new Error(
-      `yoga-holidays: no ROOM_RATES entry for season "${seasonId}"`,
+      `yoga-holidays: no ${holiday.nights}-night entry in yoga-holiday-prices.json for "${holiday.id}"`,
     );
   }
-  return rate;
-}
-
-/** Holiday price and à-la-carte saving for one season and occupancy. */
-function priceAndSaving(holiday, season, people) {
-  const discount = RATES.lengthDiscount[holiday.nights];
-  if (discount === undefined) {
-    throw new Error(
-      `yoga-holidays: no length discount defined for ${holiday.nights} nights on "${holiday.id}"`,
-    );
-  }
-  const room = roomRate(season.id);
-  const total =
-    room.hol * holiday.nights +
-    RATES.perPersonDay * holiday.nights * people +
-    RATES.massage * holiday.massages * people -
-    discount;
-  const alaCarte =
-    room.std * holiday.nights +
-    RATES.alcPerPersonDay * holiday.nights * people +
-    RATES.alcMassage * holiday.massages * people;
-  return { price: total, saving: alaCarte - total };
+  return table;
 }
 
 /** Throws (failing the build) rather than rendering a broken card. */
@@ -171,30 +122,33 @@ function validate(holidays) {
   }
 }
 
-/** Invariants over the derived seasonal prices — throws on failure. */
-function validateDerived(p, prices, saving) {
+/**
+ * Invariants over a holiday's price table — throws on failure, so a typo in
+ * yoga-holiday-prices.json fails the build instead of rendering a wrong card.
+ */
+function validatePrices(p, prices) {
   const label = `holiday "${p.id}"`;
   for (const season of SEASONS) {
     const entry = prices[season.id];
     if (!entry) {
       throw new Error(`yoga-holidays: missing ${season.id} prices on ${label}`);
     }
-    for (const { key } of OCCUPANCIES) {
+    for (const key of OCCUPANCIES) {
       const value = entry[key];
-      if (!Number.isInteger(value) || value <= 0 || value % 100 !== 0) {
+      if (!Number.isInteger(value) || value <= 0) {
         throw new Error(
-          `yoga-holidays: ${season.id} ${key} price on ${label} is not a positive multiple of 100 (got ${value})`,
+          `yoga-holidays: ${season.id} ${key} price on ${label} is not a positive integer (got ${value})`,
         );
       }
     }
-    if (entry.solo >= entry.double) {
+    if (entry.solo >= entry.shared) {
       throw new Error(
         `yoga-holidays: ${season.id} solo price not below two-sharing on ${label}`,
       );
     }
   }
   // SEASONS is ordered cheapest first, so every step up it must cost more.
-  for (const { key } of OCCUPANCIES) {
+  for (const key of OCCUPANCIES) {
     for (let i = 1; i < SEASONS.length; i += 1) {
       const cheaper = SEASONS[i - 1];
       const dearer = SEASONS[i];
@@ -203,25 +157,6 @@ function validateDerived(p, prices, saving) {
           `yoga-holidays: ${key} prices not strictly increasing ${cheaper.label} → ${dearer.label} on ${label}`,
         );
       }
-    }
-    if (!Number.isInteger(saving[key]) || saving[key] <= 0) {
-      throw new Error(`yoga-holidays: invalid ${key} saving on ${label}`);
-    }
-  }
-}
-
-/**
- * The flat per-night room discount is what the season-independent savings
- * rest on — assert every season's rack/holiday gap actually equals it.
- */
-function validateRoomRates() {
-  for (const season of SEASONS) {
-    const room = roomRate(season.id);
-    const gap = room.std - room.hol;
-    if (gap !== RATES.roomDiscountPerNight) {
-      throw new Error(
-        `yoga-holidays: ${season.id} room discount is ${gap}, expected RATES.roomDiscountPerNight (${RATES.roomDiscountPerNight})`,
-      );
     }
   }
 }
@@ -319,57 +254,38 @@ function includedTreatments() {
 }
 
 /**
- * Prices, season-independent saving, and the payload the seasonSelector /
- * holidayCard Alpine components consume (formatted price strings, raw
- * two-sharing values for analytics, season-aware WhatsApp hrefs).
+ * The per-season EUR prices and the payload the seasonSelector / holidayCard
+ * Alpine components consume (formatted price strings, raw two-sharing values
+ * for analytics, season-aware WhatsApp hrefs).
  */
 function deriveHoliday(p) {
-  const prices = {};
-  const savings = {};
-  for (const season of SEASONS) {
-    prices[season.id] = {};
-    savings[season.id] = {};
-    for (const { key, people } of OCCUPANCIES) {
-      const { price, saving } = priceAndSaving(p, season, people);
-      prices[season.id][key] = price;
-      savings[season.id][key] = saving;
-    }
-  }
-
-  // The flat per-night room discount makes the saving identical in every
-  // season; fail loudly if a rate change ever breaks that property, rather
-  // than showing a figure that is wrong in two seasons out of three.
-  for (const { key } of OCCUPANCIES) {
-    const values = SEASONS.map((s) => savings[s.id][key]);
-    if (new Set(values).size !== 1) {
-      throw new Error(
-        `yoga-holidays: ${key} saving differs across seasons on "${p.id}" (${values.join(", ")}) — the savings line assumes one figure`,
-      );
-    }
-  }
-  const saving = savings[DEFAULT_SEASON.id];
-
-  validateDerived(p, prices, saving);
+  const table = priceTable(p);
+  validatePrices(p, table);
+  // Only the seasons in SEASONS make it into the template locals — an entry
+  // for a parked season stays in the JSON without rendering anywhere.
+  const prices = Object.fromEntries(
+    SEASONS.map((s) => [
+      s.id,
+      { solo: table[s.id].solo, shared: table[s.id].shared },
+    ]),
+  );
 
   const bySeason = (build) =>
     Object.fromEntries(SEASONS.map((s) => [s.id, build(s)]));
   return {
     ...p,
     prices,
-    saving,
     // Consumed by the holidayCard Alpine component (client-side season
-    // switching). Prices are quoted to guests in EUR, so only the converted
-    // figures are shipped — conversion and formatting happen here, never in
-    // the browser. The bare number is what ships: the card markup renders the
-    // "EUR" unit beside it, in its own smaller type. `values` stays in INR: it
-    // feeds the analytics events, which report revenue in the currency
-    // actually charged.
+    // switching). Formatting happens here, never in the browser; the bare
+    // number is what ships, because the card markup renders the "EUR" unit
+    // beside it, in its own smaller type. `values` feeds the analytics
+    // events: the two-sharing EUR price, the currency quoted to guests.
     client: {
       prices: bySeason((s) => ({
         solo: eurAmount(prices[s.id].solo),
-        double: eurAmount(prices[s.id].double),
+        shared: eurAmount(prices[s.id].shared),
       })),
-      values: bySeason((s) => prices[s.id].double),
+      values: bySeason((s) => prices[s.id].shared),
       wa: bySeason((s) =>
         waHref(
           `Hi LUMA, I'd like to enquire about ${p.name} (${p.nights} nights) — ${s.label.toLowerCase()} season. My dates are: `,
@@ -393,12 +309,12 @@ function buildSchema(holidays) {
     // One AggregateOffer per holiday per occupancy — cheapest season as
     // lowPrice, dearest as highPrice, one offer per season.
     offers: holidays.flatMap((p) =>
-      OCCUPANCIES.map(({ key }) => ({
+      OCCUPANCIES.map((key) => ({
         "@type": "AggregateOffer",
         name: `${p.name} (${p.nights} nights, ${key === "solo" ? "solo" : "two sharing"})`,
         description: p.tagline,
-        lowPrice: toEur(p.prices[DEFAULT_SEASON.id][key]),
-        highPrice: toEur(p.prices[HIGHEST_SEASON.id][key]),
+        lowPrice: p.prices[DEFAULT_SEASON.id][key],
+        highPrice: p.prices[HIGHEST_SEASON.id][key],
         offerCount: SEASONS.length,
         // EUR, matching the figures on the page — structured data that
         // contradicts the visible price is worse than none.
@@ -414,7 +330,6 @@ function buildSchema(holidays) {
 /** Validates and shapes the yoga-holiday data for the page template. */
 export function loadYogaHolidaysPageData() {
   validate(HOLIDAYS);
-  validateRoomRates();
   const availableDates = getAvailableDates();
   const holidays = HOLIDAYS.map(deriveHoliday);
   const included = includedTreatments();
@@ -425,7 +340,6 @@ export function loadYogaHolidaysPageData() {
   return {
     holidays,
     season: { ...SEASON, display: formatAvailableDates(availableDates) },
-    // Room rates stay out of the template locals — only what renders.
     seasons: SEASONS,
     // The season the cards are rendered in server-side (the no-JS fallback),
     // and the dearest one, whose window the cancellation policy quotes.

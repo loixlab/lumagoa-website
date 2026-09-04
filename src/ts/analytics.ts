@@ -98,7 +98,7 @@ export function trackFindTreatment(location: TreatmentCtaLocation): void {
  * A holiday-enquiry CTA click on /yoga-holidays (WhatsApp). Also reports a
  * Meta Pixel `Lead`. Generic CTAs (final CTA, float) pass value 0 — the
  * value/price fields are then omitted rather than sent as 0. Card CTAs pass
- * the selected season's two-sharing price as the Lead value, plus the
+ * the selected season's two-sharing EUR price as the Lead value, plus the
  * season id, so conversions are attributed at the right seasonal value.
  */
 export function trackHolidayEnquiry(
@@ -117,7 +117,7 @@ export function trackHolidayEnquiry(
   });
   window.fbq?.("track", "Lead", {
     content_name: name,
-    ...(value > 0 ? { value, currency: "INR" } : {}),
+    ...(value > 0 ? { value, currency: "EUR" } : {}),
   });
 }
 
