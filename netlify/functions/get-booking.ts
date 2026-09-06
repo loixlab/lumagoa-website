@@ -48,6 +48,19 @@ export default async (req: Request) => {
     const depositPaid =
       depositPaidRaw !== "" && !["false", "0", "no"].includes(depositPaidRaw);
 
+    // Temporary debug log: JSON-encoding the raw cells exposes column shifts
+    // (naive split(",")) and invisible characters like \r in the Netlify logs.
+    console.log(
+      JSON.stringify({
+        msg: "get-booking raw guest row",
+        bookingId,
+        cellCount: guest.length,
+        cells: guest,
+        depositPaidRaw,
+        depositPaid,
+      }),
+    );
+
     return Response.json({
       customerName: guest[1],
       customerEmail: isBookingDotCom ? "" : rawEmail, // Empty if it's a booking.com relay email
