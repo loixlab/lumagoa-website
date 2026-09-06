@@ -23,7 +23,7 @@ Layout / sync contract for these files: [docs/INSTRUCTION_FILES.md](docs/INSTRUC
 - **Payments:** Razorpay (INR). **Booking data:** a published Google Sheet read as CSV. **Booking engine:** Stayflexi, embedded as an iframe on `/booking`.
 - **Analytics:** Google Tag Manager + Meta Pixel, both inlined in `src/partials/head.ejs` — emitted in production builds only (`process.env.CONTEXT === "production"`), and skipped at runtime on `*.netlify.app` hosts.
 - **Tooling scripts:** Python 3 (Pillow, pillow-heif, requests, python-dotenv) in `scripts/`.
-- **Package manager:** `yarn`. **No test suite** in this repo.
+- **Package manager:** `yarn`. **Tests:** Jest (babel type-stripping) covers the `netlify/` helpers via `yarn test`; there are no UI/e2e tests.
 
 ## Project structure
 
@@ -42,6 +42,7 @@ Layout / sync contract for these files: [docs/INSTRUCTION_FILES.md](docs/INSTRUC
 - `yarn build` — production build into `dist/`. `yarn preview` — serve the built output.
 - `yarn generate-gallery-metadata` — regenerate `public/gallery-img-metadata.json` from `public/img/gallery/large`.
 - `yarn typecheck` — `tsc` for **both** TypeScript projects (`yarn typecheck:src` / `yarn typecheck:netlify` run one).
+- `yarn test` — Jest unit tests for the `netlify/` helpers (`netlify/*.test.ts`).
 - `yarn format` — Prettier over the repo. **Run this and `yarn typecheck` before every commit** — CI enforces both.
 
 ## Cross-cutting rules (MANDATORY)
@@ -53,12 +54,12 @@ Layout / sync contract for these files: [docs/INSTRUCTION_FILES.md](docs/INSTRUC
 - **Call functions at `/api/<name>`, never `/.netlify/functions/<name>`.** `netlify.toml` rewrites `/api/*` → `/.netlify/functions/:splat` with a `200` (a rewrite, not a redirect).
 - **Guard every required env var and return a clean 500** rather than letting a missing value throw or reach the vendor SDK. Both functions do this up front; keep the pattern. Env vars are read from `process.env` **in functions only**.
 - **Never put a secret in `src/`.** `RAZORPAY_KEY_SECRET`, `RAZORPAY_KEY_ID` and `GOOGLE_SHEET_ID` are server-side (`.env`, gitignored, mirrored in the Netlify UI). The Razorpay _publishable_ key in `src/ts/deposit-payment.ts` is public by design; the secret key must never reach the client bundle.
-- **Run `yarn typecheck` after any TS change.** It type-checks **both** projects: `tsconfig.json` (`src/**`, DOM libs) and `netlify/tsconfig.json` (`functions/**`, Node libs, no DOM). A change under `netlify/` is **not** covered by the root config, so the single-project scripts are rarely what you want.
+- **Run `yarn typecheck` after any TS change.** It type-checks **both** projects: `tsconfig.json` (`src/**`, DOM libs) and `netlify/tsconfig.json` (`functions/**` + `netlify/*.ts`, Node libs, no DOM). A change under `netlify/` is **not** covered by the root config, so the single-project scripts are rarely what you want.
 - **Nothing else type-checks.** Vite and Netlify's esbuild both strip types without checking, so `yarn typecheck` is the only thing standing between a type error and production.
 - **TypeScript is strict in both projects, including `noUncheckedIndexedAccess`** — indexing an array or record yields `T | undefined`. Narrow it or default it (`row[0] ?? ""`); don't reach for `!` or `as`.
 - **Client logic lives in `src/ts/` as a registered Alpine component**, not in inline `<script>` blocks or inline `x-data` object literals. Register it in `src/main.ts` before `Alpine.start()`.
 - **Formatting is Prettier** (`.prettierrc`: 2 spaces, 80 cols) with `prettier-plugin-tailwindcss`, which sorts Tailwind classes — let it reorder rather than hand-sorting `class` attributes. Nothing formats on save or on commit, so run `yarn format` yourself. `.prettierignore` deliberately excludes build output, the vendored daisyUI reference, and the generated gallery metadata JSON — don't format those back in.
-- **Run `yarn format` and `yarn typecheck` before every commit (MANDATORY).** Both are CI jobs on every PR and push to `main`: `typecheck` runs `yarn typecheck`, and `format` runs `yarn format` then fails the build via `git diff --exit-code` if Prettier rewrote anything. Committing without them means a red build, so run both, stage whatever `yarn format` changed, and only then commit.
+- **Run `yarn format` and `yarn typecheck` before every commit (MANDATORY).** Both are CI jobs on every PR and push to `main` (a third job, `test`, runs `yarn test`): `typecheck` runs `yarn typecheck`, and `format` runs `yarn format` then fails the build via `git diff --exit-code` if Prettier rewrote anything. Committing without them means a red build, so run both, stage whatever `yarn format` changed, and only then commit.
 - **Git:** branch off `main`; commit or push only when asked. End commit messages with the `Co-Authored-By: Claude …` trailer.
 
 ## Instruction-file upkeep

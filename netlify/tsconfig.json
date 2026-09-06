@@ -17,5 +17,5 @@
     "lib": ["ES2023"],
     "types": ["node"]
   },
-  "include": ["functions/**/*.ts"]
+  "include": ["functions/**/*.ts", "*.ts"]
 }

@@ -24,6 +24,18 @@ jobs:
       # Type-checks both projects (tsconfig.json + netlify/tsconfig.json).
       - run: yarn typecheck
 
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: yarn
+      - run: yarn install --frozen-lockfile
+      # Jest unit tests (the netlify/ helpers).
+      - run: yarn test
+
   format:
     runs-on: ubuntu-latest
     steps:

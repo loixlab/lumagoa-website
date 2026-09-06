@@ -12,13 +12,17 @@
     "typecheck:src": "tsc -p tsconfig.json",
     "typecheck:netlify": "tsc -p netlify/tsconfig.json",
     "generate-gallery-metadata": "python3 ./scripts/image_metadata.py $PWD/public/img/gallery/large $PWD/public --output ./public/gallery-img-metadata.json",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "module",
   "devDependencies": {
+    "@babel/preset-env": "^7.28.0",
+    "@babel/preset-typescript": "^7.27.1",
+    "@jest/globals": "^30.5.1",
     "@tailwindcss/typography": "^0.5.19",
     "@tailwindcss/vite": "^4.1.18",
     "@types/alpinejs": "^3.13.11",
@@ -27,6 +31,7 @@
     "@types/masonry-layout": "^4.2.8",
     "@types/node": "^26.1.2",
     "daisyui": "^5.5.18",
+    "jest": "^30.5.1",
     "prettier": "^3.8.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tailwindcss": "^4.1.18",

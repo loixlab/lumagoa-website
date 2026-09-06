@@ -2,6 +2,13 @@
  * Looks up a booking by reference in the published Google Sheet (CSV export)
  * and returns the guest/deposit details the deposit-payment page needs.
  */
+import { parseCsv } from "../utils";
+
+// The sheet formats amounts with thousands separators ("75,650"), which
+// Number() would read as NaN.
+const parseAmount = (cell: string | undefined): number =>
+  Number((cell ?? "").replace(/,/g, "").trim());
+
 export default async (req: Request) => {
   const bookingId = new URL(req.url).searchParams.get("id")?.toUpperCase();
 
@@ -25,7 +32,7 @@ export default async (req: Request) => {
     }
 
     const csv = await response.text();
-    const rows = csv.split("\n").map((row) => row.split(","));
+    const rows = parseCsv(csv);
     const dataRows = rows.slice(1);
 
     // Find the specific guest
@@ -67,8 +74,8 @@ export default async (req: Request) => {
       customerPhone: guest[3],
       checkIn: guest[4],
       checkOut: guest[5],
-      bookingAmount: Number((guest[6] ?? "").trim()),
-      depositAmount: Number((guest[8] ?? "").trim()),
+      bookingAmount: parseAmount(guest[6]),
+      depositAmount: parseAmount(guest[8]),
       depositPaid,
     });
   } catch (err) {

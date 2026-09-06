@@ -4,7 +4,7 @@ applyTo: "netlify/**"
 
 # `netlify/` — Serverless Functions (Razorpay deposits + booking lookup)
 
-Two functions in `netlify/functions/`, both TypeScript ESM in Netlify's **V2** format. Together they back the `/deposit-payment` page: look a booking up in the office's Google Sheet, then create a Razorpay order for its deposit. There is no database and no shared `lib/` — each function is self-contained.
+Two functions in `netlify/functions/`, both TypeScript ESM in Netlify's **V2** format. Together they back the `/deposit-payment` page: look a booking up in the office's Google Sheet, then create a Razorpay order for its deposit. There is no database. Cross-function helpers live in `netlify/utils.ts` (currently `parseCsv`) with their Jest tests beside them in `netlify/utils.test.ts`; everything else stays in the function files themselves.
 
 ## Function conventions
 
@@ -64,14 +64,15 @@ Local values live in `.env` (gitignored) and are injected by `netlify dev`; prod
   | 8     | `depositAmount`     |
   | 9     | deposit-paid marker |
 
-- **The CSV parser is a naive `split(",")`.** A comma inside any cell (a guest name, an address, a thousands separator) shifts every subsequent column for that row. Keep commas out of the sheet, or replace the parser with a real CSV reader — don't paper over it with index fudging.
+- **The CSV is parsed by `parseCsv` from `netlify/utils.ts`, a minimal RFC 4180 parser** (quoted fields, escaped `""` quotes, newlines inside quotes, CRLF row endings). Google quotes any cell containing a comma — a guest name, an amount exported as `"75,650"` — so never regress to a naive `split(",")`: it shifts every subsequent column of that row (that bug shipped once and made `depositPaid` read a neighbouring cell). `parseCsv` is unit-tested in `netlify/utils.test.ts` — extend those tests if you touch it.
+- **Amounts go through `parseAmount`**, which strips thousands separators before `Number()` — `Number("75,650")` is `NaN`.
 - **A booking.com relay address is suppressed** (`customerEmail: ""`) so the deposit page prompts the guest for a real address instead of prefilling an unusable relay one.
 - **`depositPaid` is "any non-empty value except an explicit negative"** (`false` / `0` / `no`, case-insensitive) — the sheet marks paid deposits inconsistently, and a checkbox column exports as the literal `FALSE`. Keep that guard if you touch the logic.
 - **This endpoint is public and unauthenticated:** a booking reference is the only thing between a caller and a guest's name, email, phone and dates. **Do not widen the response** beyond what the deposit page renders, and don't add fields "just in case".
 
 ## Type-checking
 
-The functions have **their own TS project**, `netlify/tsconfig.json` (`functions/**`, Node libs, `target: ES2023`, no DOM). The root `tsconfig.json` covers `src/**` only, so a change here is not checked by it:
+The functions have **their own TS project**, `netlify/tsconfig.json` (`functions/**` plus the top-level `netlify/*.ts` helpers and tests, Node libs, `target: ES2023`, no DOM). The root `tsconfig.json` covers `src/**` only, so a change here is not checked by it:
 
 ```bash
 yarn typecheck:netlify   # this project only
@@ -89,7 +90,7 @@ curl "http://localhost:8888/api/get-booking?id=ABC123"
 curl "http://localhost:8888/api/create-order?amount=5000&id=ABC123"
 ```
 
-There are no unit tests in this repo. **Note that `create-order` uses the live Razorpay key** — a local call creates a real order, so test with a Razorpay test key or accept the stray order.
+`yarn test` runs the Jest unit tests (`netlify/*.test.ts` — currently `utils.test.ts` for the CSV parser); Jest strips types via babel, so it is **not** a type gate. **Note that `create-order` uses the live Razorpay key** — a local call creates a real order, so test with a Razorpay test key or accept the stray order.
 
 ## Verification checklist
 
