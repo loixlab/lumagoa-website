@@ -13,7 +13,7 @@ type Metadata = Record<string, ImageMetadata>;
 
 /**
  * Registers the Alpine component backing the masonry photo galleries
- * (gallery + yoga-shala pages). Placed on the grid element with the page's
+ * (gallery + yoga pages). Placed on the grid element with the page's
  * metadata file as argument, e.g.
  * `x-data="masonryGallery('gallery-img-metadata.json')"`.
  *

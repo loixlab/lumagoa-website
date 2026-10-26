@@ -7,7 +7,7 @@ yoga-holidays spec).
 ## Gallery section — built but disabled
 
 `src/pages/ayurveda-massage.ejs` contains a commented-out Gallery section
-(masonry + PhotoSwipe, `data-theme="dim"`, same markup as `yoga-shala.ejs`).
+(masonry + PhotoSwipe, `data-theme="dim"`, same markup as `yoga.ejs`).
 To enable it once gallery photography exists:
 
 1. Shoot 8–12 images: the space, details, therapist hands, exterior.

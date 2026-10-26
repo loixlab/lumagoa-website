@@ -18,6 +18,20 @@
   status = 301
   force = true
 
+# /yoga-shala was renamed to /yoga (Oct 2026) — keep the old URL alive for
+# links shared and indexed while it was live.
+[[redirects]]
+  from = "/yoga-shala"
+  to = "/yoga"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/yoga-shala.html"
+  to = "/yoga"
+  status = 301
+  force = true
+
 [[redirects]]
   from = "/winter-renewal"
   to = "/"
