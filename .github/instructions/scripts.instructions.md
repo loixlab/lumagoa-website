@@ -58,7 +58,7 @@ Emits the JSON that the galleries need, keyed by the image's **web path** (`<fol
 
 ### `generate_shala_schedule_table.py [csv]` — yoga schedule table
 
-Turns the office's class schedule into the HTML table pasted into `src/pages/yoga-shala.ejs`. With no argument it fetches `SCHEDULE_SPREADSHEET` (a published-as-CSV Google Sheet URL) from `.env`; pass a path to use a local CSV instead. Prints the HTML and copies it to the clipboard when `pyperclip` is installed.
+Turns the office's class schedule into the HTML table pasted into `src/pages/yoga.ejs`. With no argument it fetches `SCHEDULE_SPREADSHEET` (a published-as-CSV Google Sheet URL) from `.env`; pass a path to use a local CSV instead. Prints the HTML and copies it to the clipboard when `pyperclip` is installed.
 
 ```bash
 python3 ./scripts/generate_shala_schedule_table.py
@@ -79,7 +79,7 @@ The galleries break silently if the metadata isn't regenerated — PhotoSwipe ne
    # /gallery — there is a yarn script for this one
    yarn generate-gallery-metadata
 
-   # /yoga-shala — no yarn script; run it directly
+   # /yoga — no yarn script; run it directly
    python3 ./scripts/image_metadata.py \
      $PWD/public/img/gallery-shala/large $PWD/public \
      --output ./public/gallery-shala-img-metadata.json

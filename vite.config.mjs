@@ -46,9 +46,9 @@ export default defineConfig({
           filename: "winter-renewal.html",
         },
         {
-          name: "yoga-shala",
-          template: resolve(__dirname, "src/pages/yoga-shala.ejs"),
-          filename: "yoga-shala.html",
+          name: "yoga",
+          template: resolve(__dirname, "src/pages/yoga.ejs"),
+          filename: "yoga.html",
         },
         {
           name: "cafe-restaurant",
