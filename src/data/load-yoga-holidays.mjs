@@ -22,16 +22,16 @@ import { eurAmount, formatEur, numberToWord } from "./utils.mjs";
 
 const STAY = { checkIn: "14:00", checkOut: "11:00" };
 
-// Recommended class times, not a confirmed schedule — verify
-// against the final October schedule before publishing.
+// Class times and styles mirror the /yoga schedule sheet — keep them in sync
+// when the sheet or the teaching line-up changes (see src/CLAUDE.md).
 const TIMELINE = [
   {
-    time: "08:00",
+    time: "08:30",
     title: "Morning practice",
     text: "Dynamic Hatha or Vinyasa in the shaded yoga shala equipped with high quality mats and props.",
   },
   {
-    time: "09:15",
+    time: "09:30",
     title: "Breakfast",
     text: "Straight from the mat to Roots & Bloom.",
   },
@@ -43,7 +43,7 @@ const TIMELINE = [
   {
     time: "17:30",
     title: "Evening practice",
-    text: "Yin, Kundalini, pranayama, meditation.",
+    text: "Vinyasa, pranayama, meditation.",
   },
 ];
 
