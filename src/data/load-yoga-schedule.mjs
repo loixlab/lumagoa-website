@@ -327,6 +327,8 @@ export function buildYogaSchedule(raw, today) {
   const currentIndex = weeks.findIndex((w) => w.monday === currentMonday);
 
   return {
+    // Also the /yoga <lastmod> in the built sitemap (vite.config.mjs).
+    buildDate: today,
     weeks,
     currentIndex,
     // From the build date, not the build week's Monday: a mid-week deploy
