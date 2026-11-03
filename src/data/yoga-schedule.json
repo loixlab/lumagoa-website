@@ -22,13 +22,6 @@
   },
   {
     "date": "2026-11-03",
-    "timeStart": "10:00",
-    "timeEnd": "11:30",
-    "title": "New Hatha",
-    "teachers": ["Seb"]
-  },
-  {
-    "date": "2026-11-03",
     "timeStart": "17:30",
     "timeEnd": "18:30",
     "title": "Evening Vinyasa",
@@ -47,13 +40,6 @@
     "timeEnd": "18:30",
     "title": "Evening Vinyasa",
     "teachers": ["Ashutosh"]
-  },
-  {
-    "date": "2026-11-04",
-    "timeStart": "20:00",
-    "timeEnd": "21:00",
-    "title": "Sound Bath",
-    "teachers": ["Balbi", "Seb"]
   },
   {
     "date": "2026-11-05",

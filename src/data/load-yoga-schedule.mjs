@@ -34,6 +34,7 @@ const FIELDS = [
   "title",
   "subTitle",
   "teachers",
+  "highlight",
 ];
 
 const DAY_NAMES = [
@@ -222,6 +223,11 @@ function validate(raw) {
     ) {
       throw new Error(`${label}: teachers must be an array of names`);
     }
+    // A strict boolean — the string "false" would otherwise read as truthy
+    // and highlight the card.
+    if (e.highlight !== undefined && typeof e.highlight !== "boolean") {
+      throw new Error(`${label}: highlight must be true or false`);
+    }
     const key = `${e.date} ${slotOf(e)}`;
     perSlot.set(key, (perSlot.get(key) ?? 0) + 1);
   }
@@ -246,6 +252,7 @@ function toCard(e) {
     title: e.title,
     subTitle: e.subTitle ?? null,
     teachers: formatTeachers(e.teachers ?? []),
+    highlight: e.highlight === true,
   };
 }
 
