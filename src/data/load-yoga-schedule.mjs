@@ -253,8 +253,10 @@ function validate(raw, labelOf) {
 // --- The schedule sheet -----------------------------------------------------
 
 // Sheet column headers (matched case-insensitively, in any order) → the event
-// field each fills. "Notes" is for the office and never read. Keep in step
-// with HEADERS in the sheet's Apps Script (docs/yoga-schedule-sheet.md).
+// field each fills. "Notes" is for the office and never read; "Version" is a
+// label the office types in (e.g. v12) that the build logs, so a build log
+// shows which edit it read. Neither is part of a class. Keep in step with
+// HEADERS in the sheet's Apps Script (docs/yoga-schedule-sheet.gs).
 const SHEET_COLUMNS = {
   date: "date",
   start: "timeStart",
@@ -264,7 +266,13 @@ const SHEET_COLUMNS = {
   teachers: "teachers",
   highlight: "highlight",
   notes: null,
+  version: null,
 };
+// The columns that describe a class — a row with none of them filled (only
+// Notes or Version, say) is not a class.
+const CLASS_COLUMNS = Object.keys(SHEET_COLUMNS).filter(
+  (name) => SHEET_COLUMNS[name] !== null,
+);
 const REQUIRED_COLUMNS = ["date", "start", "end", "title"];
 
 /** "8:30", "08:30" or "08:30:00" → "08:30"; anything else is left for validate() to reject. */
@@ -275,14 +283,16 @@ function normalizeTime(value) {
 
 /**
  * Turns the sheet's CSV export into events, plus each one's sheet row number
- * so errors point the office at the exact row. Blank rows are skipped. Header
- * problems throw here; cell problems are left to validate().
+ * so errors point the office at the exact row, and the sheet's Version (the
+ * first non-empty cell of that column, or null). Rows with no class column
+ * filled are skipped. Header problems throw here; cell problems are left to
+ * validate().
  */
 export function parseScheduleSheet(csv) {
   const [header = [], ...body] = parseCsv(csv.replace(/^\uFEFF/, ""));
   const columns = header.map((name) => name.trim().toLowerCase());
   const allowed =
-    "Date, Start, End, Title, Subtitle, Teachers, Highlight, Notes";
+    "Date, Start, End, Title, Subtitle, Teachers, Highlight, Notes, Version";
 
   const unknown = columns.filter((c) => c !== "" && !(c in SHEET_COLUMNS));
   if (unknown.length > 0) {
@@ -303,12 +313,14 @@ export function parseScheduleSheet(csv) {
 
   const events = [];
   const rows = [];
+  let version = null;
   body.forEach((cells, i) => {
-    if (cells.every((cell) => cell.trim() === "")) return;
     const cell = (name) => {
       const at = columns.indexOf(name);
       return at === -1 ? "" : (cells[at] ?? "").trim();
     };
+    version ??= cell("version") || null;
+    if (CLASS_COLUMNS.every((name) => cell(name) === "")) return;
     const event = {
       date: cell("date"),
       timeStart: normalizeTime(cell("start")),
@@ -332,7 +344,7 @@ export function parseScheduleSheet(csv) {
     // +1 for the header row, +1 because sheet rows count from 1.
     rows.push(i + 2);
   });
-  return { events, rows };
+  return { events, rows, version };
 }
 
 // Long enough for Google's CSV export, short enough that a hung request fails
@@ -346,6 +358,15 @@ async function fetchScheduleCsv(csvUrl) {
     url = new URL(csvUrl);
   } catch {
     throw new Error("YOGA_SCHEDULE_CSV_URL is not a valid URL");
+  }
+  // A "Publish to web" link (/d/e/…/pub) serves a copy Google refreshes on
+  // its own schedule and caches for 5 minutes (max-age=300), so a build
+  // right after an edit can read the old schedule. The export link reads the
+  // live sheet.
+  if (url.pathname.includes("/d/e/") || url.pathname.endsWith("/pub")) {
+    console.warn(
+      'YOGA_SCHEDULE_CSV_URL is a "Publish to web" link, which can lag several minutes behind the sheet — use https://docs.google.com/spreadsheets/d/<SPREADSHEET_ID>/export?format=csv&gid=<GID> instead (docs/yoga-schedule-sheet.md)',
+    );
   }
   // Busts any cache between the build and Google, as get-booking does.
   url.searchParams.set("t", String(Date.now()));
@@ -485,10 +506,14 @@ export function buildYogaSchedule(
 export async function loadYogaSchedulePageData({ csvUrl, requireSheet }) {
   let raw;
   let labelOf;
+  let source;
   if (csvUrl) {
-    const { events, rows } = parseScheduleSheet(await fetchScheduleCsv(csvUrl));
+    const { events, rows, version } = parseScheduleSheet(
+      await fetchScheduleCsv(csvUrl),
+    );
     raw = events;
     labelOf = (index) => `Schedule sheet row ${rows[index]}`;
+    source = `Schedule sheet, version ${version ? `"${version}"` : "not set (no Version cell)"}`;
   } else if (requireSheet) {
     throw new Error(
       "YOGA_SCHEDULE_CSV_URL is not set — a production build reads the /yoga schedule from the Google Sheet and never falls back to the sample data",
@@ -499,9 +524,16 @@ export async function loadYogaSchedulePageData({ csvUrl, requireSheet }) {
     );
     raw = sampleEvents;
     labelOf = (index) => `yoga-schedule.sample.json: event at index ${index}`;
+    source = "sample data";
   }
 
   const yogaSchedule = buildYogaSchedule(raw, todayInGoa(), labelOf);
+  // What this build read — compare the version with the sheet's to confirm
+  // it picked up the latest edit.
+  const dates = raw.map((e) => e.date).sort();
+  console.log(
+    `Yoga schedule: ${source} — ${raw.length} classes${dates.length > 0 ? `, ${dates[0]} → ${dates.at(-1)}` : ""} (built ${yogaSchedule.buildDate}, Goa time)`,
+  );
   const current = yogaSchedule.weeks[yogaSchedule.currentIndex];
   if (current.slots.every((slot) => slot.cells.every((c) => c.length === 0))) {
     console.warn(

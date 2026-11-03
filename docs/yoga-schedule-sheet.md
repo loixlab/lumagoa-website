@@ -33,8 +33,17 @@ One row per class. Headers are matched case-insensitively, in any order.
 | Teachers  | no       | Comma-separated: `Balbi, Seb` → "with Balbi & Seb"                      |
 | Highlight | no       | Checkbox — ticked puts the card on brand gold                           |
 | Notes     | no       | For the office; never shown on the website                              |
+| Version   | no       | A label you change with each edit, e.g. `v12` — see below               |
 
-At most 4 classes fit in one day's Morning (or Evening) slot. Any other column name fails the build — rename or delete it.
+At most 4 classes fit in one day's Morning (or Evening) slot. A row with only Notes or Version filled is not a class and is skipped. Any other column name fails the build — rename or delete it.
+
+**Version** is how you check a build read your latest edit. Type a label in the first row under the header (`v12`, a date — anything), change it whenever you edit the schedule, and the build log prints what it read:
+
+```
+Yoga schedule: Schedule sheet, version "v12" — 28 classes, 2026-11-02 → 2026-11-15 (built 2026-11-03, Goa time)
+```
+
+The log is in Netlify under Deploys → the deploy → Deploy log. The sheet's **Check schedule** and **Publish schedule now** messages show the version too.
 
 ## One-time setup
 
@@ -56,9 +65,16 @@ At most 4 classes fit in one day's Morning (or Evening) slot. Any other column n
 6. **Give the sheet its hook.** In the Apps Script editor: Project Settings (gear icon) → Script properties → add `BUILD_HOOK_URL` = the sheet's build hook URL. Anyone who can edit the sheet can see it; it only lets them trigger builds, which the menu does anyway. Delete the hook in Netlify to revoke it.
 7. **Local builds** read the same variable from `.env` (`YOGA_SCHEDULE_CSV_URL=…`). Without it, `yarn dev` / `yarn build` use the sample data in `src/data/yoga-schedule.sample.json` and print a warning. A production build without it fails instead of publishing the sample.
 
+## Troubleshooting
+
+**The build read an older schedule** (the logged Version is behind the sheet's):
+
+- If the deploy log warns that `YOGA_SCHEDULE_CSV_URL` is a "Publish to web" link, that's the cause. Google serves the published copy with a 5-minute cache (`cache-control: max-age=300`) and refreshes it on its own schedule, so a build soon after an edit can read the old one. Switch the variable to the export link from step 4. Its `<SPREADSHEET_ID>` is the id in the sheet's own address bar (`/d/<ID>/edit`), not the `/d/e/…` id of the published link.
+- `yarn dev` reads the sheet once, when it starts. Restart it to pick up edits.
+
 ## Day to day
 
-1. Edit the Schedule tab.
+1. Edit the Schedule tab, and change the Version.
 2. **Website → Check schedule** lists any problems by row.
 3. **Website → Publish schedule now** checks again, then rebuilds the site. Or do nothing: the nightly rebuild picks the changes up.
 

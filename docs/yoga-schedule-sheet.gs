@@ -32,8 +32,11 @@ const HEADERS = [
   "Teachers",
   "Highlight",
   "Notes",
+  "Version",
 ];
 const REQUIRED = ["date", "start", "end", "title"];
+// Never part of a class: a row with only these filled is skipped.
+const NOT_CLASS_COLUMNS = ["notes", "version"];
 const MAX_PER_SLOT = 4;
 
 function onOpen() {
@@ -70,6 +73,7 @@ function publishSchedule() {
 
   // Make sure the last edits are saved before the build reads the sheet.
   SpreadsheetApp.flush();
+  const version = scheduleVersion_();
   const who = Session.getActiveUser().getEmail() || "the schedule sheet";
   const url =
     hookUrl +
@@ -100,7 +104,9 @@ function publishSchedule() {
   }
   ui.alert(
     "Publishing",
-    "The website is rebuilding. The new schedule will be live in about 2 minutes.",
+    "The website is rebuilding" +
+      (version ? " with version " + version : "") +
+      ". The new schedule will be live in about 2 minutes.",
     ui.ButtonSet.OK,
   );
 }
@@ -111,7 +117,14 @@ function checkSchedule() {
   if (problems.length > 0) {
     ui.alert("Problems found", summarize_(problems), ui.ButtonSet.OK);
   } else {
-    ui.alert("All good", "The schedule is ready to publish.", ui.ButtonSet.OK);
+    const version = scheduleVersion_();
+    ui.alert(
+      "All good",
+      "The schedule" +
+        (version ? " (version " + version + ")" : "") +
+        " is ready to publish.",
+      ui.ButtonSet.OK,
+    );
   }
 }
 
@@ -155,7 +168,8 @@ function setupScheduleTab() {
   ui.alert(
     "Set up Schedule tab",
     "Done. Add one row per class: Date, Start and End (24h, e.g. 17:30) and Title. " +
-      "Optional: Subtitle, Teachers (comma-separated), Highlight (tick for a gold card) and Notes (never shown on the website).",
+      "Optional: Subtitle, Teachers (comma-separated), Highlight (tick for a gold card) and Notes (never shown on the website). " +
+      "Type a label like v1 under Version and change it with each edit: the website's build log shows the version it read.",
     ui.ButtonSet.OK,
   );
 }
@@ -169,6 +183,25 @@ function scheduleProblems_() {
   }
   // Displayed values are exactly what the CSV export gives the website.
   return checkRows_(sheet.getDataRange().getDisplayValues());
+}
+
+/** The first non-empty cell under the Version header, or "" — as the build reads it. */
+function scheduleVersion_() {
+  const sheet = SpreadsheetApp.getActive().getSheetByName(TAB_NAME);
+  return sheet ? versionOf_(sheet.getDataRange().getDisplayValues()) : "";
+}
+
+function versionOf_(rows) {
+  const header = (rows[0] || []).map((name) =>
+    String(name).trim().toLowerCase(),
+  );
+  const at = header.indexOf("version");
+  if (at === -1) return "";
+  for (let r = 1; r < rows.length; r++) {
+    const value = String(rows[r][at] || "").trim();
+    if (value) return value;
+  }
+  return "";
 }
 
 /**
@@ -201,11 +234,14 @@ function checkRows_(rows) {
   const perSlot = {};
   for (let r = 1; r < rows.length; r++) {
     const cells = rows[r].map((cell) => String(cell).trim());
-    if (cells.every((cell) => cell === "")) continue;
     const get = (name) => {
       const at = header.indexOf(name);
       return at === -1 ? "" : cells[at] || "";
     };
+    const classColumns = known.filter(
+      (name) => NOT_CLASS_COLUMNS.indexOf(name) === -1,
+    );
+    if (classColumns.every((name) => get(name) === "")) continue;
     const where = "Row " + (r + 1) + ": ";
     const date = get("date");
     const start = toTime_(get("start"));
