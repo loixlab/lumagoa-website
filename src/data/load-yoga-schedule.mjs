@@ -329,10 +329,9 @@ export function buildYogaSchedule(raw, today) {
   return {
     weeks,
     currentIndex,
-    // Past weeks stay out of the JSON-LD — only what's still bookable.
-    jsonLdEvents: events
-      .filter((e) => e.date >= currentMonday)
-      .map(toJsonLdEvent),
+    // From the build date, not the build week's Monday: a mid-week deploy
+    // must not list classes that already happened as EventScheduled.
+    jsonLdEvents: events.filter((e) => e.date >= today).map(toJsonLdEvent),
   };
 }
 

@@ -18,17 +18,24 @@ export default async () => {
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 
-  const url = new URL(hookUrl);
-  // Labels the deploy in the Netlify deploy list.
-  url.searchParams.set("trigger_title", "Weekly rebuild (yoga schedule week)");
-
   try {
+    // Parsed inside the try: a malformed value throws a TypeError whose
+    // `input` property is the raw env value — uncaught, the runtime would
+    // log the secret along with it.
+    const url = new URL(hookUrl);
+    // Labels the deploy in the Netlify deploy list.
+    url.searchParams.set(
+      "trigger_title",
+      "Weekly rebuild (yoga schedule week)",
+    );
+
     const response = await fetch(url, { method: "POST", body: "{}" });
     if (!response.ok) {
       throw new Error(`Build hook returned status ${response.status}`);
     }
   } catch (error) {
-    // The message only — a fetch error's cause can carry the request URL.
+    // The message only — an invalid-URL error carries the raw value in
+    // `input`, and a fetch error's cause can carry the request URL.
     console.error(
       "weekly-rebuild: build hook call failed:",
       error instanceof Error ? error.message : error,
