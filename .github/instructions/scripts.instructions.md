@@ -2,19 +2,19 @@
 applyTo: "scripts/**"
 ---
 
-# `scripts/` — Python Image & Schedule Tooling
+# `scripts/` — Python Image Tooling
 
-Standalone Python 3 helpers run by hand from the repo root. They are **content-prep tools, not part of the build** — nothing in `yarn build` or the Netlify deploy invokes them, and their output is committed to `public/`.
+Standalone Python 3 helpers run by hand from the repo root. They are **content-prep tools, not part of the build** — nothing in `yarn build` or the Netlify deploy invokes them, and their output is committed to `public/`. (The `/yoga` class schedule is no longer generated here: it is read from a Google Sheet at build time — see `docs/yoga-schedule-sheet.md`.)
 
 ## Dependencies
 
 Not managed by `package.json` — install them yourself:
 
 ```bash
-pip3 install pillow pillow-heif requests python-dotenv pyperclip
+pip3 install pillow pillow-heif
 ```
 
-`pillow-heif` is what lets the resize scripts read the `.HEIC` files that come off a phone. `pyperclip` is optional — the schedule script falls back to printing.
+`pillow-heif` is what lets the resize scripts read the `.HEIC` files that come off a phone.
 
 ## The scripts
 
@@ -56,16 +56,6 @@ Emits the JSON that the galleries need, keyed by the image's **web path** (`<fol
 }
 ```
 
-### `generate_shala_schedule_table.py [csv]` — yoga schedule table
-
-Turns the office's class schedule into the HTML table pasted into `src/pages/yoga.ejs`. With no argument it fetches `SCHEDULE_SPREADSHEET` (a published-as-CSV Google Sheet URL) from `.env`; pass a path to use a local CSV instead. Prints the HTML and copies it to the clipboard when `pyperclip` is installed.
-
-```bash
-python3 ./scripts/generate_shala_schedule_table.py
-```
-
-The output is **pasted into the page by hand** — the schedule is not fetched at runtime, so the page is stale until someone regenerates and commits it.
-
 ## Adding gallery images (MANDATORY sequence)
 
 The galleries break silently if the metadata isn't regenerated — PhotoSwipe needs real pixel dimensions, and `src/ts/gallery.ts` only logs a per-image `console.warn` when they're missing.
@@ -94,4 +84,3 @@ The galleries break silently if the metadata isn't regenerated — PhotoSwipe ne
 - **Keep these scripts dependency-light and runnable standalone.** They're occasional-use office tooling; don't wire them into the Vite build or make them require a `node_modules` install.
 - **Commit the generated output** (resized images and metadata JSON). Nothing regenerates them at deploy time.
 - **Filenames are content, not implementation** — the metadata JSON keys, the page markup and the files on disk must agree exactly, including case and extension.
-- **`.env` is gitignored**, so `SCHEDULE_SPREADSHEET` has to be set up locally per machine.

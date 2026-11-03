@@ -34,22 +34,6 @@ python3 ./scripts/resize_hero_image.py ./public/img/cafe-hero.HEIC
 python3 ./scripts/resize_hero_image.py ./public/img/cafe-hero.jpg
 ```
 
-## Generate Yoga Shala Schedule HTML table
+## Yoga schedule
 
-Generate the CSV file from the Google Spreadsheet, then run the following command
-
-```py
-python3 ./scripts/generate_shala_schedule_table.py <CSV_FILE>
-```
-
-Alternatively you can publish a Google Spreadsheet as CSV and then create an `.env` file with the following
-
-```
-SCHEDULE_SPREADSHEET=<PUBLISHED-URL>
-```
-
-You then don't need to pass a CSV file to the script
-
-```py
-python3 ./scripts/generate_shala_schedule_table.py
-```
+The `/yoga` class schedule is edited in a Google Sheet and read at build time. See [docs/yoga-schedule-sheet.md](docs/yoga-schedule-sheet.md) for the sheet's columns, setup and troubleshooting.

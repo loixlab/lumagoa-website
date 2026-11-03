@@ -23,7 +23,7 @@ docs/
     scripts.instructions.md                # applyTo: scripts/**
 src/CLAUDE.md                              # Frontend: EJS MPA, Tailwind/DaisyUI, Alpine
 netlify/CLAUDE.md                          # Functions: Razorpay deposits, booking lookup, daily rebuild
-scripts/CLAUDE.md                          # Python image + schedule tooling
+scripts/CLAUDE.md                          # Python image tooling
 ```
 
 `.github/instructions/daisyui.instructions.md` is a **vendored** DaisyUI v5 reference (downloaded from daisyui.com's `llms.txt`, `applyTo: "**"`). It is not a hand-maintained pair — Claude references the same content via the URL noted in `src/CLAUDE.md`, so there is no `CLAUDE.md` to keep it in sync with.

@@ -12,7 +12,7 @@ This is the universal Copilot file (mirror of the root `CLAUDE.md`). Path-scoped
 - **Backend:** Netlify Functions in `netlify/functions/` — **TypeScript ESM, V2 format**.
 - **Payments:** Razorpay (INR). **Booking data:** a published Google Sheet read as CSV. **Yoga schedule:** a second Google Sheet, read as CSV at build time. **Booking engine:** Stayflexi, embedded as an iframe on `/booking`.
 - **Analytics:** Google Tag Manager + Meta Pixel, both inlined in `src/partials/head.ejs` — emitted in production builds only (`process.env.CONTEXT === "production"`), and skipped at runtime on `*.netlify.app` hosts.
-- **Tooling scripts:** Python 3 (Pillow, pillow-heif, requests, python-dotenv) in `scripts/`.
+- **Tooling scripts:** Python 3 (Pillow, pillow-heif) in `scripts/`.
 - **Package manager:** `yarn`. **Tests:** Jest (babel type-stripping) covers the `netlify/` helpers via `yarn test`; there are no UI/e2e tests.
 
 ## Project structure
@@ -23,7 +23,7 @@ This is the universal Copilot file (mirror of the root `CLAUDE.md`). Path-scoped
 - `src/styles.css` — Tailwind entry, DaisyUI theme definitions, and the gallery / Google-Maps overrides.
 - `netlify/functions/` — `create-order.ts` (Razorpay order), `get-booking.ts` (booking lookup) and `daily-rebuild.ts` (scheduled nightly rebuild); `netlify/tsconfig.json` — their own TS project.
 - `public/` — static assets served from the site root (`/img/...`, `quotes.json`, the two gallery metadata JSON files, `robots.txt`, `sitemap.xml`).
-- `scripts/` — Python image-resizing, gallery-metadata and yoga-schedule tooling. `docs/` — repo/AI docs.
+- `scripts/` — Python image-resizing and gallery-metadata tooling. `docs/` — repo/AI docs.
 
 ## Commands
 
