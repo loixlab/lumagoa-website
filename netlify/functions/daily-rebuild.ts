@@ -1,9 +1,11 @@
 /**
- * Scheduled function: rebuilds the site every Monday just after midnight in
- * Goa, so /yoga opens on the new week. The weekly schedule renders the week
+ * Scheduled function: rebuilds the site every night just after midnight in
+ * Goa. /yoga is built from the schedule Google Sheet and renders the week
  * containing the *build date* as its static HTML
- * (src/data/load-yoga-schedule.mjs), so without a fresh build the page keeps
- * opening on whatever week it was last deployed in.
+ * (src/data/load-yoga-schedule.mjs), so this nightly build is what picks up
+ * the office's sheet edits, moves the page to the new week on Mondays and
+ * drops past classes from the JSON-LD. (The sheet's "Publish schedule now"
+ * button triggers the same kind of build on demand, through its own hook.)
  *
  * It POSTs to a Netlify build hook for the production branch. Scheduled
  * functions only run on the published deploy and can't be invoked by URL —
@@ -12,9 +14,9 @@
 export default async () => {
   // A secret in all but name — anyone holding the URL can trigger builds.
   // Never log it.
-  const hookUrl = process.env.WEEKLY_BUILD_HOOK_URL;
+  const hookUrl = process.env.DAILY_BUILD_HOOK_URL;
   if (!hookUrl) {
-    console.error("weekly-rebuild: WEEKLY_BUILD_HOOK_URL env var is not set");
+    console.error("daily-rebuild: DAILY_BUILD_HOOK_URL env var is not set");
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 
@@ -24,10 +26,7 @@ export default async () => {
     // log the secret along with it.
     const url = new URL(hookUrl);
     // Labels the deploy in the Netlify deploy list.
-    url.searchParams.set(
-      "trigger_title",
-      "Weekly rebuild (yoga schedule week)",
-    );
+    url.searchParams.set("trigger_title", "Daily rebuild (yoga schedule)");
 
     const response = await fetch(url, { method: "POST", body: "{}" });
     if (!response.ok) {
@@ -37,19 +36,19 @@ export default async () => {
     // The message only — an invalid-URL error carries the raw value in
     // `input`, and a fetch error's cause can carry the request URL.
     console.error(
-      "weekly-rebuild: build hook call failed:",
+      "daily-rebuild: build hook call failed:",
       error instanceof Error ? error.message : error,
     );
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 
-  console.log("weekly-rebuild: production build triggered");
+  console.log("daily-rebuild: production build triggered");
   return new Response(null, { status: 204 });
 };
 
-// Netlify cron runs in UTC. Sunday 19:00 UTC is Monday 00:30 in Goa (UTC+5:30,
+// Netlify cron runs in UTC. 19:00 UTC is 00:30 the next day in Goa (UTC+5:30,
 // no daylight saving). The half-hour past midnight guarantees the build reads
-// Monday's date, and the week it opens on, when it computes "today".
+// the new date — and on Mondays the new week — when it computes "today".
 export const config = {
-  schedule: "0 19 * * 0",
+  schedule: "0 19 * * *",
 };

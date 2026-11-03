@@ -65,7 +65,7 @@ schemaData: {
       }
     ]
   },
-  // One Event per class from the build date on, from src/data/yoga-schedule.json.
+  // One Event per class from the build date on, from the schedule Google Sheet.
   ...(yogaSchedule.jsonLdEvents.length > 0 ? { "event": yogaSchedule.jsonLdEvents } : {})
 }
 }) %>

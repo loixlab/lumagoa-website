@@ -2,9 +2,9 @@
 applyTo: "netlify/**"
 ---
 
-# `netlify/` — Serverless Functions (Razorpay deposits, booking lookup, weekly rebuild)
+# `netlify/` — Serverless Functions (Razorpay deposits, booking lookup, daily rebuild)
 
-Three functions in `netlify/functions/`, all TypeScript ESM in Netlify's **V2** format. Two back the `/deposit-payment` page: look a booking up in the office's Google Sheet, then create a Razorpay order for its deposit. The third, `weekly-rebuild`, is a **scheduled** function that triggers a production build every Monday. There is no database. Cross-function helpers live in `netlify/utils.ts` (currently `parseCsv`) with their Jest tests beside them in `netlify/utils.test.ts`; everything else stays in the function files themselves.
+Three functions in `netlify/functions/`, all TypeScript ESM in Netlify's **V2** format. Two back the `/deposit-payment` page: look a booking up in the office's Google Sheet, then create a Razorpay order for its deposit. The third, `daily-rebuild`, is a **scheduled** function that triggers a production build every night. There is no database. Cross-function helpers live in `netlify/utils.ts` (currently `parseCsv`) with their Jest tests beside them in `netlify/utils.test.ts`. **`parseCsv` is also imported at build time** by `src/data/load-yoga-schedule.mjs` to read the schedule sheet, so keep `utils.ts` dependency-free; everything else stays in the function files themselves.
 
 ## Function conventions
 
@@ -28,12 +28,12 @@ Three functions in `netlify/functions/`, all TypeScript ESM in Netlify's **V2** 
 
 ## Environment variables
 
-| Var                     | Used by          | Notes                                                                                                        |
-| ----------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------ |
-| `RAZORPAY_KEY_ID`       | `create-order`   | Live key id (server side)                                                                                    |
-| `RAZORPAY_KEY_SECRET`   | `create-order`   | **Secret** — server side only, never in `src/`                                                               |
-| `GOOGLE_SHEET_ID`       | `get-booking`    | The _published_ sheet id (the `/d/e/…` form, not the document id)                                            |
-| `WEEKLY_BUILD_HOOK_URL` | `weekly-rebuild` | Build hook URL for the production branch — **secret**: anyone holding it can trigger builds, so never log it |
+| Var                    | Used by         | Notes                                                                                                        |
+| ---------------------- | --------------- | ------------------------------------------------------------------------------------------------------------ |
+| `RAZORPAY_KEY_ID`      | `create-order`  | Live key id (server side)                                                                                    |
+| `RAZORPAY_KEY_SECRET`  | `create-order`  | **Secret** — server side only, never in `src/`                                                               |
+| `GOOGLE_SHEET_ID`      | `get-booking`   | The _published_ sheet id (the `/d/e/…` form, not the document id)                                            |
+| `DAILY_BUILD_HOOK_URL` | `daily-rebuild` | Build hook URL for the production branch — **secret**: anyone holding it can trigger builds, so never log it |
 
 Local values live in `.env` (gitignored) and are injected by `netlify dev`; production values live in the Netlify UI. The Razorpay _publishable_ key is separately hardcoded in `src/ts/deposit-payment.ts` — that one is public by design.
 
@@ -71,14 +71,14 @@ Local values live in `.env` (gitignored) and are injected by `netlify dev`; prod
 - **`depositPaid` is "any non-empty value except an explicit negative"** (`false` / `0` / `no`, case-insensitive) — the sheet marks paid deposits inconsistently, and a checkbox column exports as the literal `FALSE`. Keep that guard if you touch the logic.
 - **This endpoint is public and unauthenticated:** a booking reference is the only thing between a caller and a guest's name, email, phone and dates. **Do not widen the response** beyond what the deposit page renders, and don't add fields "just in case".
 
-## `weekly-rebuild.ts`
+## `daily-rebuild.ts`
 
-Scheduled (`export const config = { schedule: "0 19 * * 0" }`), with no HTTP route. It POSTs to the `WEEKLY_BUILD_HOOK_URL` build hook so `/yoga` opens on the new week: the schedule renders the week containing the **build date** as plain HTML (see `src/CLAUDE.md`), so without a rebuild the page keeps opening on whatever week it was last deployed in.
+Scheduled (`export const config = { schedule: "0 19 * * *" }`), with no HTTP route. It POSTs to the `DAILY_BUILD_HOOK_URL` build hook every night. `/yoga` is built from the schedule Google Sheet and renders the week containing the **build date** as plain HTML (see `src/CLAUDE.md`), so this build is what picks up the office's sheet edits, moves the page to the new week on Mondays and drops past classes from the JSON-LD.
 
-- **Netlify cron is UTC.** `0 19 * * 0` is Sunday 19:00 UTC = **Monday 00:30 in Goa** (UTC+5:30, no daylight saving). Keep the margin past midnight: a build that reads the date before Goa midnight gets Sunday, and the page serves last week for a whole week.
+- **Netlify cron is UTC.** `0 19 * * *` is 19:00 UTC = **00:30 the next day in Goa** (UTC+5:30, no daylight saving). Keep the margin past midnight: a build that reads the date before Goa midnight gets the previous day — on a Sunday night, the previous week.
 - **It only runs on the published production deploy** — never on Deploy Previews or branch deploys — within a 30-second limit, which one hook call fits easily.
-- **The hook is created in the Netlify UI** (Build hooks, in the project's continuous-deployment settings; branch `main`) and its URL stored in the env var. Without the var the function logs it as missing and returns a `500`, and the site silently stops moving to the new week.
-- **Trigger it by hand** with **Run now** (Logs → Functions → `weekly-rebuild`), or locally with `netlify functions:invoke weekly-rebuild` under `yarn dev:netlify` — which fires a **real** production build if `WEEKLY_BUILD_HOOK_URL` is set in `.env`.
+- **The hook is created in the Netlify UI** (Build hooks, in the project's continuous-deployment settings; branch `main`) and its URL stored in the env var. Without the var the function logs it as missing and returns a `500`, and the site silently stops updating. It is a **different hook from the sheet's** "Publish schedule now" button (the `BUILD_HOOK_URL` script property in the sheet's Apps Script — `docs/yoga-schedule-sheet.md`), so each can be revoked alone.
+- **Trigger it by hand** with **Run now** (Logs → Functions → `daily-rebuild`), or locally with `netlify functions:invoke daily-rebuild` under `yarn dev:netlify` — which fires a **real** production build if `DAILY_BUILD_HOOK_URL` is set in `.env`.
 
 ## Type-checking
 
