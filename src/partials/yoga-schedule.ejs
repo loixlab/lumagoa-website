@@ -1,6 +1,7 @@
 <!-- Weekly yoga schedule — the class grid on /yoga:
        <%%- include('./src/partials/yoga-schedule.ejs', { schedule: yogaSchedule }) %%>
-     `schedule` is built from src/data/yoga-schedule.json by
+     `schedule` is built from the schedule Google Sheet (or, outside
+     production, src/data/yoga-schedule.sample.json) by
      src/data/load-yoga-schedule.mjs (validated at build time) — every date,
      time and "with …" string arrives pre-formatted.
      One loop renders every week, so there is a single copy of the markup:

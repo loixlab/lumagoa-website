@@ -1,12 +1,18 @@
 // Build-time loader for the weekly schedule on /yoga. Imported by
-// vite.config.mjs only — never shipped to the client. Validates
-// yoga-schedule.json and shapes it into the weeks rendered by
-// src/partials/yoga-schedule.ejs, plus the schema.org Event list for the
-// page's JSON-LD.
+// vite.config.mjs only — never shipped to the client. Reads the classes from
+// the office's Google Sheet (one row per class, exported as CSV — see
+// docs/yoga-schedule-sheet.md), validates them and shapes them into the weeks
+// rendered by src/partials/yoga-schedule.ejs, plus the schema.org Event list
+// for the page's JSON-LD.
 //
-// The JSON is imported (not readFileSync'd) so Vite tracks it as a config
-// dependency and auto-restarts the dev server when it changes.
-import rawEvents from "./yoga-schedule.json" with { type: "json" };
+// Without YOGA_SCHEDULE_CSV_URL (local builds, Deploy Previews) it falls back
+// to yoga-schedule.sample.json; a production build refuses to, rather than
+// publish placeholder classes. The sample is imported (not readFileSync'd) so
+// Vite tracks it as a config dependency.
+import sampleEvents from "./yoga-schedule.sample.json" with { type: "json" };
+// The same RFC 4180 parser get-booking uses for its sheet — dependency-free,
+// so it runs here at build time too.
+import { parseCsv } from "../../netlify/utils.ts";
 import { SITE_URL } from "./site.mjs";
 
 // The resort's clock. Which week the page opens on and the JSON-LD
@@ -180,14 +186,18 @@ function isText(value) {
   return typeof value === "string" && value.trim() !== "";
 }
 
-/** Throws (failing the build) rather than silently dropping an event. */
-function validate(raw) {
+/**
+ * Throws (failing the build) rather than silently dropping an event.
+ * `labelOf(index)` names an event's source in messages — a sheet row or a
+ * JSON index — so the error points at the line to fix.
+ */
+function validate(raw, labelOf) {
   if (!Array.isArray(raw)) {
-    throw new Error("yoga-schedule.json: expected an array of events");
+    throw new Error("Yoga schedule: expected an array of events");
   }
   const perSlot = new Map();
   for (const [index, e] of raw.entries()) {
-    const where = `yoga-schedule.json: event at index ${index}`;
+    const where = labelOf(index);
     if (!e || typeof e !== "object" || Array.isArray(e)) {
       throw new Error(`${where} is not an object`);
     }
@@ -229,15 +239,140 @@ function validate(raw) {
       throw new Error(`${label}: highlight must be true or false`);
     }
     const key = `${e.date} ${slotOf(e)}`;
-    perSlot.set(key, (perSlot.get(key) ?? 0) + 1);
+    perSlot.set(key, [...(perSlot.get(key) ?? []), where]);
   }
-  for (const [key, count] of perSlot) {
-    if (count > MAX_EVENTS_PER_SLOT) {
+  for (const [key, sources] of perSlot) {
+    if (sources.length > MAX_EVENTS_PER_SLOT) {
       throw new Error(
-        `yoga-schedule.json: ${count} events on ${key} — a slot holds at most ${MAX_EVENTS_PER_SLOT}`,
+        `Yoga schedule: ${sources.length} classes on ${key} (${sources.join(", ")}) — a slot holds at most ${MAX_EVENTS_PER_SLOT}`,
       );
     }
   }
+}
+
+// --- The schedule sheet -----------------------------------------------------
+
+// Sheet column headers (matched case-insensitively, in any order) → the event
+// field each fills. "Notes" is for the office and never read. Keep in step
+// with HEADERS in the sheet's Apps Script (docs/yoga-schedule-sheet.md).
+const SHEET_COLUMNS = {
+  date: "date",
+  start: "timeStart",
+  end: "timeEnd",
+  title: "title",
+  subtitle: "subTitle",
+  teachers: "teachers",
+  highlight: "highlight",
+  notes: null,
+};
+const REQUIRED_COLUMNS = ["date", "start", "end", "title"];
+
+/** "8:30", "08:30" or "08:30:00" → "08:30"; anything else is left for validate() to reject. */
+function normalizeTime(value) {
+  const match = /^(\d{1,2}):(\d{2})(?::00)?$/.exec(value);
+  return match ? `${match[1].padStart(2, "0")}:${match[2]}` : value;
+}
+
+/**
+ * Turns the sheet's CSV export into events, plus each one's sheet row number
+ * so errors point the office at the exact row. Blank rows are skipped. Header
+ * problems throw here; cell problems are left to validate().
+ */
+export function parseScheduleSheet(csv) {
+  const [header = [], ...body] = parseCsv(csv.replace(/^\uFEFF/, ""));
+  const columns = header.map((name) => name.trim().toLowerCase());
+  const allowed =
+    "Date, Start, End, Title, Subtitle, Teachers, Highlight, Notes";
+
+  const unknown = columns.filter((c) => c !== "" && !(c in SHEET_COLUMNS));
+  if (unknown.length > 0) {
+    throw new Error(
+      `Schedule sheet: unknown column(s) ${unknown.join(", ")} — allowed: ${allowed}`,
+    );
+  }
+  const duplicate = columns.find(
+    (c, i) => c !== "" && columns.indexOf(c) !== i,
+  );
+  if (duplicate) {
+    throw new Error(`Schedule sheet: column "${duplicate}" appears twice`);
+  }
+  const missing = REQUIRED_COLUMNS.filter((c) => !columns.includes(c));
+  if (missing.length > 0) {
+    throw new Error(`Schedule sheet: missing column(s) ${missing.join(", ")}`);
+  }
+
+  const events = [];
+  const rows = [];
+  body.forEach((cells, i) => {
+    if (cells.every((cell) => cell.trim() === "")) return;
+    const cell = (name) => {
+      const at = columns.indexOf(name);
+      return at === -1 ? "" : (cells[at] ?? "").trim();
+    };
+    const event = {
+      date: cell("date"),
+      timeStart: normalizeTime(cell("start")),
+      timeEnd: normalizeTime(cell("end")),
+      title: cell("title"),
+    };
+    if (cell("subtitle")) event.subTitle = cell("subtitle");
+    const teachers = cell("teachers")
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean);
+    if (teachers.length > 0) event.teachers = teachers;
+    // A checkbox column exports TRUE/FALSE. Anything else goes through as
+    // text, so validate() rejects it instead of guessing.
+    const highlight = cell("highlight");
+    if (/^true$/i.test(highlight)) event.highlight = true;
+    else if (highlight !== "" && !/^false$/i.test(highlight)) {
+      event.highlight = highlight;
+    }
+    events.push(event);
+    // +1 for the header row, +1 because sheet rows count from 1.
+    rows.push(i + 2);
+  });
+  return { events, rows };
+}
+
+// Long enough for Google's CSV export, short enough that a hung request fails
+// the build instead of stalling it.
+const FETCH_TIMEOUT_MS = 30_000;
+
+/** The sheet's CSV, or a throw. Never puts the URL in a message. */
+async function fetchScheduleCsv(csvUrl) {
+  let url;
+  try {
+    url = new URL(csvUrl);
+  } catch {
+    throw new Error("YOGA_SCHEDULE_CSV_URL is not a valid URL");
+  }
+  // Busts any cache between the build and Google, as get-booking does.
+  url.searchParams.set("t", String(Date.now()));
+
+  let response;
+  try {
+    response = await fetch(url, {
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+  } catch (error) {
+    throw new Error(
+      `Schedule sheet: request failed (${error instanceof Error ? error.message : error})`,
+    );
+  }
+  if (!response.ok) {
+    throw new Error(
+      `Schedule sheet: request returned status ${response.status}`,
+    );
+  }
+  const text = await response.text();
+  // A spreadsheet that isn't shared answers 200 with Google's sign-in page.
+  if (/^\s*<(!doctype|html)/i.test(text)) {
+    throw new Error(
+      'Schedule sheet: got an HTML page instead of CSV — is the spreadsheet shared as "Anyone with the link: Viewer", and does the URL end in format=csv?',
+    );
+  }
+  return text;
 }
 
 // --- Shaping ----------------------------------------------------------------
@@ -311,8 +446,12 @@ function toJsonLdEvent(e) {
  * containing `today` is always present (even if empty) and is the one the
  * page renders as plain HTML; `currentIndex` points at it.
  */
-export function buildYogaSchedule(raw, today) {
-  validate(raw);
+export function buildYogaSchedule(
+  raw,
+  today,
+  labelOf = (index) => `Event at index ${index}`,
+) {
+  validate(raw, labelOf);
   const events = [...raw].sort(byStart);
 
   const currentMonday = mondayOf(today);
@@ -337,13 +476,36 @@ export function buildYogaSchedule(raw, today) {
   };
 }
 
-/** Validates and shapes yoga-schedule.json for /yoga, as of today in Goa. */
-export function loadYogaSchedulePageData() {
-  const yogaSchedule = buildYogaSchedule(rawEvents, todayInGoa());
+/**
+ * Loads, validates and shapes the /yoga schedule as of today in Goa.
+ * `csvUrl` is the schedule sheet's CSV export (YOGA_SCHEDULE_CSV_URL). Without
+ * it the sample JSON is used — unless `requireSheet` (production builds), which
+ * throws instead so placeholder classes never go live.
+ */
+export async function loadYogaSchedulePageData({ csvUrl, requireSheet }) {
+  let raw;
+  let labelOf;
+  if (csvUrl) {
+    const { events, rows } = parseScheduleSheet(await fetchScheduleCsv(csvUrl));
+    raw = events;
+    labelOf = (index) => `Schedule sheet row ${rows[index]}`;
+  } else if (requireSheet) {
+    throw new Error(
+      "YOGA_SCHEDULE_CSV_URL is not set — a production build reads the /yoga schedule from the Google Sheet and never falls back to the sample data",
+    );
+  } else {
+    console.warn(
+      "YOGA_SCHEDULE_CSV_URL is not set — /yoga uses the sample data in src/data/yoga-schedule.sample.json",
+    );
+    raw = sampleEvents;
+    labelOf = (index) => `yoga-schedule.sample.json: event at index ${index}`;
+  }
+
+  const yogaSchedule = buildYogaSchedule(raw, todayInGoa(), labelOf);
   const current = yogaSchedule.weeks[yogaSchedule.currentIndex];
   if (current.slots.every((slot) => slot.cells.every((c) => c.length === 0))) {
     console.warn(
-      `yoga-schedule.json: no classes in the build week (${current.label}) — /yoga opens on an empty schedule`,
+      `Yoga schedule: no classes in the build week (${current.label}) — /yoga opens on an empty schedule`,
     );
   }
   return { yogaSchedule };
