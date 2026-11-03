@@ -4,6 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import { createMpaPlugin } from "vite-plugin-virtual-mpa";
 import { loadTreatmentPageData } from "./src/data/load-treatments.mjs";
 import { loadYogaHolidaysPageData } from "./src/data/load-yoga-holidays.mjs";
+import { loadYogaSchedulePageData } from "./src/data/load-yoga-schedule.mjs";
 import { sitePageData } from "./src/data/site.mjs";
 
 // Netlify sets CONTEXT for every build ("production", "deploy-preview",
@@ -49,6 +50,13 @@ export default defineConfig({
           name: "yoga",
           template: resolve(__dirname, "src/pages/yoga.ejs"),
           filename: "yoga.html",
+          // Weekly class schedule + its schema.org Events, from src/data/
+          // yoga-schedule.json — loadYogaSchedulePageData() validates the
+          // events and throws (failing the build) on malformed ones. The
+          // week containing the build date (Goa time) is the one rendered
+          // as plain HTML — netlify/functions/weekly-rebuild.ts rebuilds
+          // every Monday so that stays the current week.
+          data: loadYogaSchedulePageData(),
         },
         {
           name: "cafe-restaurant",
