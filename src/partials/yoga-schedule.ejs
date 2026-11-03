@@ -1,0 +1,100 @@
+<!-- Weekly yoga schedule — the class grid on /yoga:
+       <%%- include('./src/partials/yoga-schedule.ejs', { schedule: yogaSchedule }) %%>
+     `schedule` is built from src/data/yoga-schedule.json by
+     src/data/load-yoga-schedule.mjs (validated at build time) — every date,
+     time and "with …" string arrives pre-formatted.
+     One loop renders every week, so there is a single copy of the markup:
+     the week containing the build date is plain HTML (what crawlers and
+     no-JS visitors see); every other week, past or future, is wrapped in a
+     <template x-if> and only enters the DOM when the `yogaSchedule` pager
+     (src/ts/yoga-schedule.ts) moves to it. Rows: Morning (classes starting
+     before noon) and Evening; a slot stacks up to 4 cards, or shows "—".
+     The 7 day columns keep a fixed minimum width and scroll sideways on
+     narrow screens rather than stacking. Below md the Morning/Evening label
+     column is dropped visually — the card colour and time carry the slot —
+     but the labels stay as sr-only row headers: an absolutely positioned
+     (sr-only) cell takes no grid track, so the 7 day columns still line up.
+     The arrows ship `disabled` so they are inert without JS; Alpine's
+     :disabled takes over on init. -->
+<%
+var slotStyles = {
+  morning: {
+    dot: 'bg-brand-gold',
+    card: 'bg-secondary',
+    empty: 'border-secondary text-brand-brown/40',
+  },
+  evening: {
+    dot: 'bg-brand-brown',
+    card: 'bg-brand-brown text-brand-cream',
+    empty: 'border-brand-brown/25 text-brand-brown/40',
+  },
+};
+// `highlight: true` events, in either row. Brown text even in Evening —
+// cream on gold is unreadable (~1.8:1), brown on gold is ~5.5:1.
+var highlightCard = 'bg-brand-gold text-brand-brown';
+var weekLabels = schedule.weeks.map(function (week) { return week.label; });
+%>
+<div x-data="yogaSchedule(<%= JSON.stringify(weekLabels) %>, <%= schedule.currentIndex %>)" class="text-brand-brown">
+  <div class="mx-auto mb-6 flex max-w-xl items-center justify-between gap-3">
+    <button type="button" class="btn btn-circle btn-ghost border-secondary text-brand-brown disabled:opacity-50" aria-label="Previous week" disabled :disabled="!hasPrev" @click="prev()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+      </svg>
+    </button>
+    <p class="text-center font-display text-xl md:text-2xl" x-text="label"><%= weekLabels[schedule.currentIndex] %></p>
+    <button type="button" class="btn btn-circle btn-ghost border-secondary text-brand-brown disabled:opacity-50" aria-label="Next week" disabled :disabled="!hasNext" @click="next()">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="size-5" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+      </svg>
+    </button>
+  </div>
+  <p class="sr-only" aria-live="polite" x-text="announcement"></p>
+
+  <% schedule.weeks.forEach(function (week, i) { var isCurrent = i === schedule.currentIndex; %>
+  <% if (!isCurrent) { %><template x-if="index === <%= i %>"><% } %>
+  <div x-show="index === <%= i %>" class="overflow-x-auto pb-2">
+    <div role="table" aria-label="Yoga classes, <%= week.label %>" class="grid min-w-272 grid-cols-7 gap-3 md:min-w-304 md:grid-cols-[7rem_repeat(7,minmax(0,1fr))] lg:gap-4">
+      <div role="row" class="contents">
+        <div role="columnheader" class="sr-only md:not-sr-only"><span class="sr-only">Time of day</span></div>
+        <% week.days.forEach(function (day) { %>
+        <div role="columnheader" class="border-b-2 border-secondary pb-3">
+          <p class="font-display text-2xl leading-tight"><%= day.name %></p>
+          <p class="text-sm"><time datetime="<%= day.date %>"><%= day.dateLabel %></time></p>
+        </div>
+        <% }) %>
+      </div>
+
+      <% week.slots.forEach(function (slot) { var style = slotStyles[slot.id]; %>
+      <div role="row" class="contents">
+        <div role="rowheader" class="sr-only flex items-center gap-2.5 text-sm font-bold uppercase tracking-[0.16em] md:not-sr-only">
+          <span class="size-2.5 shrink-0 rounded-full <%= style.dot %>" aria-hidden="true"></span><%= slot.label %>
+        </div>
+        <% slot.cells.forEach(function (cards) { %>
+        <div role="cell" class="flex flex-col gap-2">
+          <% if (cards.length === 0) { %>
+          <div class="flex min-h-28 flex-1 items-center justify-center rounded-2xl border-2 border-dashed <%= style.empty %>">
+            <span aria-hidden="true">—</span><span class="sr-only">No class</span>
+          </div>
+          <% } %>
+          <% cards.forEach(function (card) { %>
+          <%# Cards stretch to the row's height (a neighbouring slot may stack
+              several), so the details stay together at the top and only the
+              teacher line is pushed to the bottom. %>
+          <div class="flex flex-1 flex-col justify-between gap-3 rounded-2xl p-4 <%= card.highlight ? highlightCard : style.card %>">
+            <div>
+              <p class="text-sm font-bold"><%= card.time %></p>
+              <p class="mt-2 font-display text-xl leading-tight"><%= card.title %></p>
+              <% if (card.subTitle) { %><p class="mt-1 text-xs opacity-75"><%= card.subTitle %></p><% } %>
+            </div>
+            <% if (card.teachers) { %><p class="text-sm"><%= card.teachers %></p><% } %>
+          </div>
+          <% }) %>
+        </div>
+        <% }) %>
+      </div>
+      <% }) %>
+    </div>
+  </div>
+  <% if (!isCurrent) { %></template><% } %>
+  <% }) %>
+</div>

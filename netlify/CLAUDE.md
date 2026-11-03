@@ -1,12 +1,12 @@
-# `netlify/` — Serverless Functions (Razorpay deposits + booking lookup)
+# `netlify/` — Serverless Functions (Razorpay deposits, booking lookup, weekly rebuild)
 
-Two functions in `netlify/functions/`, both TypeScript ESM in Netlify's **V2** format. Together they back the `/deposit-payment` page: look a booking up in the office's Google Sheet, then create a Razorpay order for its deposit. There is no database. Cross-function helpers live in `netlify/utils.ts` (currently `parseCsv`) with their Jest tests beside them in `netlify/utils.test.ts`; everything else stays in the function files themselves.
+Three functions in `netlify/functions/`, all TypeScript ESM in Netlify's **V2** format. Two back the `/deposit-payment` page: look a booking up in the office's Google Sheet, then create a Razorpay order for its deposit. The third, `weekly-rebuild`, is a **scheduled** function that triggers a production build every Monday. There is no database. Cross-function helpers live in `netlify/utils.ts` (currently `parseCsv`) with their Jest tests beside them in `netlify/utils.test.ts`; everything else stays in the function files themselves.
 
 ## Function conventions
 
 - **V2 format only:** `export default async (req: Request) => …` returning a native `Response`, built with `Response.json(body, { status })`. Never `exports.handler` and never `{ statusCode, body }` — the repo was migrated off that shape in #5.
 - **Read query params from the URL:** `new URL(req.url).searchParams`. There is no `event.queryStringParameters` in V2.
-- **Reachable at `/api/<name>`** via the `netlify.toml` rewrite (status `200`), as well as at the raw `/.netlify/functions/<name>`. Client code uses `/api/<name>`.
+- **Reachable at `/api/<name>`** via the `netlify.toml` rewrite (status `200`), as well as at the raw `/.netlify/functions/<name>`. Client code uses `/api/<name>`. **Scheduled functions are the exception:** Netlify gives them no URL at all (the rewrite included) — only their cron or the **Run now** button in the Netlify UI invokes them.
 - **Validate input before doing any work**, and return `400` for bad input — never let malformed input reach the vendor SDK or turn into a `500`.
 - **Guard required env vars up front and return a clean `500`**, logging _which_ var is missing. Don't let a missing value throw or silently construct a broken client:
 
@@ -24,11 +24,12 @@ Two functions in `netlify/functions/`, both TypeScript ESM in Netlify's **V2** f
 
 ## Environment variables
 
-| Var                   | Used by        | Notes                                                             |
-| --------------------- | -------------- | ----------------------------------------------------------------- |
-| `RAZORPAY_KEY_ID`     | `create-order` | Live key id (server side)                                         |
-| `RAZORPAY_KEY_SECRET` | `create-order` | **Secret** — server side only, never in `src/`                    |
-| `GOOGLE_SHEET_ID`     | `get-booking`  | The _published_ sheet id (the `/d/e/…` form, not the document id) |
+| Var                     | Used by          | Notes                                                                                                        |
+| ----------------------- | ---------------- | ------------------------------------------------------------------------------------------------------------ |
+| `RAZORPAY_KEY_ID`       | `create-order`   | Live key id (server side)                                                                                    |
+| `RAZORPAY_KEY_SECRET`   | `create-order`   | **Secret** — server side only, never in `src/`                                                               |
+| `GOOGLE_SHEET_ID`       | `get-booking`    | The _published_ sheet id (the `/d/e/…` form, not the document id)                                            |
+| `WEEKLY_BUILD_HOOK_URL` | `weekly-rebuild` | Build hook URL for the production branch — **secret**: anyone holding it can trigger builds, so never log it |
 
 Local values live in `.env` (gitignored) and are injected by `netlify dev`; production values live in the Netlify UI. The Razorpay _publishable_ key is separately hardcoded in `src/ts/deposit-payment.ts` — that one is public by design.
 
@@ -66,6 +67,15 @@ Local values live in `.env` (gitignored) and are injected by `netlify dev`; prod
 - **`depositPaid` is "any non-empty value except an explicit negative"** (`false` / `0` / `no`, case-insensitive) — the sheet marks paid deposits inconsistently, and a checkbox column exports as the literal `FALSE`. Keep that guard if you touch the logic.
 - **This endpoint is public and unauthenticated:** a booking reference is the only thing between a caller and a guest's name, email, phone and dates. **Do not widen the response** beyond what the deposit page renders, and don't add fields "just in case".
 
+## `weekly-rebuild.ts`
+
+Scheduled (`export const config = { schedule: "0 19 * * 0" }`), with no HTTP route. It POSTs to the `WEEKLY_BUILD_HOOK_URL` build hook so `/yoga` opens on the new week: the schedule renders the week containing the **build date** as plain HTML (see `src/CLAUDE.md`), so without a rebuild the page keeps opening on whatever week it was last deployed in.
+
+- **Netlify cron is UTC.** `0 19 * * 0` is Sunday 19:00 UTC = **Monday 00:30 in Goa** (UTC+5:30, no daylight saving). Keep the margin past midnight: a build that reads the date before Goa midnight gets Sunday, and the page serves last week for a whole week.
+- **It only runs on the published production deploy** — never on Deploy Previews or branch deploys — within a 30-second limit, which one hook call fits easily.
+- **The hook is created in the Netlify UI** (Build hooks, in the project's continuous-deployment settings; branch `main`) and its URL stored in the env var. Without the var the function logs it as missing and returns a `500`, and the site silently stops moving to the new week.
+- **Trigger it by hand** with **Run now** (Logs → Functions → `weekly-rebuild`), or locally with `netlify functions:invoke weekly-rebuild` under `yarn dev:netlify` — which fires a **real** production build if `WEEKLY_BUILD_HOOK_URL` is set in `.env`.
+
 ## Type-checking
 
 The functions have **their own TS project**, `netlify/tsconfig.json` (`functions/**` plus the top-level `netlify/*.ts` helpers and tests, Node libs, `target: ES2023`, no DOM). The root `tsconfig.json` covers `src/**` only, so a change here is not checked by it:
@@ -95,4 +105,4 @@ curl "http://localhost:8888/api/create-order?amount=5000&id=ABC123"
 - [ ] `response.ok` checked on any `fetch`; indexed access defaulted, not asserted.
 - [ ] Response fields limited to what the client actually renders.
 - [ ] `yarn typecheck` is clean.
-- [ ] Exercised through `yarn dev:netlify` at `/api/<name>`.
+- [ ] Exercised through `yarn dev:netlify` at `/api/<name>` (a scheduled function: `netlify functions:invoke <name>`).

@@ -65,38 +65,8 @@ schemaData: {
       }
     ]
   },
-  // Off season — restore with the new class grid when we re-open in October
-  // (together with the commented-out schedule table below).
-  /*
-  "event": [
-    {
-      "@type": "Event",
-      "name": "Hatha Yoga",
-      "description": "Traditional Hatha yoga practice with Ravi.",
-      "startDate": "2026-03-10T08:30:00",
-      "location": {
-        "@type": "Place",
-        "name": "Luma Goa Yoga Shala",
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "Palolem Down St",
-          "addressLocality": "Palolem",
-          "addressRegion": "South Goa",
-          "postalCode": "403702",
-          "addressCountry": "IN"
-        }
-      },
-      "performer": { "@type": "Person", "name": "Ravi" },
-      "eventSchedule": {
-        "@type": "Schedule",
-        "repeatFrequency": "P1W",
-        "byDay": ["Monday", "Wednesday", "Thursday", "Friday"],
-        "startTime": "08:30",
-        "endTime": "09:30"
-      }
-    }
-  ]
-  */
+  // One Event per class from the build date on, from src/data/yoga-schedule.json.
+  ...(yogaSchedule.jsonLdEvents.length > 0 ? { "event": yogaSchedule.jsonLdEvents } : {})
 }
 }) %>
 
@@ -130,15 +100,9 @@ schemaData: {
           </p>
 
           <div class="pt-8">
-            <div>
-              <a href="#schedule" class="px-10 py-4 bg-[#c66f54] text-white rounded-full inline-block hover:bg-opacity-90 transition-all shadow-xl font-bold tracking-wide">
-                View Weekly Schedule
-              </a>
-            </div>
-
-            <div class="my-2.5 inline-block px-3 py-1.5 bg-brand-cream text-brand-brown text-sm font-medium rounded-md">
-              The Yoga Shala is closed for Monsoon<br /> &mdash; Re-opening in November
-            </div>
+            <a href="#schedule" class="px-10 py-4 bg-[#c66f54] text-white rounded-full inline-block hover:bg-opacity-90 transition-all shadow-xl font-bold tracking-wide">
+              View Weekly Schedule
+            </a>
           </div>
         </div>
       </div>
@@ -168,75 +132,9 @@ schemaData: {
     <!-- Weekly Schedule Section -->
     <section id="schedule" class="py-18">
       <div class="px-6 lg:container lg:mx-auto">
-        <h2 class="text-center font-display text-3xl font-bold mb-4 md:text-5xl">Weekly Schedule</h2>
+        <h2 class="text-center font-display text-3xl font-bold mb-8 md:text-5xl">Weekly Schedule</h2>
 
-        <p class="text-center text-lg text-stone-600 max-w-2xl mx-auto leading-relaxed">
-          We're currently on our off-season pause. The new weekly schedule will be posted when we re-open in November.
-        </p>
-
-        <!-- Off season — restore the schedule table (and the event block in
-             schemaData above) with the new grid when we re-open in October.
-        <div class="my-16 overflow-x-auto">
-          <table class="w-full min-w-[1000px] table-fixed border-collapse bg-white rounded-2xl overflow-hidden shadow-sm border border-stone-100">
-            <thead class="bg-stone-50 border-b border-stone-100">
-              <tr>
-                <th class="w-32 p-5 text-left font-display text-stone-400 italic font-light">Time</th>
-                <th class="w-[13%] p-5 text-left font-display text-stone-800">Mon</th>
-                <th class="w-[13%] p-5 text-left font-display text-stone-800">Tue</th>
-                <th class="w-[13%] p-5 text-left font-display text-stone-800">Wed</th>
-                <th class="w-[13%] p-5 text-left font-display text-stone-800">Thur</th>
-                <th class="w-[13%] p-5 text-left font-display text-stone-800">Fri</th>
-                <th class="w-[13%] p-5 text-left font-display text-stone-800">Sat</th>
-                <th class="w-[13%] p-5 text-left font-display text-stone-800">Sun</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-stone-50">
-              <tr>
-                <td class="p-5 py-8 align-top font-medium text-brand-brown bg-stone-50/30">08:30 - 09:30</td>
-                <td class="p-5 align-top border-l border-stone-50">
-                  <span class="block font-medium leading-tight mb-1 text-stone-800">Hatha Yoga</span>
-                  <span class="text-xs text-stone-400 uppercase tracking-widest">Ravi</span>
-                </td>
-                <td class="p-5 align-top border-l border-stone-50 text-stone-300 italic"></td>
-                <td class="p-5 align-top border-l border-stone-50">
-                  <span class="block font-medium leading-tight mb-1 text-stone-800">Hatha Yoga</span>
-                  <span class="text-xs text-stone-400 uppercase tracking-widest">Ravi</span>
-                </td>
-                <td class="p-5 align-top border-l border-stone-50">
-                  <span class="block font-medium leading-tight mb-1 text-stone-800">Hatha Yoga</span>
-                  <span class="text-xs text-stone-400 uppercase tracking-widest">Ravi</span>
-                </td>
-                <td class="p-5 align-top border-l border-stone-50">
-                  <span class="block font-medium leading-tight mb-1 text-stone-800">Hatha Yoga</span>
-                  <span class="text-xs text-stone-400 uppercase tracking-widest">Ravi</span>
-                </td>
-                <td class="p-5 align-top border-l border-stone-50 text-stone-300 italic"></td>
-                <td class="p-5 align-top border-l border-stone-50 text-stone-300 italic"></td>
-              </tr>
-              <tr class="bg-stone-50/30">
-                <td class="p-5 py-8 align-top font-medium text-brand-brown bg-stone-50/30 italic">Morning</td>
-                <td colspan="7" class="p-5 align-top border-l border-stone-50">
-                </td>
-              </tr>
-              <tr>
-                <td class="p-5 py-8 align-top font-medium text-brand-brown bg-stone-50/30 italic">Afternoon</td>
-                <td class="p-5 align-top border-l border-stone-50 text-stone-300 italic"></td>
-                <td class="p-5 align-top border-l border-stone-50 text-stone-300 italic"></td>
-                <td class="p-5 align-top border-l border-stone-50 text-stone-300 italic"></td>
-                <td class="p-5 align-top border-l border-stone-50 text-stone-300 italic"></td>
-                <td class="p-5 align-top border-l border-stone-50 text-stone-300 italic"></td>
-                <td class="p-5 align-top border-l border-stone-50 text-stone-300 italic"></td>
-                <td class="p-5 align-top border-l border-stone-50 text-stone-300 italic"></td>
-              </tr>
-              <tr class="bg-stone-900 text-stone-200">
-                <td class="p-5 py-6 align-top font-medium text-secondary italic">Evening</td>
-                <td colspan="7" class="p-5 align-top border-l border-stone-800">
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        -->
+        <%- include('./src/partials/yoga-schedule.ejs', { schedule: yogaSchedule }) %>
 
         <!-- Pricing -->
         <div class="mt-12 container max-w-4xl mx-auto text-center">

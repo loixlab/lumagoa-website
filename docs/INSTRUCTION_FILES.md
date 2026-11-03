@@ -22,7 +22,7 @@ docs/
     netlify.instructions.md                # applyTo: netlify/**
     scripts.instructions.md                # applyTo: scripts/**
 src/CLAUDE.md                              # Frontend: EJS MPA, Tailwind/DaisyUI, Alpine
-netlify/CLAUDE.md                          # Functions: Razorpay deposits + booking lookup
+netlify/CLAUDE.md                          # Functions: Razorpay deposits, booking lookup, weekly rebuild
 scripts/CLAUDE.md                          # Python image + schedule tooling
 ```
 

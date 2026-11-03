@@ -1,10 +1,12 @@
+import { readFile, writeFile } from "node:fs/promises";
 import { resolve } from "path";
 import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
 import { createMpaPlugin } from "vite-plugin-virtual-mpa";
 import { loadTreatmentPageData } from "./src/data/load-treatments.mjs";
 import { loadYogaHolidaysPageData } from "./src/data/load-yoga-holidays.mjs";
-import { sitePageData } from "./src/data/site.mjs";
+import { loadYogaSchedulePageData } from "./src/data/load-yoga-schedule.mjs";
+import { SITE_URL, sitePageData } from "./src/data/site.mjs";
 
 // Netlify sets CONTEXT for every build ("production", "deploy-preview",
 // "branch-deploy"); it is unset locally. Analytics (GTM + Meta Pixel) is only
@@ -13,8 +15,53 @@ import { sitePageData } from "./src/data/site.mjs";
 // `process` does not exist.
 const isProduction = process.env.CONTEXT === "production";
 
+// Loaded once so the /yoga page and its sitemap <lastmod> agree on the build
+// date (the date only changes at Goa midnight, but two calls could straddle it).
+const yogaSchedulePageData = loadYogaSchedulePageData();
+
+/**
+ * Sets the <lastmod> of one sitemap entry, found by its <loc>. Throws
+ * (failing the build) if the entry or its <lastmod> is missing, so the date
+ * can't silently stop updating after someone edits the sitemap.
+ */
+function setSitemapLastmod(xml, loc, date) {
+  const start = xml.indexOf(`<loc>${loc}</loc>`);
+  const end = xml.indexOf("</url>", start);
+  const lastmod = /<lastmod>[^<]*<\/lastmod>/;
+  if (start === -1 || end === -1 || !lastmod.test(xml.slice(start, end))) {
+    throw new Error(`sitemap.xml: no <lastmod> in the ${loc} entry to set`);
+  }
+  const entry = xml
+    .slice(start, end)
+    .replace(lastmod, `<lastmod>${date}</lastmod>`);
+  return xml.slice(0, start) + entry + xml.slice(end);
+}
+
 export default defineConfig({
   plugins: [
+    {
+      // /yoga changes with every build: the schedule opens on the build week
+      // and its JSON-LD starts at the build date. So its sitemap <lastmod> is
+      // that build date (Goa time), set here rather than hand-edited.
+      // public/sitemap.xml stays the hand-maintained source for every other
+      // page; this rewrites only the copy in the output dir. Vite copies
+      // public/ there at renderStart, so it exists by writeBundle — which
+      // also only runs after a successful write.
+      name: "sitemap-yoga-lastmod",
+      apply: "build",
+      async writeBundle(options) {
+        const file = resolve(options.dir, "sitemap.xml");
+        const xml = await readFile(file, "utf8");
+        await writeFile(
+          file,
+          setSitemapLastmod(
+            xml,
+            `${SITE_URL}/yoga`,
+            yogaSchedulePageData.yogaSchedule.buildDate,
+          ),
+        );
+      },
+    },
     {
       name: "redirect-root", // Custom plugin for dev server redirect
       configureServer(server) {
@@ -49,6 +96,13 @@ export default defineConfig({
           name: "yoga",
           template: resolve(__dirname, "src/pages/yoga.ejs"),
           filename: "yoga.html",
+          // Weekly class schedule + its schema.org Events, from src/data/
+          // yoga-schedule.json — loadYogaSchedulePageData() validates the
+          // events and throws (failing the build) on malformed ones. The
+          // week containing the build date (Goa time) is the one rendered
+          // as plain HTML — netlify/functions/weekly-rebuild.ts rebuilds
+          // every Monday so that stays the current week.
+          data: yogaSchedulePageData,
         },
         {
           name: "cafe-restaurant",
