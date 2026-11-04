@@ -12,7 +12,7 @@ import {
   type HolidayCtaLocation,
 } from "./analytics";
 
-export type SeasonId = (typeof SEASON_IDS)[number];
+type SeasonId = (typeof SEASON_IDS)[number];
 
 function isSeasonId(value: string | null): value is SeasonId {
   return value !== null && (SEASON_IDS as readonly string[]).includes(value);

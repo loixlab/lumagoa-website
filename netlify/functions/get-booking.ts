@@ -1,8 +1,15 @@
 /**
- * Looks up a booking by reference in the published Google Sheet (CSV export)
- * and returns the guest/deposit details the deposit-payment page needs.
+ * Looks up a booking by reference in the office's bookings Google Sheet and
+ * returns the guest/deposit details the deposit-payment page needs.
+ *
+ * The sheet holds guest PII, so it is private: shared only with a service
+ * account, read live through the Sheets API (netlify/google-sheets.ts).
  */
-import { parseCsv } from "../utils";
+import { readSheetValues } from "../google-sheets";
+
+// The bookings tab and the columns the lookup uses (A–J; see the column
+// table in netlify/CLAUDE.md). With no tab name, the API reads the first tab.
+const BOOKINGS_RANGE = "A:J";
 
 // The sheet formats amounts with thousands separators ("75,650"), which
 // Number() would read as NaN.
@@ -16,23 +23,27 @@ export default async (req: Request) => {
     return Response.json({ error: "Missing ID" }, { status: 400 });
   }
 
-  const SHEET_ID = process.env.GOOGLE_SHEET_ID;
-  if (!SHEET_ID) {
-    console.error("get-booking: GOOGLE_SHEET_ID env var is not set");
+  const spreadsheetId = process.env.BOOKINGS_SPREADSHEET_ID;
+  const email = process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL;
+  const privateKey = process.env.GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY;
+  if (!spreadsheetId || !email || !privateKey) {
+    const missing = [
+      ["BOOKINGS_SPREADSHEET_ID", spreadsheetId],
+      ["GOOGLE_SERVICE_ACCOUNT_EMAIL", email],
+      ["GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY", privateKey],
+    ]
+      .filter(([, value]) => !value)
+      .map(([name]) => name);
+    console.error(`get-booking: ${missing.join(", ")} env var(s) not set`);
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
-  const csvUrl = `https://docs.google.com/spreadsheets/d/e/${SHEET_ID}/pub?gid=0&output=csv`;
 
   try {
-    // The t param busts Google's CSV cache. Unlike axios, fetch doesn't throw
-    // on non-2xx, so check ok explicitly to keep the old 500 behavior.
-    const response = await fetch(`${csvUrl}&t=${Date.now()}`);
-    if (!response.ok) {
-      throw new Error(`Sheet fetch failed with status ${response.status}`);
-    }
-
-    const csv = await response.text();
-    const rows = parseCsv(csv);
+    const rows = await readSheetValues(
+      { email, privateKey },
+      spreadsheetId,
+      BOOKINGS_RANGE,
+    );
     const dataRows = rows.slice(1);
 
     // Find the specific guest
@@ -50,7 +61,7 @@ export default async (req: Request) => {
 
     // The sheet marks a paid deposit with any non-empty value; only guard
     // against explicit negative markers so a literal FALSE/0/no cell (e.g. a
-    // checkbox column exported to CSV) doesn't read as paid.
+    // checkbox column, which reads as "FALSE") doesn't read as paid.
     const depositPaidRaw = (guest[9] ?? "").trim().toLowerCase();
     const depositPaid =
       depositPaidRaw !== "" && !["false", "0", "no"].includes(depositPaidRaw);
@@ -66,7 +77,12 @@ export default async (req: Request) => {
       depositPaid,
     });
   } catch (err) {
-    console.error("get-booking error:", err);
+    // Only the message: the helper's errors never carry credentials, but an
+    // unexpected error object could hold request details.
+    console.error(
+      "get-booking error:",
+      err instanceof Error ? err.message : err,
+    );
     return Response.json({ error: "Internal server error" }, { status: 500 });
   }
 };

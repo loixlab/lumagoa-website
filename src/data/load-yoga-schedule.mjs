@@ -288,7 +288,7 @@ function normalizeTime(value) {
  * filled are skipped. Header problems throw here; cell problems are left to
  * validate().
  */
-export function parseScheduleSheet(csv) {
+function parseScheduleSheet(csv) {
   const [header = [], ...body] = parseCsv(csv.replace(/^\uFEFF/, ""));
   const columns = header.map((name) => name.trim().toLowerCase());
   const allowed =
@@ -467,7 +467,7 @@ function toJsonLdEvent(e) {
  * containing `today` is always present (even if empty) and is the one the
  * page renders as plain HTML; `currentIndex` points at it.
  */
-export function buildYogaSchedule(
+function buildYogaSchedule(
   raw,
   today,
   labelOf = (index) => `Event at index ${index}`,

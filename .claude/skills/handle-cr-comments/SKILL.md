@@ -102,7 +102,7 @@ grep -rn '\.netlify/functions' src/ --include='*.ts' --include='*.ejs'   # must 
 
 If a reviewer flags one function, **check the others too** — there are three (`create-order`, `get-booking`, the scheduled `daily-rebuild`), and they share every convention: V2 signature returning `Response.json(...)`, params via `new URL(req.url).searchParams`, required env vars guarded with a logged generic 500, `response.ok` checked on `fetch`, indexed access defaulted (`guest[9] ?? ""`) rather than asserted.
 
-**`get-booking` is public and unauthenticated over guest PII** (name, email, phone, dates). If a change widens its response, that's a valid finding even if the reviewer framed it as something else. Its column indices are a contract with the Google Sheet, and the CSV parse is a naive `split(",")`.
+**`get-booking` is public and unauthenticated over guest PII** (name, email, phone, dates). If a change widens its response, that's a valid finding even if the reviewer framed it as something else. Its column indices are a contract with the Google Sheet, which it reads privately through the Sheets API as a service account (`netlify/google-sheets.ts`) — a change that logs or returns the private key, JWT or access token is a valid finding too.
 
 ### 4e. Duplicated constants (fix one, grep the rest)
 
