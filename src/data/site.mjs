@@ -17,7 +17,7 @@ export const EMAIL = EMAIL_PARTS.join("@");
 // Single source of truth for the phone number. wa.me and tel: URLs need the
 // digits-only form (country code included, no "+" or spaces).
 export const PHONE_DISPLAY = "+91 808 772 34 55";
-export const PHONE_DIGITS = PHONE_DISPLAY.replace(/\D/g, "");
+const PHONE_DIGITS = PHONE_DISPLAY.replace(/\D/g, "");
 
 /** wa.me link with a prefilled message. */
 export function waHref(message) {
@@ -28,7 +28,7 @@ export function waHref(message) {
 // so a seasonal price change can't leave a stale copy behind. The
 // sound-bath price renders on /yoga (visible block + JSON-LD) and in
 // the /yoga-holidays "What's not included" accordion.
-export const PRICES = { soundBath: 800 };
+const PRICES = { soundBath: 800 };
 
 /** EJS locals injected into every page. */
 export const sitePageData = {

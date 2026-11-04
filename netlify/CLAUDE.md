@@ -1,6 +1,6 @@
 # `netlify/` — Serverless Functions (Razorpay deposits, booking lookup, daily rebuild)
 
-Three functions in `netlify/functions/`, all TypeScript ESM in Netlify's **V2** format. Two back the `/deposit-payment` page: look a booking up in the office's Google Sheet, then create a Razorpay order for its deposit. The third, `daily-rebuild`, is a **scheduled** function that triggers a production build every night. There is no database. Cross-function helpers live in `netlify/utils.ts` (currently `parseCsv`) with their Jest tests beside them in `netlify/utils.test.ts`. **`parseCsv` is also imported at build time** by `src/data/load-yoga-schedule.mjs` to read the schedule sheet, so keep `utils.ts` dependency-free; everything else stays in the function files themselves.
+Three functions in `netlify/functions/`, all TypeScript ESM in Netlify's **V2** format. Two back the `/deposit-payment` page: look a booking up in the office's Google Sheet, then create a Razorpay order for its deposit. The third, `daily-rebuild`, is a **scheduled** function that triggers a production build every night. There is no database. Shared helpers live beside the functions with their Jest tests: `netlify/google-sheets.ts` (reads a private Google Sheet through the Sheets API as a service account — `get-booking`) and `netlify/utils.ts` (`parseCsv`). **`parseCsv` is imported at build time** by `src/data/load-yoga-schedule.mjs` to read the schedule sheet, so keep `utils.ts` dependency-free; everything else stays in the function files themselves.
 
 ## Function conventions
 
@@ -20,18 +20,20 @@ Three functions in `netlify/functions/`, all TypeScript ESM in Netlify's **V2** 
 
 - **Never return an internal error message to the client** except where it's already deliberate (`create-order` echoes the Razorpay SDK message under `details`). Log the real error with `console.error` and return a generic string. Never log or return an env-var _value_.
 - **`fetch` does not throw on non-2xx** — check `response.ok` explicitly. This is the classic regression when porting code that used axios.
-- **`noUncheckedIndexedAccess` is on**, so every CSV cell is `string | undefined`. Default it (`guest[9] ?? ""`) rather than asserting with `!`.
+- **`noUncheckedIndexedAccess` is on**, so every sheet cell is `string | undefined`. Default it (`row[at] ?? ""`) rather than asserting with `!`.
 
 ## Environment variables
 
-| Var                    | Used by         | Notes                                                                                                        |
-| ---------------------- | --------------- | ------------------------------------------------------------------------------------------------------------ |
-| `RAZORPAY_KEY_ID`      | `create-order`  | Live key id (server side)                                                                                    |
-| `RAZORPAY_KEY_SECRET`  | `create-order`  | **Secret** — server side only, never in `src/`                                                               |
-| `GOOGLE_SHEET_ID`      | `get-booking`   | The _published_ sheet id (the `/d/e/…` form, not the document id)                                            |
-| `DAILY_BUILD_HOOK_URL` | `daily-rebuild` | Build hook URL for the production branch — **secret**: anyone holding it can trigger builds, so never log it |
+| Var                                  | Used by         | Notes                                                                                                                                         |
+| ------------------------------------ | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RAZORPAY_KEY_ID`                    | `create-order`  | Live key id (server side)                                                                                                                     |
+| `RAZORPAY_KEY_SECRET`                | `create-order`  | **Secret** — server side only, never in `src/`                                                                                                |
+| `BOOKINGS_SPREADSHEET_ID`            | `get-booking`   | The bookings spreadsheet's id — the one in its `/d/<id>/edit` address                                                                         |
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL`       | `get-booking`   | The service account's `client_email`; the bookings sheet is shared with it (Viewer)                                                           |
+| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | `get-booking`   | **Secret** — the `private_key` from its JSON key, pasted as-is: real newlines or the file's `\n` escapes, with or without its wrapping quotes |
+| `DAILY_BUILD_HOOK_URL`               | `daily-rebuild` | Build hook URL for the production branch — **secret**: anyone holding it can trigger builds, so never log it                                  |
 
-Local values live in `.env` (gitignored) and are injected by `netlify dev`; production values live in the Netlify UI. The Razorpay _publishable_ key is separately hardcoded in `src/ts/deposit-payment.ts` — that one is public by design.
+Local values live in `.env` (gitignored) and are injected by `netlify dev`; production values live in the Netlify UI. **Functions share a 4 KB budget for all their env vars** (AWS Lambda), which is why only the service account's email and private key are stored, not its whole JSON key file. The Razorpay _publishable_ key is separately hardcoded in `src/ts/deposit-payment.ts` — that one is public by design.
 
 ## `create-order.ts`
 
@@ -46,25 +48,28 @@ Local values live in `.env` (gitignored) and are injected by `netlify dev`; prod
 
 `GET /api/get-booking?id=<bookingRef>` → the guest and deposit details, or `404`.
 
-- Reads the office's **published Google Sheet as CSV** (`…/pub?gid=0&output=csv`), appending `&t=<Date.now()>` to bust Google's cache. Row 0 is the header and is dropped; the reference is matched case-insensitively against column 0.
-- **Column indices are a contract with the spreadsheet** — changing the sheet's column order breaks this function with no error, just wrong data:
+- Reads the bookings sheet **live through the Google Sheets API** (`values.get`, columns `A:Z` of the **first tab**) as a service account, via `netlify/google-sheets.ts`. The sheet is **private** — shared only with the service account's email — so there is no public copy of the guest data and no publish lag. Row 0 is the header row; the reference is matched case-insensitively against the `bookingId` column.
+- **Columns are found by header name, not position** (`COLUMNS` in `get-booking.ts`, matched case-insensitively). The office can insert, move or delete any other column — `stayflexiBooking`, `deposit %`, `paymentLink`, `Comment`… — and those are never read into the response. **Renaming or deleting one of these headers makes every lookup fail** with a `500` whose log names the column: loud, never a neighbouring cell's data. The tab is still a contract — the API reads the first tab, so keep the bookings tab leftmost, with these headers within columns A–Z:
 
-  | Index | Field               |
-  | ----- | ------------------- |
-  | 0     | booking reference   |
-  | 1     | `customerName`      |
-  | 2     | email               |
-  | 3     | `customerPhone`     |
-  | 4     | `checkIn`           |
-  | 5     | `checkOut`          |
-  | 6     | `bookingAmount`     |
-  | 8     | `depositAmount`     |
-  | 9     | deposit-paid marker |
+  | Header          | Field                                             |
+  | --------------- | ------------------------------------------------- |
+  | `bookingId`     | matched against `?id=` (case-insensitive)         |
+  | `customerName`  | `customerName`                                    |
+  | `email`         | `customerEmail` (blank for a booking.com relay)   |
+  | `phone`         | `customerPhone`                                   |
+  | `checkIn`       | `checkIn`                                         |
+  | `checkOut`      | `checkOut`                                        |
+  | `bookingAmount` | `bookingAmount`                                   |
+  | `depositAmount` | `depositAmount`                                   |
+  | `paymentId`     | `depositPaid` (filled = paid, see the rule below) |
 
-- **The CSV is parsed by `parseCsv` from `netlify/utils.ts`, a minimal RFC 4180 parser** (quoted fields, escaped `""` quotes, newlines inside quotes, CRLF row endings). Google quotes any cell containing a comma — a guest name, an amount exported as `"75,650"` — so never regress to a naive `split(",")`: it shifts every subsequent column of that row (that bug shipped once and made `depositPaid` read a neighbouring cell). `parseCsv` is unit-tested in `netlify/utils.test.ts` — extend those tests if you touch it.
+- **New booking IDs come from the bookings spreadsheet's own menu** — _Bookings → Generate booking ID for selected rows_, from the Apps Script in `docs/booking-deposits.gs`: 8 random characters without look-alikes, unique in the `bookingId` column, never overwriting an existing ID. The ID is the only key to a guest's details on this public endpoint, so don't shorten it or make it sequential.
+- **The API returns the displayed values, row by row** — the same text the old CSV export had, so amounts still arrive as `"75,650"`. It **drops trailing empty cells and rows**, so a row can be shorter than the header row. `cell()` reads every cell as a trimmed string (`""` when missing), so **every field in the response is always present**: the client calls string methods on them (`customerName.normalize(…)` in `deposit-payment.ts`).
+- **An incomplete booking answers exactly like an unknown one** — `404`, same body — when `customerName`, `checkIn` or `checkOut` is empty, or an unpaid booking has no positive `depositAmount` (a paid one still shows its "paid" view). That's a row the office hasn't finished, e.g. just after the ID menu filled column A; serving it would greet nobody and fail at Pay. The identical body keeps the endpoint from confirming which IDs exist; the function log (`booking <ref> is not ready — missing …`) tells the office what to fill.
+- **The service-account auth is hand-rolled in `google-sheets.ts`** (a JWT signed with `node:crypto`, traded for an access token that is cached per warm instance until a minute before expiry) rather than pulling in `google-auth-library`. **Never log or return the private key, the JWT or the token** — its errors carry only Google's message plus a hint (403: sheet not shared with the service account, or Sheets API not enabled; 404: wrong spreadsheet id). It is unit-tested in `netlify/google-sheets.test.ts` — extend those tests if you touch it.
 - **Amounts go through `parseAmount`**, which strips thousands separators before `Number()` — `Number("75,650")` is `NaN`.
 - **A booking.com relay address is suppressed** (`customerEmail: ""`) so the deposit page prompts the guest for a real address instead of prefilling an unusable relay one.
-- **`depositPaid` is "any non-empty value except an explicit negative"** (`false` / `0` / `no`, case-insensitive) — the sheet marks paid deposits inconsistently, and a checkbox column exports as the literal `FALSE`. Keep that guard if you touch the logic.
+- **`depositPaid` is "any non-empty `paymentId` except an explicit negative"** (`false` / `0` / `no`, case-insensitive) — the sheet marks paid deposits inconsistently, and a checkbox column reads as the literal `FALSE`. Keep that guard if you touch the logic.
 - **This endpoint is public and unauthenticated:** a booking reference is the only thing between a caller and a guest's name, email, phone and dates. **Do not widen the response** beyond what the deposit page renders, and don't add fields "just in case".
 
 ## `daily-rebuild.ts`
@@ -96,7 +101,7 @@ curl "http://localhost:8888/api/get-booking?id=ABC123"
 curl "http://localhost:8888/api/create-order?amount=5000&id=ABC123"
 ```
 
-`yarn test` runs the Jest unit tests (`netlify/*.test.ts` — currently `utils.test.ts` for the CSV parser); Jest strips types via babel, so it is **not** a type gate. **Note that `create-order` uses the live Razorpay key** — a local call creates a real order, so test with a Razorpay test key or accept the stray order.
+`yarn test` runs the Jest unit tests (`netlify/*.test.ts` — `utils.test.ts` for the CSV parser, `google-sheets.test.ts` for the service-account Sheets reads); Jest strips types via babel, so it is **not** a type gate. **Note that `create-order` uses the live Razorpay key** — a local call creates a real order, so test with a Razorpay test key or accept the stray order.
 
 ## Verification checklist
 
