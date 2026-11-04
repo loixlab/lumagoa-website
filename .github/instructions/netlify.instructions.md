@@ -24,7 +24,7 @@ Three functions in `netlify/functions/`, all TypeScript ESM in Netlify's **V2** 
 
 - **Never return an internal error message to the client** except where it's already deliberate (`create-order` echoes the Razorpay SDK message under `details`). Log the real error with `console.error` and return a generic string. Never log or return an env-var _value_.
 - **`fetch` does not throw on non-2xx** — check `response.ok` explicitly. This is the classic regression when porting code that used axios.
-- **`noUncheckedIndexedAccess` is on**, so every CSV cell is `string | undefined`. Default it (`guest[9] ?? ""`) rather than asserting with `!`.
+- **`noUncheckedIndexedAccess` is on**, so every sheet cell is `string | undefined`. Default it (`cell(guest, "paymentId") ?? ""`) rather than asserting with `!`.
 
 ## Environment variables
 
@@ -52,26 +52,27 @@ Local values live in `.env` (gitignored) and are injected by `netlify dev`; prod
 
 `GET /api/get-booking?id=<bookingRef>` → the guest and deposit details, or `404`.
 
-- Reads the bookings sheet **live through the Google Sheets API** (`values.get`, range `A:J` of the **first tab**) as a service account, via `netlify/google-sheets.ts`. The sheet is **private** — shared only with the service account's email — so there is no public copy of the guest data and no publish lag. Row 0 is the header and is dropped; the reference is matched case-insensitively against column 0.
-- **Column indices and the tab are a contract with the spreadsheet** — changing the sheet's column order, or moving another tab in front of the bookings tab, breaks this function with no error, just wrong data:
+- Reads the bookings sheet **live through the Google Sheets API** (`values.get`, columns `A:Z` of the **first tab**) as a service account, via `netlify/google-sheets.ts`. The sheet is **private** — shared only with the service account's email — so there is no public copy of the guest data and no publish lag. Row 0 is the header row; the reference is matched case-insensitively against the `bookingId` column.
+- **Columns are found by header name, not position** (`COLUMNS` in `get-booking.ts`, matched case-insensitively). The office can insert, move or delete any other column — `stayflexiBooking`, `deposit %`, `paymentLink`, `Comment`… — and those are never read into the response. **Renaming or deleting one of these headers makes every lookup fail** with a `500` whose log names the column: loud, never a neighbouring cell's data. The tab is still a contract — the API reads the first tab, so keep the bookings tab leftmost, with these headers within columns A–Z:
 
-  | Index | Field               |
-  | ----- | ------------------- |
-  | 0     | booking reference   |
-  | 1     | `customerName`      |
-  | 2     | email               |
-  | 3     | `customerPhone`     |
-  | 4     | `checkIn`           |
-  | 5     | `checkOut`          |
-  | 6     | `bookingAmount`     |
-  | 8     | `depositAmount`     |
-  | 9     | deposit-paid marker |
+  | Header          | Field                                             |
+  | --------------- | ------------------------------------------------- |
+  | `bookingId`     | matched against `?id=` (case-insensitive)         |
+  | `customerName`  | `customerName`                                    |
+  | `email`         | `customerEmail` (blank for a booking.com relay)   |
+  | `phone`         | `customerPhone`                                   |
+  | `checkIn`       | `checkIn`                                         |
+  | `checkOut`      | `checkOut`                                        |
+  | `bookingAmount` | `bookingAmount`                                   |
+  | `depositAmount` | `depositAmount`                                   |
+  | `paymentId`     | `depositPaid` (filled = paid, see the rule below) |
 
-- **The API returns the displayed values, row by row** — the same text the old CSV export had, so amounts still arrive as `"75,650"`. It **drops trailing empty cells and rows**, so a row can be shorter than ten columns: default every cell (`guest[9] ?? ""`), never assert.
+- **New booking IDs come from the bookings spreadsheet's own menu** — _Bookings → Generate booking ID for selected rows_, from the Apps Script in `docs/booking-deposits.gs`: 8 random characters without look-alikes, unique in the `bookingId` column, never overwriting an existing ID. The ID is the only key to a guest's details on this public endpoint, so don't shorten it or make it sequential.
+- **The API returns the displayed values, row by row** — the same text the old CSV export had, so amounts still arrive as `"75,650"`. It **drops trailing empty cells and rows**, so a row can be shorter than the header row: default every cell (`cell(guest, "paymentId") ?? ""`), never assert.
 - **The service-account auth is hand-rolled in `google-sheets.ts`** (a JWT signed with `node:crypto`, traded for an access token that is cached per warm instance until a minute before expiry) rather than pulling in `google-auth-library`. **Never log or return the private key, the JWT or the token** — its errors carry only Google's message plus a hint (403: sheet not shared with the service account, or Sheets API not enabled; 404: wrong spreadsheet id). It is unit-tested in `netlify/google-sheets.test.ts` — extend those tests if you touch it.
 - **Amounts go through `parseAmount`**, which strips thousands separators before `Number()` — `Number("75,650")` is `NaN`.
 - **A booking.com relay address is suppressed** (`customerEmail: ""`) so the deposit page prompts the guest for a real address instead of prefilling an unusable relay one.
-- **`depositPaid` is "any non-empty value except an explicit negative"** (`false` / `0` / `no`, case-insensitive) — the sheet marks paid deposits inconsistently, and a checkbox column reads as the literal `FALSE`. Keep that guard if you touch the logic.
+- **`depositPaid` is "any non-empty `paymentId` except an explicit negative"** (`false` / `0` / `no`, case-insensitive) — the sheet marks paid deposits inconsistently, and a checkbox column reads as the literal `FALSE`. Keep that guard if you touch the logic.
 - **This endpoint is public and unauthenticated:** a booking reference is the only thing between a caller and a guest's name, email, phone and dates. **Do not widen the response** beyond what the deposit page renders, and don't add fields "just in case".
 
 ## `daily-rebuild.ts`

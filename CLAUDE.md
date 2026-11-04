@@ -33,7 +33,7 @@ Layout / sync contract for these files: [docs/INSTRUCTION_FILES.md](docs/INSTRUC
 - `src/styles.css` — Tailwind entry, DaisyUI theme definitions, and the gallery / Google-Maps overrides.
 - `netlify/functions/` — `create-order.ts` (Razorpay order), `get-booking.ts` (booking lookup) and `daily-rebuild.ts` (scheduled nightly rebuild); `netlify/tsconfig.json` — their own TS project.
 - `public/` — static assets served from the site root (`/img/...`, `quotes.json`, the two gallery metadata JSON files, `robots.txt`, `sitemap.xml`).
-- `scripts/` — Python image-resizing and gallery-metadata tooling. `docs/` — repo/AI docs.
+- `scripts/` — Python image-resizing and gallery-metadata tooling. `docs/` — repo/AI docs, plus the Apps Scripts that run inside the two Google Sheets (`yoga-schedule-sheet.gs`, `booking-deposits.gs`): versioned here, pasted into each sheet's Apps Script editor.
 
 ## Commands
 

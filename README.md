@@ -37,3 +37,9 @@ python3 ./scripts/resize_hero_image.py ./public/img/cafe-hero.jpg
 ## Yoga schedule
 
 The `/yoga` class schedule is edited in a Google Sheet and read at build time. See [docs/yoga-schedule-sheet.md](docs/yoga-schedule-sheet.md) for the sheet's columns, setup and troubleshooting.
+
+## Booking deposits
+
+Guests pay their booking deposit on `/deposit-payment`, which looks the booking up in the office's private bookings Google Sheet through the Sheets API (`netlify/functions/get-booking.ts`). The sheet is shared only with a service account; its env vars and the column headers the lookup relies on are documented in [netlify/CLAUDE.md](netlify/CLAUDE.md).
+
+New booking IDs come from the sheet's **Bookings → Generate booking ID for selected rows** menu, whose Apps Script is versioned in [docs/booking-deposits.gs](docs/booking-deposits.gs).

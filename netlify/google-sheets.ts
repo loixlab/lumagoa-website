@@ -137,8 +137,8 @@ async function getAccessToken(account: ServiceAccount): Promise<string> {
 }
 
 /**
- * The displayed values of `range` (A1 notation, e.g. "A:J" for the first
- * tab or "'Bookings'!A:J"), as rows of strings — the same text a CSV export
+ * The displayed values of `range` (A1 notation, e.g. "A:Z" for the first
+ * tab or "'Bookings'!A:Z"), as rows of strings — the same text a CSV export
  * would give, so "75,650" stays "75,650". Google drops trailing empty cells
  * and rows, so rows can be shorter than the range: default missing cells.
  */
