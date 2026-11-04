@@ -24,7 +24,7 @@ Three functions in `netlify/functions/`, all TypeScript ESM in Netlify's **V2** 
 
 - **Never return an internal error message to the client** except where it's already deliberate (`create-order` echoes the Razorpay SDK message under `details`). Log the real error with `console.error` and return a generic string. Never log or return an env-var _value_.
 - **`fetch` does not throw on non-2xx** — check `response.ok` explicitly. This is the classic regression when porting code that used axios.
-- **`noUncheckedIndexedAccess` is on**, so every sheet cell is `string | undefined`. Default it (`cell(guest, "paymentId") ?? ""`) rather than asserting with `!`.
+- **`noUncheckedIndexedAccess` is on**, so every sheet cell is `string | undefined`. Default it (`row[at] ?? ""`) rather than asserting with `!`.
 
 ## Environment variables
 
@@ -68,7 +68,8 @@ Local values live in `.env` (gitignored) and are injected by `netlify dev`; prod
   | `paymentId`     | `depositPaid` (filled = paid, see the rule below) |
 
 - **New booking IDs come from the bookings spreadsheet's own menu** — _Bookings → Generate booking ID for selected rows_, from the Apps Script in `docs/booking-deposits.gs`: 8 random characters without look-alikes, unique in the `bookingId` column, never overwriting an existing ID. The ID is the only key to a guest's details on this public endpoint, so don't shorten it or make it sequential.
-- **The API returns the displayed values, row by row** — the same text the old CSV export had, so amounts still arrive as `"75,650"`. It **drops trailing empty cells and rows**, so a row can be shorter than the header row: default every cell (`cell(guest, "paymentId") ?? ""`), never assert.
+- **The API returns the displayed values, row by row** — the same text the old CSV export had, so amounts still arrive as `"75,650"`. It **drops trailing empty cells and rows**, so a row can be shorter than the header row. `cell()` reads every cell as a trimmed string (`""` when missing), so **every field in the response is always present**: the client calls string methods on them (`customerName.normalize(…)` in `deposit-payment.ts`).
+- **An incomplete booking answers exactly like an unknown one** — `404`, same body — when `customerName`, `checkIn` or `checkOut` is empty, or an unpaid booking has no positive `depositAmount` (a paid one still shows its "paid" view). That's a row the office hasn't finished, e.g. just after the ID menu filled column A; serving it would greet nobody and fail at Pay. The identical body keeps the endpoint from confirming which IDs exist; the function log (`booking <ref> is not ready — missing …`) tells the office what to fill.
 - **The service-account auth is hand-rolled in `google-sheets.ts`** (a JWT signed with `node:crypto`, traded for an access token that is cached per warm instance until a minute before expiry) rather than pulling in `google-auth-library`. **Never log or return the private key, the JWT or the token** — its errors carry only Google's message plus a hint (403: sheet not shared with the service account, or Sheets API not enabled; 404: wrong spreadsheet id). It is unit-tested in `netlify/google-sheets.test.ts` — extend those tests if you touch it.
 - **Amounts go through `parseAmount`**, which strips thousands separators before `Number()` — `Number("75,650")` is `NaN`.
 - **A booking.com relay address is suppressed** (`customerEmail: ""`) so the deposit page prompts the guest for a real address instead of prefilling an unusable relay one.
