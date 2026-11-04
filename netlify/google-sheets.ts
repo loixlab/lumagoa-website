@@ -34,12 +34,19 @@ const TOKEN_LIFETIME_S = 3_600;
 const TOKEN_REFRESH_MARGIN_MS = 60_000;
 
 /**
- * Parses the PEM key. A key pasted into an env var often keeps the JSON
- * file's literal "\n" sequences instead of real newlines — both work.
+ * Parses the PEM key. A `private_key` copied as-is from the JSON key file
+ * keeps its wrapping quotes and literal "\n" sequences. A `.env` loader strips
+ * and expands those, but Netlify's UI stores the value verbatim, so undo both
+ * here: a PEM key never starts or ends with a quote.
  */
 function parsePrivateKey(pem: string): KeyObject {
   try {
-    return createPrivateKey(pem.replace(/\\n/g, "\n"));
+    return createPrivateKey(
+      pem
+        .trim()
+        .replace(/^["']|["']$/g, "")
+        .replace(/\\n/g, "\n"),
+    );
   } catch {
     // Node's own message is safe, but say what to check instead.
     throw new Error(

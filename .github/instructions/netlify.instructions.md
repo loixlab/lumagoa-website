@@ -28,14 +28,14 @@ Three functions in `netlify/functions/`, all TypeScript ESM in Netlify's **V2** 
 
 ## Environment variables
 
-| Var                                  | Used by         | Notes                                                                                                        |
-| ------------------------------------ | --------------- | ------------------------------------------------------------------------------------------------------------ |
-| `RAZORPAY_KEY_ID`                    | `create-order`  | Live key id (server side)                                                                                    |
-| `RAZORPAY_KEY_SECRET`                | `create-order`  | **Secret** — server side only, never in `src/`                                                               |
-| `BOOKINGS_SPREADSHEET_ID`            | `get-booking`   | The bookings spreadsheet's id — the one in its `/d/<id>/edit` address                                        |
-| `GOOGLE_SERVICE_ACCOUNT_EMAIL`       | `get-booking`   | The service account's `client_email`; the bookings sheet is shared with it (Viewer)                          |
-| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | `get-booking`   | **Secret** — the `private_key` from its JSON key, real newlines or the file's `\n` escapes                   |
-| `DAILY_BUILD_HOOK_URL`               | `daily-rebuild` | Build hook URL for the production branch — **secret**: anyone holding it can trigger builds, so never log it |
+| Var                                  | Used by         | Notes                                                                                                                                         |
+| ------------------------------------ | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `RAZORPAY_KEY_ID`                    | `create-order`  | Live key id (server side)                                                                                                                     |
+| `RAZORPAY_KEY_SECRET`                | `create-order`  | **Secret** — server side only, never in `src/`                                                                                                |
+| `BOOKINGS_SPREADSHEET_ID`            | `get-booking`   | The bookings spreadsheet's id — the one in its `/d/<id>/edit` address                                                                         |
+| `GOOGLE_SERVICE_ACCOUNT_EMAIL`       | `get-booking`   | The service account's `client_email`; the bookings sheet is shared with it (Viewer)                                                           |
+| `GOOGLE_SERVICE_ACCOUNT_PRIVATE_KEY` | `get-booking`   | **Secret** — the `private_key` from its JSON key, pasted as-is: real newlines or the file's `\n` escapes, with or without its wrapping quotes |
+| `DAILY_BUILD_HOOK_URL`               | `daily-rebuild` | Build hook URL for the production branch — **secret**: anyone holding it can trigger builds, so never log it                                  |
 
 Local values live in `.env` (gitignored) and are injected by `netlify dev`; production values live in the Netlify UI. **Functions share a 4 KB budget for all their env vars** (AWS Lambda), which is why only the service account's email and private key are stored, not its whole JSON key file. The Razorpay _publishable_ key is separately hardcoded in `src/ts/deposit-payment.ts` — that one is public by design.
 

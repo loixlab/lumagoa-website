@@ -96,6 +96,17 @@ describe("authentication", () => {
     ]);
   });
 
+  it("accepts private_key copied as-is from the JSON file, quotes included (Netlify stores it verbatim)", async () => {
+    const pasted = {
+      ...account,
+      privateKey: ` "${privateKey.replace(/\n/g, "\\n")}"\n`,
+    };
+    await expect(readSheetValues(pasted, "sheet-id", "A:J")).resolves.toEqual([
+      ["ref"],
+      ["ABC123"],
+    ]);
+  });
+
   it("rejects a malformed key without echoing it", async () => {
     const broken = { ...account, privateKey: "not-a-key-SECRET-VALUE" };
     const failure = readSheetValues(broken, "sheet-id", "A:J");
