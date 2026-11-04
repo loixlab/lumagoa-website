@@ -113,7 +113,7 @@ export function registerTreatmentFinderComponents(alpine: typeof Alpine) {
     },
 
     scrollToFinder() {
-      this.scrollTo("#find");
+      this.scrollTo("#treatments");
     },
 
     scrollTo(selector: string) {
