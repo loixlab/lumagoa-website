@@ -17,9 +17,11 @@
      A day with a class across noon (`day.merged`) shows one tall cell
      instead: its Morning cell spans both rows (row-span-2 + aria-rowspan)
      and lists every class of the day in time order, each card coloured by
-     the row it starts in (`card.slot`); its Evening cell is null and not
-     rendered — the grid's sparse auto-placement skips the occupied track,
-     so the days after it still land in their own columns.
+     the row it starts in (`card.slot`); its Evening cell (an empty array,
+     like every cell) is skipped — the grid's sparse auto-placement skips
+     the occupied track, so the days after it still land in their own
+     columns. The merged cell opens with an sr-only "Morning and evening
+     classes", since it sits in the Morning row for assistive tech.
      The 7 day columns keep a fixed minimum width and scroll sideways on
      narrow screens rather than stacking. Below md the Morning/Evening label
      column is dropped visually — the card colour and time carry the slot —
@@ -80,8 +82,9 @@ var weekLabels = schedule.weeks.map(function (week) { return week.label; });
         <div role="rowheader" class="sr-only flex items-center gap-2.5 text-sm font-bold uppercase tracking-[0.16em] md:not-sr-only">
           <span class="size-2.5 shrink-0 rounded-full <%= style.dot %>" aria-hidden="true"></span><%= slot.label %>
         </div>
-        <% slot.cells.forEach(function (cards, d) { if (cards === null) return; var merged = week.days[d].merged; %>
+        <% slot.cells.forEach(function (cards, d) { var merged = week.days[d].merged; if (merged && slot.id === 'evening') return; %>
         <div role="cell" class="flex flex-col gap-2<%= merged ? ' row-span-2' : '' %>"<% if (merged) { %> aria-rowspan="2"<% } %>>
+          <% if (merged) { %><span class="sr-only">Morning and evening classes</span><% } %>
           <% if (cards.length === 0) { %>
           <div class="flex min-h-28 flex-1 items-center justify-center rounded-2xl border-2 border-dashed <%= style.empty %>">
             <span aria-hidden="true">—</span><span class="sr-only">No class</span>

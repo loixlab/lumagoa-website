@@ -629,8 +629,8 @@ function buildWeek(monday, events, teacherLinks) {
   // `events` arrive sorted by start, so each day's list is in time order.
   const byDay = dates.map((date) => events.filter((e) => e.date === date));
   // A day with a class across noon is shown as one tall cell — its Morning
-  // cell, spanning both rows — holding every class of the day; it has no
-  // Evening cell.
+  // cell, spanning both rows — holding every class of the day; the partial
+  // skips its Evening cell.
   const merged = byDay.map((day) => day.some(crossesNoon));
   return {
     monday,
@@ -645,13 +645,14 @@ function buildWeek(monday, events, teacherLinks) {
       ...slot,
       // One list of cards per day, Monday first; empty renders as "—". On a
       // merged day the Morning cell carries the whole day and the Evening
-      // cell is null: the partial renders nothing there, and the grid's
-      // auto-placement lets the tall cell take the track.
+      // cell is left empty: the partial skips it (day.merged), and the
+      // grid's auto-placement lets the tall cell take the track. Every cell
+      // is an array, so nothing downstream needs a null check.
       cells: byDay.map((day, i) => {
         if (merged[i]) {
           return slot.id === "morning"
             ? day.map((e) => toCard(e, teacherLinks))
-            : null;
+            : [];
         }
         return day
           .filter((e) => slotOf(e) === slot.id)
