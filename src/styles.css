@@ -53,6 +53,25 @@
   }
 }
 
+/* daisyUI gives .btn a fixed height (var(--size)), so a label that wraps to
+   two lines on a narrow screen spills out of the button ("Enquire About
+   Private Sessions" on /yoga). Let the button grow with its label instead:
+   the fixed height becomes a minimum, with no vertical padding so a
+   single-line button keeps its exact size.
+   daisyUI's classes live in sub-layers of `utilities`, so a Tailwind utility
+   on the element (py-4, h-auto) always beats them. This rule sits in a
+   sub-layer of its own, declared after daisyUI's: it overrides .btn, and the
+   element's utilities still override it. */
+@layer utilities {
+  @layer site {
+    .btn {
+      height: auto;
+      min-height: var(--size);
+      padding-block: 0;
+    }
+  }
+}
+
 @layer utilities {
   .grid-sizer,
   .grid-item {
