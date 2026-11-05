@@ -121,11 +121,19 @@ The brand colour is the DaisyUI `--color-primary` in `styles.css`, `PRIMARY_BRAN
 - The footer sets `data-theme="dim"` on itself deliberately — a reviewer calling that inconsistent with the page's `pastel` is a **false positive**.
 - Mobile-first: check the change at a narrow viewport before claiming it's responsive.
 
-### 4g. Galleries
+### 4g. New-tab links
+
+Every `target="_blank"` carries `rel="noopener"` (see `src/CLAUDE.md`). Automated reviewers flag a missing one as "moderate" even on same-origin image links, so one stray anchor re-opens the thread:
+
+```bash
+grep -rn 'target="_blank"' src | grep -v 'rel='   # must be empty
+```
+
+### 4h. Galleries
 
 Images added or renamed require the matching metadata JSON to be regenerated (`yarn generate-gallery-metadata` for `/gallery`; run `scripts/image_metadata.py` directly for `gallery-shala`). The JSON keys must equal the link `href` exactly — a mismatch is a silent `console.warn` and a broken lightbox, not an error.
 
-### 4h. Instruction-file sync
+### 4i. Instruction-file sync
 
 Changing a `CLAUDE.md` requires updating its `.github/instructions/*.instructions.md` mirror (or `.github/copilot-instructions.md` for the root) **in the same commit**. If a reviewer catches drift in one pair, check all four:
 
