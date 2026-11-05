@@ -420,9 +420,13 @@ function checkColumns(columns, { known, required, label, allowed, isExtra }) {
   }
 }
 
-/** The header row (trimmed, lower-cased) and the body of a tab's CSV export. */
+/**
+ * The header row (trimmed, lower-cased) and the body of a tab's CSV export.
+ * Google's export starts with a byte-order mark, which would otherwise end
+ * up on the first header.
+ */
 function parseSheetCsv(csv) {
-  const [header = [], ...body] = parseCsv(csv.replace(/^﻿/, ""));
+  const [header = [], ...body] = parseCsv(csv.replace(/^\uFEFF/, ""));
   return {
     header,
     columns: header.map((name) => name.trim().toLowerCase()),

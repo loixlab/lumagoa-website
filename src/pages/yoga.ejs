@@ -150,7 +150,7 @@ schemaData: {
             <div class="text-center">
               <h4 class="font-bold text-xl mb-2">Sound bath</h4>
               <p><%= prices.soundBath %> INR per session</p>
-              <p class="mt-2 text-sm text-stone-600">Limited spots — call or WhatsApp <a href="tel:<%= phone.tel %>" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary"><%= phone.display %></a> to book.</p>
+              <p class="mt-2 text-sm text-stone-600">Limited spots — book on <a href="<%= waHref("Hi LUMA, I'd like to book a spot in a Sound Bath session.") %>" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary" target="_blank" rel="noopener">WhatsApp</a> or call <a href="tel:<%= phone.tel %>" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary"><%= phone.display %></a>.</p>
             </div>
           </div>
           <p class="mt-10 text-stone-600">
