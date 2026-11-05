@@ -26,6 +26,7 @@ One row per class. Headers are matched case-insensitively, in any order.
 
 | Column    | Required | Format                                                                                                                                                  |
 | --------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Day       | no       | The weekday, `Mon`, filled from Date by a formula (below) — don't type in it. For whoever fills the rows; the website never reads it                    |
 | Date      | yes      | `2026-11-02` (the setup formats the column)                                                                                                             |
 | Start     | yes      | 24h time, `08:30` or `17:30`. Before 12:00 = Morning row, else Evening.                                                                                 |
 | End       | yes      | 24h time, after Start                                                                                                                                   |
@@ -36,9 +37,22 @@ One row per class. Headers are matched case-insensitively, in any order.
 | Highlight | no       | Checkbox — ticked puts the card on brand gold                                                                                                           |
 | Notes     | no       | For the office; never shown on the website                                                                                                              |
 
-At most 4 classes fit in one day's Morning (or Evening) slot. A class that starts before noon and ends after it — `11:00`–`14:00`, or just `11:30`–`12:30` — belongs to both rows, so that day shows a single tall cell listing all its classes in time order instead of a Morning and an Evening cell. For the limit it still counts in the slot it starts in (Morning), so such a day can hold up to 8 classes. A row with only Notes filled is not a class and is skipped. Any other column name fails the build — rename or delete it — except the version header below. A class's price is shown on its card only when it differs from the drop-in price (`dropIn` in `src/data/site.mjs`, the one in the Prices block under the grid); every class carries its price, that one by default, in the page's structured data.
+At most 4 classes fit in one day's Morning (or Evening) slot. A class that starts before noon and ends after it — `11:00`–`14:00`, or just `11:30`–`12:30` — belongs to both rows, so that day shows a single tall cell listing all its classes in time order instead of a Morning and an Evening cell. For the limit it still counts in the slot it starts in (Morning), so such a day can hold up to 8 classes. A row with only Notes (or only a Day) filled is not a class and is skipped. A class's price is shown on its card only when it differs from the drop-in price (`dropIn` in `src/data/site.mjs`, the one in the Prices block under the grid); every class carries its price, that one by default, in the page's structured data.
 
-**The version is a header of its own**, `Version 12`, in its own column (the setup puts it in column J; any column works, but only one). It is how you check a build read your latest edit:
+**Columns of your own are fine.** Any column the table doesn't list — `Room`, `Paid`… — is ignored by the website. The build log names them (`Schedule sheet: ignoring column(s) Room, Paid`), and so do the sheet's **Check schedule** and **Publish schedule now** messages, so a misspelt column that slipped through shows up there. A column with no header at all is skipped without a mention, so if a column's details (subtitles, teachers, prices, highlights) vanish from the site, check its header is still there. What still fails the build:
+
+- **A name one letter away from a known column**, or the same letters spaced differently — `Teacher`, `Prices`, `Tittle`, `Ends`, `Sub title`, `Hightlight`. That is almost always a typo, and ignoring it would silently drop the column, so the build stops with `did you mean "Teachers"?`. Rename it. A few real words are that close to a short column name (`Pay` is one letter from `Day`); give such a column a longer name. `Day` itself is two letters from `Date`, so both are fine.
+- A known column twice, or a required one missing.
+
+**The Day column** shows each class's weekday to whoever fills the rows. A formula fills it from Date, for every row, new ones included — **Set up** puts it in a new tab, **Website → Fill Day column** in an existing one (see Troubleshooting), or paste it in the Day column's row 2 yourself, with the Date column's letter (here B):
+
+```
+=ARRAYFORMULA(IF(B2:B="","",TEXT(B2:B,"ddd")))
+```
+
+Don't type in the column: a typed cell stops the formula, which then shows `#REF!`. **Check schedule** and **Publish schedule now** compare each class's Day with its Date (`Row 5: Day says Tue but 2026-11-09 is a Monday`; `Mon`, `MON` and `Monday` all pass for a Monday). Only the sheet checks this — the website never reads Day, so the nightly build publishes a mismatch the sheet would have caught. The formula writes day names in the spreadsheet's language (File → Settings → Locale), and the check expects English ones.
+
+**The version is a header of its own**, `Version 12`, in its own column (the setup puts it in column K; any column works, but only one). It is how you check a build read your latest edit:
 
 - **Website → Publish schedule now bumps it** before rebuilding the site: `Version 12` → `Version 13` (the last number goes up: `v09` → `v10`, a bare `Version` → `Version 1`). If Netlify rejects the request, the header is put back, so it always names what was last published.
 - Edits left for the nightly rebuild don't bump it — change the number by hand if you want that build to show a new version.
@@ -68,7 +82,7 @@ Optional: it turns the names in a card's "with …" line into links. One row per
 | Link   | yes      | `#teacher-ashutosh` → the teacher's card in "Meet Your Teachers" on the yoga page · `/ayurveda-massage` → another page of the site · `https://…` → the teacher's own page, opened in a new tab |
 | Notes  | no       | For the office; never shown on the website                                                                                                                                                     |
 
-A name the tab doesn't list stays plain text; the build log names it (`no link for Nicky`), which is also how a misspelt name shows up. A name listed twice, a row with only a Name or only a Link, a link in any other form, or any other column fails the build. A row with only Notes is skipped.
+A name the tab doesn't list stays plain text; the build log names it (`no link for Nicky`), which is also how a misspelt name shows up. A name listed twice, a row with only a Name or only a Link, or a link in any other form fails the build. A row with only Notes is skipped. Other columns are ignored and named in the build log, as on the Schedule tab — except a near-miss of `Name`, `Link` or `Notes` (`Links`), which fails the build.
 
 The card anchors are the `id`s of the teacher cards in `src/pages/yoga.ejs`: `teacher-` and the first name in lower case (`#teacher-ashutosh`, `#teacher-emilia`). Adding a teacher to the website means adding a card with such an `id` there. The build can't check that an anchor exists — a wrong one is a link that scrolls nowhere — so copy it from the page.
 
@@ -102,10 +116,16 @@ The card anchors are the `id`s of the teacher cards in `src/pages/yoga.ejs`: `te
 
 **The sheet still has a `Version` column with the value underneath** (the earlier layout): change the header to `Version <that value>` (e.g. `Version 5`) and clear the cell below it. Until then nothing breaks; the build just logs "version not set".
 
+**The Schedule tab has no Day column** (it was set up before Day existed). In this order:
+
+1. Paste the current [`yoga-schedule-sheet.gs`](yoga-schedule-sheet.gs) into the sheet's Apps Script editor and reload the spreadsheet. An older script calls `Day` an unknown column and refuses to publish.
+2. Right-click the letter above the Date column → **Insert 1 column left**, and type `Day` in its first cell.
+3. **Website → Fill Day column.** It finds the Day and Date columns by their headers and puts the formula in. It does nothing if the Day column already has something below its header; clear it first.
+
 ## Day to day
 
 1. Edit the Schedule tab — and the Teachers tab when a teacher or a link changes.
-2. **Website → Check schedule** lists any problems by row, in both tabs.
+2. **Website → Check schedule** lists any problems by row, in both tabs, and the columns the website ignores.
 3. **Website → Publish schedule now** checks again, bumps the version, then rebuilds the site. Or do nothing: the nightly rebuild picks the changes up.
 
-The script applies the same rules as the build. If you change a rule in `src/data/load-yoga-schedule.mjs`, change `docs/yoga-schedule-sheet.gs` to match and paste the new version into the sheet's Apps Script editor.
+The script applies the same rules as the build, plus one of its own: the Day check. If you change a rule in `src/data/load-yoga-schedule.mjs`, change `docs/yoga-schedule-sheet.gs` to match and paste the new version into the sheet's Apps Script editor.

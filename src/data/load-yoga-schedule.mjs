@@ -352,9 +352,13 @@ function teacherLinksOf(raw, labelOf) {
 // --- The schedule spreadsheet ---------------------------------------------
 
 // Schedule tab column headers (matched case-insensitively, in any order) →
-// the event field each fills. "Notes" is for the office and never read. Keep
-// in step with HEADERS in the sheet's Apps Script (docs/yoga-schedule-sheet.gs).
+// the event field each fills. "Day" (the weekday, filled from Date by a
+// formula — the sheet script checks it) and "Notes" are for the office and
+// never read. Any other header is ignored, unless it is a near-miss of one of
+// these (nearMiss). Keep in step with HEADERS in the sheet's Apps Script
+// (docs/yoga-schedule-sheet.gs), in the same order.
 const SHEET_COLUMNS = {
+  day: null,
   date: "date",
   start: "timeStart",
   end: "timeEnd",
@@ -366,13 +370,14 @@ const SHEET_COLUMNS = {
   notes: null,
 };
 // The columns that describe a class — a row with none of them filled (only
-// a note, say) is not a class.
+// a note or a Day, say) is not a class.
 const CLASS_COLUMNS = Object.keys(SHEET_COLUMNS).filter(
   (name) => SHEET_COLUMNS[name] !== null,
 );
 const REQUIRED_COLUMNS = ["date", "start", "end", "title"];
 
-// Teachers tab: one row per teacher. Keep in step with TEACHER_HEADERS in
+// Teachers tab: one row per teacher; any other header is ignored, as on the
+// Schedule tab. Keep in step with TEACHER_HEADERS in
 // docs/yoga-schedule-sheet.gs.
 const TEACHER_COLUMNS = { name: "name", link: "link", notes: null };
 const REQUIRED_TEACHER_COLUMNS = ["name", "link"];
@@ -404,21 +409,85 @@ function normalizePrice(value) {
 }
 
 /**
- * Header problems throw here, naming the tab: a column that isn't one of
- * `known` (`isExtra(index)` exempts the Schedule tab's version header), one
- * that appears twice, or a `required` one that is missing.
+ * The number of single-letter edits (insert, delete or replace) turning `a`
+ * into `b`. Keep in step with editDistance_ in docs/yoga-schedule-sheet.gs.
  */
-function checkColumns(columns, { known, required, label, allowed, isExtra }) {
-  const unknown = columns.filter(
-    (c, i) => c !== "" && !(c in known) && !isExtra(i),
+function editDistance(a, b) {
+  let previous = Array.from({ length: b.length + 1 }, (_, j) => j);
+  for (let i = 1; i <= a.length; i++) {
+    const current = [i];
+    for (let j = 1; j <= b.length; j++) {
+      current[j] = Math.min(
+        previous[j] + 1,
+        current[j - 1] + 1,
+        previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+    }
+    previous = current;
+  }
+  return previous[b.length];
+}
+
+/** "Sub title", "sub-title" → "subtitle": a header as nearMiss compares it. */
+function lettersOnly(name) {
+  return name.toLowerCase().replace(/[^a-z]/g, "");
+}
+
+/**
+ * The known column (as its key in `known`) that the unknown header `name`
+ * looks like a typo of — the same letters ("Sub title"), or one letter added,
+ * dropped or changed ("Teacher", "Tittle") — or null. "Day" is two letters
+ * from "Date", so both are safe. Keep in step with nearMiss_ in
+ * docs/yoga-schedule-sheet.gs.
+ */
+function nearMiss(name, known) {
+  const letters = lettersOnly(name);
+  return (
+    Object.keys(known).find(
+      (key) => editDistance(letters, lettersOnly(key)) <= 1,
+    ) ?? null
   );
-  if (unknown.length > 0) {
+}
+
+/** "subtitle" → "Subtitle", as the column is spelled in the sheet. */
+function headerName(key) {
+  return key.charAt(0).toUpperCase() + key.slice(1);
+}
+
+/**
+ * Header problems throw here, naming the tab: a header that isn't one of
+ * `known` but looks like a typo of one, a known one that appears twice, or a
+ * `required` one that is missing. Any other header (`isExtra(index)` exempts
+ * the Schedule tab's version header) is ignored: returns those headers, as
+ * written in the sheet, for the build log. A blank header is skipped without
+ * a mention, as a spacer column always was. `allowed` describes the tab's
+ * columns in the typo message.
+ */
+function checkColumns(
+  header,
+  columns,
+  { known, required, label, allowed, isExtra },
+) {
+  const ignored = [];
+  const typos = [];
+  columns.forEach((c, i) => {
+    if (c === "" || Object.hasOwn(known, c) || isExtra(i)) return;
+    const near = nearMiss(c, known);
+    if (near === null) {
+      ignored.push(header[i].trim());
+    } else {
+      typos.push(
+        `column "${header[i].trim()}" (did you mean "${headerName(near)}"?)`,
+      );
+    }
+  });
+  if (typos.length > 0) {
     throw new Error(
-      `${label}: unknown column(s) ${unknown.join(", ")} — allowed: ${allowed}`,
+      `${label}: ${typos.join(", ")} — too close to a known column to be ignored. Known columns: ${allowed}. Any other column is ignored.`,
     );
   }
   const duplicate = columns.find(
-    (c, i) => c !== "" && columns.indexOf(c) !== i,
+    (c, i) => Object.hasOwn(known, c) && columns.indexOf(c) !== i,
   );
   if (duplicate) {
     throw new Error(`${label}: column "${duplicate}" appears twice`);
@@ -427,6 +496,7 @@ function checkColumns(columns, { known, required, label, allowed, isExtra }) {
   if (missing.length > 0) {
     throw new Error(`${label}: missing column(s) ${missing.join(", ")}`);
   }
+  return ignored;
 }
 
 /**
@@ -453,10 +523,10 @@ function cellReader(columns, cells) {
 
 /**
  * Turns the Schedule tab's CSV export into events, plus each one's sheet row
- * number so errors point the office at the exact row, and the sheet's version
- * (from its "Version …" header, or null). Rows with no class column filled
- * are skipped. Header problems throw here; cell problems are left to
- * validate().
+ * number so errors point the office at the exact row, the sheet's version
+ * (from its "Version …" header, or null) and the headers it ignored. Rows
+ * with no class column filled are skipped. Header problems throw here; cell
+ * problems are left to validate().
  */
 function parseScheduleSheet(csv) {
   const { header, columns, body } = parseSheetCsv(csv);
@@ -471,12 +541,12 @@ function parseScheduleSheet(csv) {
     versionAt.length === 1
       ? header[versionAt[0]].trim().replace(VERSION_HEADER, "") || null
       : null;
-  checkColumns(columns, {
+  const ignored = checkColumns(header, columns, {
     known: SHEET_COLUMNS,
     required: REQUIRED_COLUMNS,
     label: "Schedule sheet",
     allowed:
-      'Date, Start, End, Title, Subtitle, Teachers, Price, Highlight, Notes, and one "Version …" header',
+      'required Date, Start, End, Title; optional Day, Subtitle, Teachers, Price, Highlight, Notes; and one "Version …" header',
     isExtra: (i) => versionAt.includes(i),
   });
 
@@ -509,22 +579,22 @@ function parseScheduleSheet(csv) {
     // +1 for the header row, +1 because sheet rows count from 1.
     rows.push(i + 2);
   });
-  return { events, rows, version };
+  return { events, rows, version, ignored };
 }
 
 /**
  * Turns the Teachers tab's CSV export into { name, link } rows plus their
- * sheet row numbers. A row with only Notes filled is skipped; one with a
- * name but no link (or the reverse) goes through for teacherLinksOf() to
- * reject by row.
+ * sheet row numbers, and the headers it ignored. A row with only Notes filled
+ * is skipped; one with a name but no link (or the reverse) goes through for
+ * teacherLinksOf() to reject by row.
  */
 function parseTeachersSheet(csv) {
-  const { columns, body } = parseSheetCsv(csv);
-  checkColumns(columns, {
+  const { header, columns, body } = parseSheetCsv(csv);
+  const ignored = checkColumns(header, columns, {
     known: TEACHER_COLUMNS,
     required: REQUIRED_TEACHER_COLUMNS,
     label: "Teachers sheet",
-    allowed: "Name, Link, Notes",
+    allowed: "required Name, Link; optional Notes",
     isExtra: () => false,
   });
 
@@ -536,7 +606,14 @@ function parseTeachersSheet(csv) {
     teachers.push({ name: cell("name"), link: cell("link") });
     rows.push(i + 2);
   });
-  return { teachers, rows };
+  return { teachers, rows, ignored };
+}
+
+/** Names the columns a tab's build skipped — the office's own, or a typo too far from a known name to be caught. */
+function logIgnored(label, ignored) {
+  if (ignored.length > 0) {
+    console.log(`${label}: ignoring column(s) ${ignored.join(", ")}`);
+  }
 }
 
 // Long enough for Google's CSV export, short enough that a hung request fails
@@ -780,12 +857,18 @@ export async function loadYogaSchedulePageData({
           })
         : null,
     ]);
-    const { events, rows, version } = parseScheduleSheet(scheduleCsv);
+    const { events, rows, version, ignored } = parseScheduleSheet(scheduleCsv);
+    logIgnored("Schedule sheet", ignored);
     raw = events;
     labelOf = (index) => `Schedule sheet row ${rows[index]}`;
     source = `Schedule sheet, version ${version ? `"${version}"` : 'not set (give the sheet a header like "Version 1")'}`;
     if (teachersCsv !== null) {
-      const { teachers, rows: teacherRows } = parseTeachersSheet(teachersCsv);
+      const {
+        teachers,
+        rows: teacherRows,
+        ignored: teachersIgnored,
+      } = parseTeachersSheet(teachersCsv);
+      logIgnored("Teachers sheet", teachersIgnored);
       teacherLinks = teacherLinksOf(
         teachers,
         (index) => `Teachers sheet row ${teacherRows[index]}`,
