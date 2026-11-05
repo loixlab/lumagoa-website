@@ -3,7 +3,11 @@
      `schedule` is built from the schedule Google Sheet (or, outside
      production, src/data/yoga-schedule.sample.json) by
      src/data/load-yoga-schedule.mjs (validated at build time) — every date,
-     time and "with …" string arrives pre-formatted.
+     time, price and "with …" part arrives pre-formatted. A card's `teachers`
+     are the parts of its "with A, B & C" line (`prefix` + `name`), each with
+     the `href` the sheet's Teachers tab gives that name (null: plain text);
+     an `external` one opens in a new tab. `price` is set only when the class
+     costs something other than the drop-in price shown under the grid.
      One loop renders every week, so there is a single copy of the markup:
      the week containing the build date is plain HTML (what crawlers and
      no-JS visitors see); every other week, past or future, is wrapped in a
@@ -80,14 +84,25 @@ var weekLabels = schedule.weeks.map(function (week) { return week.label; });
           <% cards.forEach(function (card) { %>
           <%# Cards stretch to the row's height (a neighbouring slot may stack
               several), so the details stay together at the top and only the
-              teacher line is pushed to the bottom. %>
+              teacher and price lines are pushed to the bottom. %>
           <div class="flex flex-1 flex-col justify-between gap-3 rounded-2xl p-4 <%= card.highlight ? highlightCard : style.card %>">
             <div>
               <p class="text-sm font-bold"><%= card.time %></p>
               <p class="mt-2 font-display text-xl leading-tight"><%= card.title %></p>
               <% if (card.subTitle) { %><p class="mt-1 text-xs opacity-75"><%= card.subTitle %></p><% } %>
             </div>
-            <% if (card.teachers) { %><p class="text-sm"><%= card.teachers %></p><% } %>
+            <% if (card.teachers.length > 0 || card.price) { %>
+            <%# The price gets a line of its own: two names and a four-digit
+                price don't share one. %>
+            <div class="text-sm">
+              <% if (card.teachers.length > 0) { %>
+              <%# Links underline in the card's own text colour, whichever row
+                  or highlight it is in. %>
+              <p><% card.teachers.forEach(function (t) { %><%= t.prefix %><% if (t.href) { %><a href="<%= t.href %>" class="underline decoration-current/40 underline-offset-2 hover:decoration-current"<% if (t.external) { %> target="_blank" rel="noopener"<% } %>><%= t.name %><% if (t.external) { %><span class="sr-only"> (opens in a new tab)</span><% } %></a><% } else { %><%= t.name %><% } %><% }) %></p>
+              <% } %>
+              <% if (card.price) { %><p class="<%= card.teachers.length > 0 ? 'mt-1 ' : '' %>font-bold"><%= card.price %></p><% } %>
+            </div>
+            <% } %>
           </div>
           <% }) %>
         </div>

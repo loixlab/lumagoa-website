@@ -42,9 +42,11 @@ export default defineConfig(async ({ mode }) => {
 
   // Loaded once so the /yoga page and its sitemap <lastmod> agree on the build
   // date. A production build without YOGA_SCHEDULE_CSV_URL fails here rather
-  // than publish the sample classes.
+  // than publish the sample classes. The Teachers tab (name → link) is
+  // optional: without its URL the teacher names are plain text.
   const yogaSchedulePageData = await loadYogaSchedulePageData({
     csvUrl: env.YOGA_SCHEDULE_CSV_URL,
+    teachersCsvUrl: env.YOGA_TEACHERS_CSV_URL,
     requireSheet: isProduction,
   });
 

@@ -44,7 +44,7 @@ schemaData: {
         "itemOffered": {
           "@type": "Service",
           "name": "Drop-in Yoga Classes",
-          "description": "Join our morning flow and evening relaxation classes for 600 INR."
+          "description": "Join our morning flow and evening relaxation classes for " + prices.dropIn + " INR."
         }
       },
       {
@@ -139,15 +139,19 @@ schemaData: {
         <!-- Pricing -->
         <div class="mt-12 container max-w-4xl mx-auto text-center">
           <h3 class="text-center font-display text-xl mb-8 md:text-2xl">Prices</h3>
-          <div class="grid grid-cols-1 md:grid-cols-1 lg:grid-cols-1 gap-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div class="text-center">
               <h4 class="font-bold text-xl mb-2">Drop-in classes</h4>
-              <p>600 INR</p>
+              <p><%= prices.dropIn %> INR per class</p>
+              <%# A class with its own Price in the schedule sheet shows it on
+                  its card; every other class costs the drop-in price. %>
+              <p class="mt-2 text-sm text-stone-600">Applies to every class unless a different price is shown on the class in the schedule above.</p>
             </div>
-            <!-- <div class="text-center">
+            <div class="text-center">
               <h4 class="font-bold text-xl mb-2">Sound bath</h4>
-              <p><%= prices.soundBath %> INR<br>(limited spots, contact for enquiry <%= phone.display %>)</p>
-            </div> -->
+              <p><%= prices.soundBath %> INR per session</p>
+              <p class="mt-2 text-sm text-stone-600">Limited spots — call or WhatsApp <a href="tel:<%= phone.tel %>" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary"><%= phone.display %></a> to book.</p>
+            </div>
           </div>
           <p class="mt-10 text-stone-600">
             Staying with us? Yoga is included in <a href="/yoga-holidays" class="text-brand-brown underline decoration-primary/30 hover:decoration-primary">every LUMA yoga holiday</a>.
@@ -296,34 +300,39 @@ schemaData: {
           Our experienced facilitators bring heart-centered teaching rooted in tradition and presence. Join us for authentic guidance in a peaceful setting just 200 m from Palolem Beach.
         </p>
 
+        <!-- Each card's id is what the schedule sheet's Teachers tab links a
+             name to ("#teacher-ashutosh" in its Link column), so keep the
+             id when editing a card and give a new card one (teacher-<first
+             name, lower-case>). scroll-mt keeps the anchored card clear of
+             the fixed header. -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-10">
           <!-- Teacher Card 1 -->
-          <div class="text-center">
+          <div id="teacher-ashutosh" class="text-center scroll-mt-[75px] md:scroll-mt-[102px]">
             <img src="/img/teachers/ashutosh.jpg" alt="Ashutosh - Yoga Teacher Luma Goa Palolem" class="w-48 h-48 rounded-full mx-auto mb-6 object-cover shadow-lg" />
             <h3 class="font-bold text-2xl mb-2">Ashutosh</h3>
             <p class="text-lg text-gray-600 mb-4">Hatha, Vinyasa & Ashtanga Teacher • RYT 500 • 6+ Years Experience</p>
             <p class="text-base">Trained in Rishikesh with a 500-hour Yoga Alliance certification, Ashutosh brings over six years of professional teaching experience.<br />His path has taken him from leading Ashtanga classes at RYTTC Rishikesh to guiding daily yoga, meditation and breathwork at a Himalayan retreat in Ladakh. Grounded in a deep understanding of anatomy, his Hatha and Vinyasa classes balance strength, alignment and breath, and he adapts each practice to every level and body.<br />Attentive and warmly encouraging, he invites you to move with intention and leave feeling restored. His classes are the perfect start or close to your day in our palm-shaded shala in Palolem.</p>
           </div>
-          <!-- <div class="text-center">
+          <!-- <div id="teacher-pankaj" class="text-center scroll-mt-[75px] md:scroll-mt-[102px]">
             <img src="/img/teachers/pankaj.jpg" alt="Pankaj Kamal - Yoga Therapist and Philosopher Luma Goa Palolem" class="w-48 h-48 rounded-full mx-auto mb-6 object-cover shadow-lg" />
             <h3 class="font-bold text-2xl mb-2">Pankaj Kamal</h3>
             <p class="text-lg text-gray-600 mb-4">M.Sc Yoga Therapy • MA Philosophy • RYT 500 • 10+ Years Experience</p>
             <p class="text-base">Pankaj Kamal brings over 10 years of dedicated teaching experience to every class, blending scientific precision with profound philosophical insight. Holding an M.Sc in Yoga Therapy, an MA in Philosophy, and a 500-hour RYT certification, he specializes in therapeutic yoga practices that address body, mind, and spirit holistically. His sessions offer clear, compassionate guidance — helping students build strength, release tension, and cultivate lasting inner balance in our peaceful, nature-immersed shala.</p>
           </div> -->
-          <div class="text-center">
+          <div id="teacher-emilia" class="text-center scroll-mt-[75px] md:scroll-mt-[102px]">
             <img src="/img/teachers/emilia.jpg" alt="Emilia Maljarow - Luma Goa Palolem" class="w-48 h-48 rounded-full mx-auto mb-6 object-cover shadow-lg" />
             <h3 class="font-bold text-2xl mb-2">Emilia Maljarow</h3>
             <p class="text-lg text-gray-600 mb-4">Yoga, Pilates & Massage Therapist • 6+ Years Experience</p>
             <p class="text-base">Emilia’s journey with yoga began at the age of 16, when she first discovered the transformative power of movement, breath and mindfulness. What started as a personal practice soon became a deep passion and eventually her life's work.<br /> For over six years, she has been teaching yoga and guiding people through practices that support not only the physical body, but also mental and emotional wellbeing. Her teaching is rooted in a holistic approach, combining mindful movement, breathwork and nervous system regulation to create experiences that feel grounding, empowering and deeply restorative.<br /> Alongside yoga, she also teaches Pilates and works as a massage therapist, which allows her to bring a strong understanding of the body, alignment and recovery into her classes and retreats. Her intention is to help people reconnect with themselves, build strength from within and create balance in both body and mind.</p>
           </div>
-          <!-- <div class="text-center">
+          <!-- <div id="teacher-nicky" class="text-center scroll-mt-[75px] md:scroll-mt-[102px]">
             <img src="/img/teachers/nicky.jpg" alt="Nicky - Luma Goa Palolem" class="w-48 h-48 rounded-full mx-auto mb-6 object-cover shadow-lg" />
             <h3 class="font-bold text-2xl mb-2">Nicky</h3>
             <p class="text-lg text-gray-600 mb-4">Kundalini, Vinyasa & Yin Yoga Teacher</p>
             <p class="text-base">Nicky offers dynamic yet grounding, breath-led classes that blend Kundalini sequences with mindful movement and moments of stillness. Her teaching supports embodied awareness, vitality, and nervous system regulation.
               In her Yin classes, she guides slow, long-held postures with conscious breathing, supporting deep release, grounding, and rest.</p>
           </div> -->
-          <!-- <div class="text-center">
+          <!-- <div id="teacher-sunny" class="text-center scroll-mt-[75px] md:scroll-mt-[102px]">
             <img src="/img/teachers/sunny.jpg" alt="Sunny - Yoga & Sound Healing Teacher at Luma Goa Palolem" class="w-48 h-48 rounded-full mx-auto mb-6 object-cover shadow-lg" />
             <h3 class="font-bold text-2xl mb-2">Sunny</h3>
             <p class="text-lg text-gray-600 mb-4">Yoga & Sound Healing Guide • 9+ Years Experience</p>

@@ -78,6 +78,15 @@
   },
   {
     "date": "2026-11-07",
+    "timeStart": "10:30",
+    "timeEnd": "11:30",
+    "title": "Pilates",
+    "subTitle": "Mat class",
+    "teachers": ["Emilia"],
+    "price": 800
+  },
+  {
+    "date": "2026-11-07",
     "timeStart": "17:30",
     "timeEnd": "18:30",
     "title": "Evening Vinyasa",
@@ -173,6 +182,15 @@
     "timeEnd": "09:30",
     "title": "Morning Hatha",
     "teachers": ["Ashutosh"]
+  },
+  {
+    "date": "2026-11-14",
+    "timeStart": "10:30",
+    "timeEnd": "11:30",
+    "title": "Pilates",
+    "subTitle": "Mat class",
+    "teachers": ["Emilia"],
+    "price": 800
   },
   {
     "date": "2026-11-14",

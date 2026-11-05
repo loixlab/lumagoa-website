@@ -3,17 +3,21 @@
 // the office's Google Sheet (one row per class, exported as CSV — see
 // docs/yoga-schedule-sheet.md), validates them and shapes them into the weeks
 // rendered by src/partials/yoga-schedule.ejs, plus the schema.org Event list
-// for the page's JSON-LD.
+// for the page's JSON-LD. The same spreadsheet's Teachers tab maps a teacher's
+// name to a link — their card in "Meet Your Teachers" on /yoga, or their own
+// page elsewhere — so each name in a card's "with …" line can be a link.
 //
 // Without YOGA_SCHEDULE_CSV_URL (local builds, Deploy Previews) it falls back
-// to yoga-schedule.sample.json; a production build refuses to, rather than
-// publish placeholder classes. The sample is imported (not readFileSync'd) so
-// Vite tracks it as a config dependency.
+// to yoga-schedule.sample.json and yoga-teachers.sample.json; a production
+// build refuses to, rather than publish placeholder classes. The samples are
+// imported (not readFileSync'd) so Vite tracks them as config dependencies.
 import sampleEvents from "./yoga-schedule.sample.json" with { type: "json" };
+import sampleTeachers from "./yoga-teachers.sample.json" with { type: "json" };
 // The same RFC 4180 parser get-booking uses for its sheet — dependency-free,
 // so it runs here at build time too.
 import { parseCsv } from "../../netlify/utils.ts";
-import { SITE_URL } from "./site.mjs";
+import { PRICES, SITE_URL } from "./site.mjs";
+import { formatPrice } from "./utils.mjs";
 
 // The resort's clock. Which week the page opens on and the JSON-LD
 // timestamps are both Goa time, whatever timezone the build runs in —
@@ -40,8 +44,10 @@ const FIELDS = [
   "title",
   "subTitle",
   "teachers",
+  "price",
   "highlight",
 ];
+const TEACHER_FIELDS = ["name", "link"];
 
 const DAY_NAMES = [
   "Monday",
@@ -169,11 +175,44 @@ function formatTimeRange(start, end) {
     : `${a.clock} ${a.period} – ${b.clock} ${b.period}`;
 }
 
+// --- Teachers -------------------------------------------------------------
+
+/** What goes before the i-th of n names: "with A", "with A & B", "with A, B & C". */
+function teacherPrefix(i, n) {
+  if (i === 0) return "with ";
+  return i === n - 1 ? " & " : ", ";
+}
+
 /** ["A"] → "with A"; ["A", "B", "C"] → "with A, B & C"; [] → null. */
 function formatTeachers(teachers) {
   if (teachers.length === 0) return null;
-  if (teachers.length === 1) return `with ${teachers[0]}`;
-  return `with ${teachers.slice(0, -1).join(", ")} & ${teachers.at(-1)}`;
+  return teachers
+    .map((name, i) => teacherPrefix(i, teachers.length) + name)
+    .join("");
+}
+
+/** The Teachers tab's key for a name: the schedule's "Emilia " matches its "emilia". */
+function teacherKey(name) {
+  return name.trim().toLowerCase();
+}
+
+/**
+ * A teacher's link, as written in the Teachers tab: a card in "Meet Your
+ * Teachers" on /yoga ("#teacher-ashutosh"), a page of this site
+ * ("/ayurveda-massage") or an http(s) URL. A bare "//host" is not a page of
+ * this site, so it is rejected with everything else.
+ */
+function isLink(value) {
+  return (
+    typeof value === "string" &&
+    (/^#[A-Za-z][\w-]*$/.test(value) ||
+      /^\/(?!\/)\S*$/.test(value) ||
+      /^https?:\/\/\S+$/i.test(value))
+  );
+}
+
+function isExternal(link) {
+  return /^https?:\/\//i.test(link);
 }
 
 function slotOf(event) {
@@ -233,6 +272,13 @@ function validate(raw, labelOf) {
     ) {
       throw new Error(`${label}: teachers must be an array of names`);
     }
+    // A whole INR amount. The sheet's cell arrives as a number only when it
+    // reads as one (normalizePrice), so a typo is rejected, not guessed.
+    if (e.price !== undefined && (!Number.isInteger(e.price) || e.price <= 0)) {
+      throw new Error(
+        `${label}: price must be a whole INR amount, like 800, got ${JSON.stringify(e.price)}`,
+      );
+    }
     // A strict boolean — the string "false" would otherwise read as truthy
     // and highlight the card.
     if (e.highlight !== undefined && typeof e.highlight !== "boolean") {
@@ -250,11 +296,55 @@ function validate(raw, labelOf) {
   }
 }
 
-// --- The schedule sheet -----------------------------------------------------
+/**
+ * The Teachers tab's rows (or the sample JSON) as a Map from teacherKey(name)
+ * to { href, external } — or a throw naming the row to fix. A name listed
+ * twice is an error: the build must not pick one of its two links.
+ */
+function teacherLinksOf(raw, labelOf) {
+  if (!Array.isArray(raw)) {
+    throw new Error("Yoga teachers: expected an array of teachers");
+  }
+  const links = new Map();
+  const listedAt = new Map();
+  for (const [index, t] of raw.entries()) {
+    const where = labelOf(index);
+    if (!t || typeof t !== "object" || Array.isArray(t)) {
+      throw new Error(`${where} is not an object`);
+    }
+    const unknown = Object.keys(t).filter(
+      (key) => !TEACHER_FIELDS.includes(key),
+    );
+    if (unknown.length > 0) {
+      throw new Error(
+        `${where} has unknown field(s) ${unknown.join(", ")} — allowed: ${TEACHER_FIELDS.join(", ")}`,
+      );
+    }
+    if (!isText(t.name)) {
+      throw new Error(`${where}: missing name`);
+    }
+    if (!isLink(t.link)) {
+      throw new Error(
+        `${where} ("${t.name}"): link must be a card on /yoga like #teacher-ashutosh, a page like /ayurveda-massage or an https:// URL, got ${JSON.stringify(t.link)}`,
+      );
+    }
+    const key = teacherKey(t.name);
+    if (listedAt.has(key)) {
+      throw new Error(
+        `${where}: "${t.name}" is already listed (${listedAt.get(key)})`,
+      );
+    }
+    listedAt.set(key, where);
+    links.set(key, { href: t.link, external: isExternal(t.link) });
+  }
+  return links;
+}
 
-// Sheet column headers (matched case-insensitively, in any order) → the event
-// field each fills. "Notes" is for the office and never read. Keep in step
-// with HEADERS in the sheet's Apps Script (docs/yoga-schedule-sheet.gs).
+// --- The schedule spreadsheet ---------------------------------------------
+
+// Schedule tab column headers (matched case-insensitively, in any order) →
+// the event field each fills. "Notes" is for the office and never read. Keep
+// in step with HEADERS in the sheet's Apps Script (docs/yoga-schedule-sheet.gs).
 const SHEET_COLUMNS = {
   date: "date",
   start: "timeStart",
@@ -262,6 +352,7 @@ const SHEET_COLUMNS = {
   title: "title",
   subtitle: "subTitle",
   teachers: "teachers",
+  price: "price",
   highlight: "highlight",
   notes: null,
 };
@@ -271,6 +362,11 @@ const CLASS_COLUMNS = Object.keys(SHEET_COLUMNS).filter(
   (name) => SHEET_COLUMNS[name] !== null,
 );
 const REQUIRED_COLUMNS = ["date", "start", "end", "title"];
+
+// Teachers tab: one row per teacher. Keep in step with TEACHER_HEADERS in
+// docs/yoga-schedule-sheet.gs.
+const TEACHER_COLUMNS = { name: "name", link: "link", notes: null };
+const REQUIRED_TEACHER_COLUMNS = ["name", "link"];
 
 // The version is a header of its own: "Version 12", "Version: v12"… in any
 // column, case-insensitive. The build logs the text after "Version", so a
@@ -286,16 +382,71 @@ function normalizeTime(value) {
 }
 
 /**
- * Turns the sheet's CSV export into events, plus each one's sheet row number
- * so errors point the office at the exact row, and the sheet's version (from
- * its "Version …" header, or null). Rows with no class column filled are
- * skipped. Header problems throw here; cell problems are left to validate().
+ * "800", "₹800", "Rs 800", "800 INR", "800.00" or "1,200" → the number;
+ * anything else is left for validate() to reject. Keep in step with toPrice_
+ * in docs/yoga-schedule-sheet.gs.
+ */
+function normalizePrice(value) {
+  const match =
+    /^(?:₹|rs\.?|inr)?\s*(\d{1,3}(?:,\d{3})+|\d+)(?:\.00)?(?:\s*inr)?$/i.exec(
+      value,
+    );
+  return match ? Number(match[1].replace(/,/g, "")) : value;
+}
+
+/**
+ * Header problems throw here, naming the tab: a column that isn't one of
+ * `known` (`isExtra(index)` exempts the Schedule tab's version header), one
+ * that appears twice, or a `required` one that is missing.
+ */
+function checkColumns(columns, { known, required, label, allowed, isExtra }) {
+  const unknown = columns.filter(
+    (c, i) => c !== "" && !(c in known) && !isExtra(i),
+  );
+  if (unknown.length > 0) {
+    throw new Error(
+      `${label}: unknown column(s) ${unknown.join(", ")} — allowed: ${allowed}`,
+    );
+  }
+  const duplicate = columns.find(
+    (c, i) => c !== "" && columns.indexOf(c) !== i,
+  );
+  if (duplicate) {
+    throw new Error(`${label}: column "${duplicate}" appears twice`);
+  }
+  const missing = required.filter((c) => !columns.includes(c));
+  if (missing.length > 0) {
+    throw new Error(`${label}: missing column(s) ${missing.join(", ")}`);
+  }
+}
+
+/** The header row (trimmed, lower-cased) and the body of a tab's CSV export. */
+function parseSheetCsv(csv) {
+  const [header = [], ...body] = parseCsv(csv.replace(/^﻿/, ""));
+  return {
+    header,
+    columns: header.map((name) => name.trim().toLowerCase()),
+    body,
+  };
+}
+
+/** Reads `row`'s cell under the column called `name` ("" when absent), trimmed. */
+function cellReader(columns, cells) {
+  return (name) => {
+    const at = columns.indexOf(name);
+    return at === -1 ? "" : (cells[at] ?? "").trim();
+  };
+}
+
+/**
+ * Turns the Schedule tab's CSV export into events, plus each one's sheet row
+ * number so errors point the office at the exact row, and the sheet's version
+ * (from its "Version …" header, or null). Rows with no class column filled
+ * are skipped. Header problems throw here; cell problems are left to
+ * validate().
  */
 function parseScheduleSheet(csv) {
-  const [header = [], ...body] = parseCsv(csv.replace(/^\uFEFF/, ""));
-  const columns = header.map((name) => name.trim().toLowerCase());
-  const allowed =
-    'Date, Start, End, Title, Subtitle, Teachers, Highlight, Notes, and one "Version …" header';
+  const { header, columns, body } = parseSheetCsv(csv);
 
   const versionAt = columns.flatMap((c, i) =>
     VERSION_HEADER.test(c) ? [i] : [],
@@ -307,33 +458,19 @@ function parseScheduleSheet(csv) {
     versionAt.length === 1
       ? header[versionAt[0]].trim().replace(VERSION_HEADER, "") || null
       : null;
-
-  const unknown = columns.filter(
-    (c, i) => c !== "" && !(c in SHEET_COLUMNS) && !versionAt.includes(i),
-  );
-  if (unknown.length > 0) {
-    throw new Error(
-      `Schedule sheet: unknown column(s) ${unknown.join(", ")} — allowed: ${allowed}`,
-    );
-  }
-  const duplicate = columns.find(
-    (c, i) => c !== "" && columns.indexOf(c) !== i,
-  );
-  if (duplicate) {
-    throw new Error(`Schedule sheet: column "${duplicate}" appears twice`);
-  }
-  const missing = REQUIRED_COLUMNS.filter((c) => !columns.includes(c));
-  if (missing.length > 0) {
-    throw new Error(`Schedule sheet: missing column(s) ${missing.join(", ")}`);
-  }
+  checkColumns(columns, {
+    known: SHEET_COLUMNS,
+    required: REQUIRED_COLUMNS,
+    label: "Schedule sheet",
+    allowed:
+      'Date, Start, End, Title, Subtitle, Teachers, Price, Highlight, Notes, and one "Version …" header',
+    isExtra: (i) => versionAt.includes(i),
+  });
 
   const events = [];
   const rows = [];
   body.forEach((cells, i) => {
-    const cell = (name) => {
-      const at = columns.indexOf(name);
-      return at === -1 ? "" : (cells[at] ?? "").trim();
-    };
+    const cell = cellReader(columns, cells);
     if (CLASS_COLUMNS.every((name) => cell(name) === "")) return;
     const event = {
       date: cell("date"),
@@ -347,6 +484,7 @@ function parseScheduleSheet(csv) {
       .map((name) => name.trim())
       .filter(Boolean);
     if (teachers.length > 0) event.teachers = teachers;
+    if (cell("price")) event.price = normalizePrice(cell("price"));
     // A checkbox column exports TRUE/FALSE. Anything else goes through as
     // text, so validate() rejects it instead of guessing.
     const highlight = cell("highlight");
@@ -361,17 +499,47 @@ function parseScheduleSheet(csv) {
   return { events, rows, version };
 }
 
+/**
+ * Turns the Teachers tab's CSV export into { name, link } rows plus their
+ * sheet row numbers. A row with only Notes filled is skipped; one with a
+ * name but no link (or the reverse) goes through for teacherLinksOf() to
+ * reject by row.
+ */
+function parseTeachersSheet(csv) {
+  const { columns, body } = parseSheetCsv(csv);
+  checkColumns(columns, {
+    known: TEACHER_COLUMNS,
+    required: REQUIRED_TEACHER_COLUMNS,
+    label: "Teachers sheet",
+    allowed: "Name, Link, Notes",
+    isExtra: () => false,
+  });
+
+  const teachers = [];
+  const rows = [];
+  body.forEach((cells, i) => {
+    const cell = cellReader(columns, cells);
+    if (cell("name") === "" && cell("link") === "") return;
+    teachers.push({ name: cell("name"), link: cell("link") });
+    rows.push(i + 2);
+  });
+  return { teachers, rows };
+}
+
 // Long enough for Google's CSV export, short enough that a hung request fails
 // the build instead of stalling it.
 const FETCH_TIMEOUT_MS = 30_000;
 
-/** The sheet's CSV, or a throw. Never puts the URL in a message. */
-async function fetchScheduleCsv(csvUrl) {
+/**
+ * A tab's CSV, or a throw. `envVar` and `label` ("Schedule sheet") name the
+ * source in messages; the URL itself never appears in one.
+ */
+async function fetchSheetCsv(csvUrl, { envVar, label }) {
   let url;
   try {
     url = new URL(csvUrl);
   } catch {
-    throw new Error("YOGA_SCHEDULE_CSV_URL is not a valid URL");
+    throw new Error(`${envVar} is not a valid URL`);
   }
   // A "Publish to web" link (/d/e/…/pub) serves a copy Google refreshes on
   // its own schedule and caches for 5 minutes (max-age=300), so a build
@@ -379,7 +547,7 @@ async function fetchScheduleCsv(csvUrl) {
   // live sheet.
   if (url.pathname.includes("/d/e/") || url.pathname.endsWith("/pub")) {
     console.warn(
-      'YOGA_SCHEDULE_CSV_URL is a "Publish to web" link, which can lag several minutes behind the sheet — use https://docs.google.com/spreadsheets/d/<SPREADSHEET_ID>/export?format=csv&gid=<GID> instead (docs/yoga-schedule-sheet.md)',
+      `${envVar} is a "Publish to web" link, which can lag several minutes behind the sheet — use https://docs.google.com/spreadsheets/d/<SPREADSHEET_ID>/export?format=csv&gid=<GID> instead (docs/yoga-schedule-sheet.md)`,
     );
   }
   // Busts any cache between the build and Google, as get-booking does.
@@ -392,19 +560,17 @@ async function fetchScheduleCsv(csvUrl) {
     });
   } catch (error) {
     throw new Error(
-      `Schedule sheet: request failed (${error instanceof Error ? error.message : error})`,
+      `${label}: request failed (${error instanceof Error ? error.message : error})`,
     );
   }
   if (!response.ok) {
-    throw new Error(
-      `Schedule sheet: request returned status ${response.status}`,
-    );
+    throw new Error(`${label}: request returned status ${response.status}`);
   }
   const text = await response.text();
   // A spreadsheet that isn't shared answers 200 with Google's sign-in page.
   if (/^\s*<(!doctype|html)/i.test(text)) {
     throw new Error(
-      'Schedule sheet: got an HTML page instead of CSV — is the spreadsheet shared as "Anyone with the link: Viewer", and does the URL end in format=csv?',
+      `${label}: got an HTML page instead of CSV — is the spreadsheet shared as "Anyone with the link: Viewer", and does the URL end in format=csv?`,
     );
   }
   return text;
@@ -416,17 +582,33 @@ function byStart(a, b) {
   return a.date.localeCompare(b.date) || a.timeStart.localeCompare(b.timeStart);
 }
 
-function toCard(e) {
+function toCard(e, teacherLinks) {
+  const teachers = e.teachers ?? [];
   return {
     time: formatTimeRange(e.timeStart, e.timeEnd),
     title: e.title,
     subTitle: e.subTitle ?? null,
-    teachers: formatTeachers(e.teachers ?? []),
+    // "with A, B & C" — each name with its link from the Teachers tab, if any
+    // (`href` null otherwise). The partial renders the parts in order.
+    teachers: teachers.map((name, i) => ({
+      prefix: teacherPrefix(i, teachers.length),
+      name,
+      ...(teacherLinks.get(teacherKey(name)) ?? {
+        href: null,
+        external: false,
+      }),
+    })),
+    // Only a price that differs from the drop-in price — that one is in the
+    // Prices block under the grid, so repeating it on every card is noise.
+    price:
+      e.price !== undefined && e.price !== PRICES.dropIn
+        ? formatPrice(e.price)
+        : null,
     highlight: e.highlight === true,
   };
 }
 
-function buildWeek(monday, events) {
+function buildWeek(monday, events, teacherLinks) {
   const dates = DAY_NAMES.map((_, i) => addDays(monday, i));
   return {
     monday,
@@ -442,13 +624,28 @@ function buildWeek(monday, events) {
       cells: dates.map((date) =>
         events
           .filter((e) => e.date === date && slotOf(e) === slot.id)
-          .map(toCard),
+          .map((e) => toCard(e, teacherLinks)),
       ),
     })),
   };
 }
 
-function toJsonLdEvent(e) {
+/** A class's teacher as a schema.org Person, linked the way the card is. */
+function toPerson(name, teacherLinks) {
+  const link = teacherLinks.get(teacherKey(name));
+  if (!link) return { "@type": "Person", name };
+  // Their own page elsewhere is `sameAs`; a page of this site (a /yoga card
+  // anchor included) is their `url` here.
+  return link.external
+    ? { "@type": "Person", name, sameAs: link.href }
+    : {
+        "@type": "Person",
+        name,
+        url: `${SITE_URL}${link.href.startsWith("#") ? "/yoga" : ""}${link.href}`,
+      };
+}
+
+function toJsonLdEvent(e, teacherLinks) {
   const teachers = e.teachers ?? [];
   const withTeachers = formatTeachers(teachers);
   return {
@@ -466,26 +663,31 @@ function toJsonLdEvent(e) {
       name: "Luma Goa Yoga Shala",
       url: `${SITE_URL}/yoga`,
     },
+    // Every class has a price: its own, or the drop-in price.
+    offers: {
+      "@type": "Offer",
+      price: e.price ?? PRICES.dropIn,
+      priceCurrency: "INR",
+      availability: "https://schema.org/InStock",
+      url: `${SITE_URL}/yoga#schedule`,
+    },
     ...(teachers.length > 0
-      ? { performer: teachers.map((name) => ({ "@type": "Person", name })) }
+      ? { performer: teachers.map((name) => toPerson(name, teacherLinks)) }
       : {}),
   };
 }
 
 /**
  * Pure core of the loader — `today` ("YYYY-MM-DD", Goa time) is a parameter
- * so a run can be pinned to any date.
+ * so a run can be pinned to any date; `teacherLinks` is teacherLinksOf()'s
+ * Map (empty: no name is linked).
  *
  * Weeks run Monday–Sunday and cover every week from the earliest event to
  * the latest, gaps included, so the arrows always step one week. The week
  * containing `today` is always present (even if empty) and is the one the
  * page renders as plain HTML; `currentIndex` points at it.
  */
-function buildYogaSchedule(
-  raw,
-  today,
-  labelOf = (index) => `Event at index ${index}`,
-) {
+function buildYogaSchedule(raw, { today, labelOf, teacherLinks }) {
   validate(raw, labelOf);
   const events = [...raw].sort(byStart);
 
@@ -496,7 +698,7 @@ function buildYogaSchedule(
 
   const weeks = [];
   for (let monday = first; monday <= last; monday = addDays(monday, 7)) {
-    weeks.push(buildWeek(monday, events));
+    weeks.push(buildWeek(monday, events, teacherLinks));
   }
   const currentIndex = weeks.findIndex((w) => w.monday === currentMonday);
 
@@ -507,27 +709,61 @@ function buildYogaSchedule(
     currentIndex,
     // From the build date, not the build week's Monday: a mid-week deploy
     // must not list classes that already happened as EventScheduled.
-    jsonLdEvents: events.filter((e) => e.date >= today).map(toJsonLdEvent),
+    jsonLdEvents: events
+      .filter((e) => e.date >= today)
+      .map((e) => toJsonLdEvent(e, teacherLinks)),
   };
 }
 
 /**
  * Loads, validates and shapes the /yoga schedule as of today in Goa.
- * `csvUrl` is the schedule sheet's CSV export (YOGA_SCHEDULE_CSV_URL). Without
- * it the sample JSON is used — unless `requireSheet` (production builds), which
- * throws instead so placeholder classes never go live.
+ * `csvUrl` is the Schedule tab's CSV export (YOGA_SCHEDULE_CSV_URL) and
+ * `teachersCsvUrl` the Teachers tab's (YOGA_TEACHERS_CSV_URL) — optional:
+ * without it no teacher name is a link. Without `csvUrl` the sample JSON is
+ * used for both — unless `requireSheet` (production builds), which throws
+ * instead so placeholder classes never go live.
  */
-export async function loadYogaSchedulePageData({ csvUrl, requireSheet }) {
+export async function loadYogaSchedulePageData({
+  csvUrl,
+  teachersCsvUrl,
+  requireSheet,
+}) {
   let raw;
   let labelOf;
   let source;
+  // Null until a Teachers tab (or the sample) was read.
+  let teacherLinks = null;
+  let teachersSource;
   if (csvUrl) {
-    const { events, rows, version } = parseScheduleSheet(
-      await fetchScheduleCsv(csvUrl),
-    );
+    // Two tabs of the same spreadsheet — fetched together.
+    const [scheduleCsv, teachersCsv] = await Promise.all([
+      fetchSheetCsv(csvUrl, {
+        envVar: "YOGA_SCHEDULE_CSV_URL",
+        label: "Schedule sheet",
+      }),
+      teachersCsvUrl
+        ? fetchSheetCsv(teachersCsvUrl, {
+            envVar: "YOGA_TEACHERS_CSV_URL",
+            label: "Teachers sheet",
+          })
+        : null,
+    ]);
+    const { events, rows, version } = parseScheduleSheet(scheduleCsv);
     raw = events;
     labelOf = (index) => `Schedule sheet row ${rows[index]}`;
     source = `Schedule sheet, version ${version ? `"${version}"` : 'not set (give the sheet a header like "Version 1")'}`;
+    if (teachersCsv !== null) {
+      const { teachers, rows: teacherRows } = parseTeachersSheet(teachersCsv);
+      teacherLinks = teacherLinksOf(
+        teachers,
+        (index) => `Teachers sheet row ${teacherRows[index]}`,
+      );
+      teachersSource = "Teachers sheet";
+    } else {
+      console.warn(
+        "YOGA_TEACHERS_CSV_URL is not set — teacher names on /yoga are plain text, not links",
+      );
+    }
   } else if (requireSheet) {
     throw new Error(
       "YOGA_SCHEDULE_CSV_URL is not set — a production build reads the /yoga schedule from the Google Sheet and never falls back to the sample data",
@@ -539,15 +775,34 @@ export async function loadYogaSchedulePageData({ csvUrl, requireSheet }) {
     raw = sampleEvents;
     labelOf = (index) => `yoga-schedule.sample.json: event at index ${index}`;
     source = "sample data";
+    teacherLinks = teacherLinksOf(
+      sampleTeachers,
+      (index) => `yoga-teachers.sample.json: teacher at index ${index}`,
+    );
+    teachersSource = "sample data";
   }
 
-  const yogaSchedule = buildYogaSchedule(raw, todayInGoa(), labelOf);
+  const yogaSchedule = buildYogaSchedule(raw, {
+    today: todayInGoa(),
+    labelOf,
+    teacherLinks: teacherLinks ?? new Map(),
+  });
   // What this build read — compare the version with the sheet's to confirm
   // it picked up the latest edit.
   const dates = raw.map((e) => e.date).sort();
   console.log(
     `Yoga schedule: ${source} — ${raw.length} classes${dates.length > 0 ? `, ${dates[0]} → ${dates.at(-1)}` : ""} (built ${yogaSchedule.buildDate}, Goa time)`,
   );
+  if (teacherLinks) {
+    // A name the tab doesn't list stays plain text — fine when deliberate,
+    // but this is also how a misspelt name shows up.
+    const unlinked = [
+      ...new Set(raw.flatMap((e) => e.teachers ?? []).map((n) => n.trim())),
+    ].filter((name) => !teacherLinks.has(teacherKey(name)));
+    console.log(
+      `Yoga teachers: ${teachersSource} — ${teacherLinks.size} link(s)${unlinked.length > 0 ? `; no link for ${unlinked.join(", ")}` : ""}`,
+    );
+  }
   const current = yogaSchedule.weeks[yogaSchedule.currentIndex];
   if (current.slots.every((slot) => slot.cells.every((c) => c.length === 0))) {
     console.warn(
