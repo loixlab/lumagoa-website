@@ -5,13 +5,16 @@
  * Script editor (replacing the default Code.gs), save, then reload the
  * spreadsheet: a "Website" menu appears.
  *
- *   Publish schedule now  Checks the Schedule tab, bumps its version
- *                         header (Version 12 → Version 13), then asks Netlify
- *                         to rebuild the website (live in about 2 minutes).
- *                         Without it, edits go live at the nightly rebuild
- *                         (00:30 Goa time) — bump the version by hand then.
+ *   Publish schedule now  Checks the Schedule and Teachers tabs, bumps the
+ *                         Schedule tab's version header (Version 12 →
+ *                         Version 13), then asks Netlify to rebuild the
+ *                         website (live in about 2 minutes). Without it,
+ *                         edits go live at the nightly rebuild (00:30 Goa
+ *                         time) — bump the version by hand then.
  *   Check schedule        The same checks, without publishing.
- *   Set up Schedule tab   One-time: headers, date/time formats, checkboxes.
+ *   Set up Schedule & Teachers tabs
+ *                         One-time: headers, date/time/price formats,
+ *                         checkboxes, and the Teachers tab (Name → Link).
  *
  * One-time setup: Project Settings (gear icon) → Script properties → add
  * BUILD_HOOK_URL = the Netlify build hook created for this sheet.
@@ -31,6 +34,7 @@ const HEADERS = [
   "Title",
   "Subtitle",
   "Teachers",
+  "Price",
   "Highlight",
   "Notes",
 ];
@@ -45,6 +49,13 @@ const CLASS_COLUMNS = HEADERS.map((name) => name.toLowerCase()).filter(
 const VERSION_HEADER = /^version(?![a-z])[\s:#-]*/i;
 const FIRST_VERSION_HEADER = "Version 1";
 const MAX_PER_SLOT = 4;
+// The Teachers tab links a name (as written in the Schedule tab's Teachers
+// column) to the teacher's card on the website's yoga page or to their own
+// page. Optional: without the tab (or a name), names are plain text. Keep in
+// step with TEACHER_COLUMNS in src/data/load-yoga-schedule.mjs.
+const TEACHERS_TAB_NAME = "Teachers";
+const TEACHER_HEADERS = ["Name", "Link", "Notes"];
+const TEACHER_REQUIRED = ["name", "link"];
 
 function onOpen() {
   SpreadsheetApp.getUi()
@@ -52,7 +63,7 @@ function onOpen() {
     .addItem("Publish schedule now", "publishSchedule")
     .addItem("Check schedule", "checkSchedule")
     .addSeparator()
-    .addItem("Set up Schedule tab", "setupScheduleTab")
+    .addItem("Set up Schedule & Teachers tabs", "setupTabs")
     .addToUi();
 }
 
@@ -198,33 +209,67 @@ function checkSchedule() {
   }
 }
 
-function setupScheduleTab() {
+function setupTabs() {
   const ui = SpreadsheetApp.getUi();
   const spreadsheet = SpreadsheetApp.getActive();
-  let sheet = spreadsheet.getSheetByName(TAB_NAME);
+  const notes = [];
+
   // Never re-header a tab with data: its columns may be in another order.
-  if (sheet && sheet.getLastRow() > 1) {
-    ui.alert(
-      "Set up Schedule tab",
+  let schedule = spreadsheet.getSheetByName(TAB_NAME);
+  if (schedule && schedule.getLastRow() > 1) {
+    notes.push(
       'The "' +
         TAB_NAME +
         '" tab already has rows, so it was left as it is. Set up only works on a new or empty tab.',
-      ui.ButtonSet.OK,
     );
-    return;
+  } else {
+    if (!schedule) schedule = spreadsheet.insertSheet(TAB_NAME);
+    setupScheduleTab_(schedule);
+    notes.push(
+      '"' +
+        TAB_NAME +
+        '" is ready. Add one row per class: Date, Start and End (24h, e.g. 17:30) and Title. ' +
+        "Optional: Subtitle, Teachers (comma-separated), Price (a whole INR amount, only when the class doesn't cost the drop-in price), Highlight (tick for a gold card) and Notes (never shown on the website). " +
+        '"' +
+        FIRST_VERSION_HEADER +
+        '" (column ' +
+        columnLetter_(HEADERS.length + 1) +
+        ") names the schedule's version: Publish schedule now bumps it, and the website's build log shows the version it read.",
+    );
   }
-  if (!sheet) sheet = spreadsheet.insertSheet(TAB_NAME);
 
-  // The version goes in its own header, after the class columns (column I).
+  let teachers = spreadsheet.getSheetByName(TEACHERS_TAB_NAME);
+  if (teachers && teachers.getLastRow() > 1) {
+    notes.push(
+      'The "' +
+        TEACHERS_TAB_NAME +
+        '" tab already has rows, so it was left as it is.',
+    );
+  } else {
+    if (!teachers) teachers = spreadsheet.insertSheet(TEACHERS_TAB_NAME);
+    setupTeachersTab_(teachers);
+    notes.push(
+      '"' +
+        TEACHERS_TAB_NAME +
+        "\" is ready. One row per teacher: Name, exactly as written in the Schedule tab's Teachers column, and Link — #teacher-ashutosh for their card on the website's yoga page, or a full https:// address (opens in a new tab). Notes are never read.",
+    );
+  }
+
+  ui.alert("Set up tabs", notes.join("\n\n"), ui.ButtonSet.OK);
+}
+
+/** Headers, formats and checkboxes of a new (or empty) Schedule tab. */
+function setupScheduleTab_(sheet) {
+  // The version goes in its own header, after the class columns.
   sheet
     .getRange(1, 1, 1, HEADERS.length + 1)
     .setValues([HEADERS.concat(FIRST_VERSION_HEADER)])
     .setFontWeight("bold");
   sheet.setFrozenRows(1);
   const rows = sheet.getMaxRows() - 1;
-  // Columns A (Date), B–C (Start, End) and G (Highlight), as in HEADERS.
+  const column = (name) => HEADERS.indexOf(name) + 1;
   sheet
-    .getRange(2, 1, rows, 1)
+    .getRange(2, column("Date"), rows, 1)
     .setNumberFormat("yyyy-mm-dd")
     .setDataValidation(
       SpreadsheetApp.newDataValidation()
@@ -233,29 +278,48 @@ function setupScheduleTab() {
         .setHelpText("A date, e.g. 2026-11-02")
         .build(),
     );
-  sheet.getRange(2, 2, rows, 2).setNumberFormat("HH:mm");
-  sheet.getRange(2, 7, rows, 1).insertCheckboxes();
+  sheet.getRange(2, column("Start"), rows, 1).setNumberFormat("HH:mm");
+  sheet.getRange(2, column("End"), rows, 1).setNumberFormat("HH:mm");
+  // A plain whole number: the website reads the displayed value.
+  sheet.getRange(2, column("Price"), rows, 1).setNumberFormat("0");
+  sheet.getRange(2, column("Highlight"), rows, 1).insertCheckboxes();
+}
 
-  ui.alert(
-    "Set up Schedule tab",
-    "Done. Add one row per class: Date, Start and End (24h, e.g. 17:30) and Title. " +
-      "Optional: Subtitle, Teachers (comma-separated), Highlight (tick for a gold card) and Notes (never shown on the website). " +
-      '"' +
-      FIRST_VERSION_HEADER +
-      "\" (column I) names the schedule's version: Publish schedule now bumps it, and the website's build log shows the version it read.",
-    ui.ButtonSet.OK,
-  );
+/** Headers of a new (or empty) Teachers tab. */
+function setupTeachersTab_(sheet) {
+  sheet
+    .getRange(1, 1, 1, TEACHER_HEADERS.length)
+    .setValues([TEACHER_HEADERS])
+    .setFontWeight("bold");
+  sheet.setFrozenRows(1);
+}
+
+/** 1 → "A", 10 → "J" (the tabs never get past column Z). */
+function columnLetter_(column) {
+  return String.fromCharCode(64 + column);
 }
 
 function scheduleProblems_() {
-  const sheet = SpreadsheetApp.getActive().getSheetByName(TAB_NAME);
+  const spreadsheet = SpreadsheetApp.getActive();
+  const sheet = spreadsheet.getSheetByName(TAB_NAME);
   if (!sheet) {
     return [
-      'There is no "' + TAB_NAME + '" tab. Use Website → Set up Schedule tab.',
+      'There is no "' +
+        TAB_NAME +
+        '" tab. Use Website → Set up Schedule & Teachers tabs.',
     ];
   }
   // Displayed values are exactly what the CSV export gives the website.
-  return checkRows_(sheet.getDataRange().getDisplayValues());
+  const problems = checkRows_(sheet.getDataRange().getDisplayValues());
+  // The Teachers tab is optional — but when it exists the website reads it,
+  // so it has to pass too.
+  const teachers = spreadsheet.getSheetByName(TEACHERS_TAB_NAME);
+  if (teachers) {
+    checkTeacherRows_(teachers.getDataRange().getDisplayValues()).forEach(
+      (problem) => problems.push(TEACHERS_TAB_NAME + " tab — " + problem),
+    );
+  }
+  return problems;
 }
 
 /** The version in the tab's "Version …" header, or "" — as the build reads it. */
@@ -338,6 +402,15 @@ function checkRows_(rows) {
     if (highlight !== "" && highlight !== "TRUE" && highlight !== "FALSE") {
       problems.push(where + "Highlight must be a checkbox");
     }
+    const price = get("price");
+    if (price !== "" && toPrice_(price) === null) {
+      problems.push(
+        where +
+          'Price must be a whole amount in INR, like 800, not "' +
+          price +
+          '"',
+      );
+    }
     if (isDate_(date) && start) {
       const slot = date + (start < "12:00" ? " morning" : " evening");
       perSlot[slot] = (perSlot[slot] || []).concat(r + 1);
@@ -360,11 +433,96 @@ function checkRows_(rows) {
   return problems;
 }
 
+/**
+ * The website build's rules for the Teachers tab (header row first): Name and
+ * Link both filled, each name listed once, and a link that is a card on the
+ * yoga page (#teacher-ashutosh), a page of the site (/ayurveda-massage) or an
+ * http(s):// address. A row with only Notes is skipped. Keep in step with
+ * teacherLinksOf() in src/data/load-yoga-schedule.mjs.
+ */
+function checkTeacherRows_(rows) {
+  const header = (rows[0] || []).map((name) =>
+    String(name).trim().toLowerCase(),
+  );
+  const known = TEACHER_HEADERS.map((name) => name.toLowerCase());
+  const problems = [];
+
+  header.forEach((name, i) => {
+    if (name && known.indexOf(name) === -1) {
+      problems.push(
+        'Unknown column "' + name + '". Allowed: ' + TEACHER_HEADERS.join(", "),
+      );
+    } else if (name && header.indexOf(name) !== i) {
+      problems.push('Column "' + name + '" appears twice');
+    }
+  });
+  TEACHER_REQUIRED.forEach((name) => {
+    if (header.indexOf(name) === -1)
+      problems.push('Missing column "' + name + '"');
+  });
+  if (problems.length > 0) return problems;
+
+  const listedAt = {};
+  for (let r = 1; r < rows.length; r++) {
+    const cells = rows[r].map((cell) => String(cell).trim());
+    const get = (name) => {
+      const at = header.indexOf(name);
+      return at === -1 ? "" : cells[at] || "";
+    };
+    const name = get("name");
+    const link = get("link");
+    if (name === "" && link === "") continue;
+    const where = "Row " + (r + 1) + ": ";
+    if (name === "") problems.push(where + "Name is empty");
+    if (!isLink_(link)) {
+      problems.push(
+        where +
+          'Link must be a card on the yoga page like #teacher-ashutosh, a page like /ayurveda-massage or an https:// address, not "' +
+          link +
+          '"',
+      );
+    }
+    const key = name.toLowerCase();
+    if (name !== "" && listedAt[key]) {
+      problems.push(
+        where + '"' + name + '" is already listed (row ' + listedAt[key] + ")",
+      );
+    } else if (name !== "") {
+      listedAt[key] = r + 1;
+    }
+  }
+  return problems;
+}
+
+/** A card anchor (#teacher-ashutosh), a page of the site (/ayurveda-massage) or an http(s):// address. */
+function isLink_(value) {
+  return (
+    /^#[A-Za-z][\w-]*$/.test(value) ||
+    /^\/(?!\/)\S*$/.test(value) ||
+    /^https?:\/\/\S+$/i.test(value)
+  );
+}
+
 /** A real calendar date written yyyy-mm-dd. */
 function isDate_(value) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
   const date = new Date(value + "T00:00:00Z");
   return !isNaN(date.getTime()) && date.toISOString().slice(0, 10) === value;
+}
+
+/**
+ * "800", "₹800", "Rs 800", "800 INR", "800.00" or "1,200" → 800; anything
+ * else (0 included) → null. Keep in step with normalizePrice in
+ * src/data/load-yoga-schedule.mjs.
+ */
+function toPrice_(value) {
+  const match =
+    /^(?:₹|rs\.?|inr)?\s*(\d{1,3}(?:,\d{3})+|\d+)(?:\.00)?(?:\s*inr)?$/i.exec(
+      value,
+    );
+  if (!match) return null;
+  const price = Number(match[1].replace(/,/g, ""));
+  return price > 0 ? price : null;
 }
 
 /** "8:30", "08:30" or "08:30:00" → "08:30"; anything else → null. */

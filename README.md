@@ -36,7 +36,7 @@ python3 ./scripts/resize_hero_image.py ./public/img/cafe-hero.jpg
 
 ## Yoga schedule
 
-The `/yoga` class schedule is edited in a Google Sheet and read at build time. See [docs/yoga-schedule-sheet.md](docs/yoga-schedule-sheet.md) for the sheet's columns, setup and troubleshooting.
+The `/yoga` class schedule — and the links behind the teachers' names — is edited in a Google Sheet and read at build time. See [docs/yoga-schedule-sheet.md](docs/yoga-schedule-sheet.md) for the sheet's columns, setup and troubleshooting.
 
 ## Booking deposits
 
