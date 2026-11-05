@@ -33,14 +33,19 @@ One row per class. Headers are matched case-insensitively, in any order.
 | Teachers  | no       | Comma-separated: `Balbi, Seb` → "with Balbi & Seb"                      |
 | Highlight | no       | Checkbox — ticked puts the card on brand gold                           |
 | Notes     | no       | For the office; never shown on the website                              |
-| Version   | no       | A label you change with each edit, e.g. `v12` — see below               |
 
-At most 4 classes fit in one day's Morning (or Evening) slot. A row with only Notes or Version filled is not a class and is skipped. Any other column name fails the build — rename or delete it.
+At most 4 classes fit in one day's Morning (or Evening) slot. A row with only Notes filled is not a class and is skipped. Any other column name fails the build — rename or delete it — except the version header below.
 
-**Version** is how you check a build read your latest edit. Type a label in the first row under the header (`v12`, a date — anything), change it whenever you edit the schedule, and the build log prints what it read:
+**The version is a header of its own**, `Version 12`, in its own column (the setup puts it in column I; any column works, but only one). It is how you check a build read your latest edit:
+
+- **Website → Publish schedule now bumps it** before rebuilding the site: `Version 12` → `Version 13` (the last number goes up: `v09` → `v10`, a bare `Version` → `Version 1`). If Netlify rejects the request, the header is put back, so it always names what was last published.
+- Edits left for the nightly rebuild don't bump it — change the number by hand if you want that build to show a new version.
+- The column's cells are never read; leave them empty.
+
+The build log prints the version it read:
 
 ```
-Yoga schedule: Schedule sheet, version "v12" — 28 classes, 2026-11-02 → 2026-11-15 (built 2026-11-03, Goa time)
+Yoga schedule: Schedule sheet, version "12" — 28 classes, 2026-11-02 → 2026-11-15 (built 2026-11-03, Goa time)
 ```
 
 The log is in Netlify under Deploys → the deploy → Deploy log. The sheet's **Check schedule** and **Publish schedule now** messages show the version too.
@@ -67,15 +72,17 @@ The log is in Netlify under Deploys → the deploy → Deploy log. The sheet's *
 
 ## Troubleshooting
 
-**The build read an older schedule** (the logged Version is behind the sheet's):
+**The build read an older schedule** (the logged version is behind the sheet's `Version …` header):
 
 - If the deploy log warns that `YOGA_SCHEDULE_CSV_URL` is a "Publish to web" link, that's the cause. Google serves the published copy with a 5-minute cache (`cache-control: max-age=300`) and refreshes it on its own schedule, so a build soon after an edit can read the old one. Switch the variable to the export link from step 4. Its `<SPREADSHEET_ID>` is the id in the sheet's own address bar (`/d/<ID>/edit`), not the `/d/e/…` id of the published link.
 - `yarn dev` reads the sheet once, when it starts. Restart it to pick up edits.
 
+**The sheet still has a `Version` column with the value underneath** (the earlier layout): change the header to `Version <that value>` (e.g. `Version 5`) and clear the cell below it. Until then nothing breaks; the build just logs "version not set".
+
 ## Day to day
 
-1. Edit the Schedule tab, and change the Version.
+1. Edit the Schedule tab.
 2. **Website → Check schedule** lists any problems by row.
-3. **Website → Publish schedule now** checks again, then rebuilds the site. Or do nothing: the nightly rebuild picks the changes up.
+3. **Website → Publish schedule now** checks again, bumps the version, then rebuilds the site. Or do nothing: the nightly rebuild picks the changes up.
 
 The script applies the same rules as the build. If you change a rule in `src/data/load-yoga-schedule.mjs`, change `docs/yoga-schedule-sheet.gs` to match and paste the new version into the sheet's Apps Script editor.

@@ -253,10 +253,8 @@ function validate(raw, labelOf) {
 // --- The schedule sheet -----------------------------------------------------
 
 // Sheet column headers (matched case-insensitively, in any order) → the event
-// field each fills. "Notes" is for the office and never read; "Version" is a
-// label the office types in (e.g. v12) that the build logs, so a build log
-// shows which edit it read. Neither is part of a class. Keep in step with
-// HEADERS in the sheet's Apps Script (docs/yoga-schedule-sheet.gs).
+// field each fills. "Notes" is for the office and never read. Keep in step
+// with HEADERS in the sheet's Apps Script (docs/yoga-schedule-sheet.gs).
 const SHEET_COLUMNS = {
   date: "date",
   start: "timeStart",
@@ -266,14 +264,20 @@ const SHEET_COLUMNS = {
   teachers: "teachers",
   highlight: "highlight",
   notes: null,
-  version: null,
 };
 // The columns that describe a class — a row with none of them filled (only
-// Notes or Version, say) is not a class.
+// a note, say) is not a class.
 const CLASS_COLUMNS = Object.keys(SHEET_COLUMNS).filter(
   (name) => SHEET_COLUMNS[name] !== null,
 );
 const REQUIRED_COLUMNS = ["date", "start", "end", "title"];
+
+// The version is a header of its own: "Version 12", "Version: v12"… in any
+// column, case-insensitive. The build logs the text after "Version", so a
+// deploy log shows which edit it read; the sheet's "Publish schedule now"
+// button bumps it. The column's cells are never read. Keep in step with
+// VERSION_HEADER in docs/yoga-schedule-sheet.gs.
+const VERSION_HEADER = /^version(?![a-z])[\s:#-]*/i;
 
 /** "8:30", "08:30" or "08:30:00" → "08:30"; anything else is left for validate() to reject. */
 function normalizeTime(value) {
@@ -283,18 +287,30 @@ function normalizeTime(value) {
 
 /**
  * Turns the sheet's CSV export into events, plus each one's sheet row number
- * so errors point the office at the exact row, and the sheet's Version (the
- * first non-empty cell of that column, or null). Rows with no class column
- * filled are skipped. Header problems throw here; cell problems are left to
- * validate().
+ * so errors point the office at the exact row, and the sheet's version (from
+ * its "Version …" header, or null). Rows with no class column filled are
+ * skipped. Header problems throw here; cell problems are left to validate().
  */
 function parseScheduleSheet(csv) {
   const [header = [], ...body] = parseCsv(csv.replace(/^\uFEFF/, ""));
   const columns = header.map((name) => name.trim().toLowerCase());
   const allowed =
-    "Date, Start, End, Title, Subtitle, Teachers, Highlight, Notes, Version";
+    'Date, Start, End, Title, Subtitle, Teachers, Highlight, Notes, and one "Version …" header';
 
-  const unknown = columns.filter((c) => c !== "" && !(c in SHEET_COLUMNS));
+  const versionAt = columns.flatMap((c, i) =>
+    VERSION_HEADER.test(c) ? [i] : [],
+  );
+  if (versionAt.length > 1) {
+    throw new Error('Schedule sheet: more than one "Version …" header');
+  }
+  const version =
+    versionAt.length === 1
+      ? header[versionAt[0]].trim().replace(VERSION_HEADER, "") || null
+      : null;
+
+  const unknown = columns.filter(
+    (c, i) => c !== "" && !(c in SHEET_COLUMNS) && !versionAt.includes(i),
+  );
   if (unknown.length > 0) {
     throw new Error(
       `Schedule sheet: unknown column(s) ${unknown.join(", ")} — allowed: ${allowed}`,
@@ -313,13 +329,11 @@ function parseScheduleSheet(csv) {
 
   const events = [];
   const rows = [];
-  let version = null;
   body.forEach((cells, i) => {
     const cell = (name) => {
       const at = columns.indexOf(name);
       return at === -1 ? "" : (cells[at] ?? "").trim();
     };
-    version ??= cell("version") || null;
     if (CLASS_COLUMNS.every((name) => cell(name) === "")) return;
     const event = {
       date: cell("date"),
@@ -513,7 +527,7 @@ export async function loadYogaSchedulePageData({ csvUrl, requireSheet }) {
     );
     raw = events;
     labelOf = (index) => `Schedule sheet row ${rows[index]}`;
-    source = `Schedule sheet, version ${version ? `"${version}"` : "not set (no Version cell)"}`;
+    source = `Schedule sheet, version ${version ? `"${version}"` : 'not set (give the sheet a header like "Version 1")'}`;
   } else if (requireSheet) {
     throw new Error(
       "YOGA_SCHEDULE_CSV_URL is not set — a production build reads the /yoga schedule from the Google Sheet and never falls back to the sample data",
