@@ -101,6 +101,15 @@
   },
   {
     "date": "2026-11-08",
+    "timeStart": "11:00",
+    "timeEnd": "14:00",
+    "title": "Weekend Workshop",
+    "subTitle": "Hatha, pranayama & meditation",
+    "teachers": ["Ashutosh"],
+    "price": 1500
+  },
+  {
+    "date": "2026-11-08",
     "timeStart": "17:30",
     "timeEnd": "18:30",
     "title": "Evening Vinyasa",
@@ -205,6 +214,15 @@
     "timeEnd": "09:30",
     "title": "Morning Hatha",
     "teachers": ["Ashutosh"]
+  },
+  {
+    "date": "2026-11-15",
+    "timeStart": "11:00",
+    "timeEnd": "14:00",
+    "title": "Weekend Workshop",
+    "subTitle": "Hatha, pranayama & meditation",
+    "teachers": ["Ashutosh"],
+    "price": 1500
   },
   {
     "date": "2026-11-15",
