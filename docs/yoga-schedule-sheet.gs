@@ -5,10 +5,11 @@
  * Script editor (replacing the default Code.gs), save, then reload the
  * spreadsheet: a "Website" menu appears.
  *
- *   Publish schedule now  Checks the Schedule tab, then asks Netlify to
- *                         rebuild the website (live in about 2 minutes).
+ *   Publish schedule now  Checks the Schedule tab, bumps its version
+ *                         header (Version 12 → Version 13), then asks Netlify
+ *                         to rebuild the website (live in about 2 minutes).
  *                         Without it, edits go live at the nightly rebuild
- *                         (00:30 Goa time).
+ *                         (00:30 Goa time) — bump the version by hand then.
  *   Check schedule        The same checks, without publishing.
  *   Set up Schedule tab   One-time: headers, date/time formats, checkboxes.
  *
@@ -32,11 +33,17 @@ const HEADERS = [
   "Teachers",
   "Highlight",
   "Notes",
-  "Version",
 ];
 const REQUIRED = ["date", "start", "end", "title"];
-// Never part of a class: a row with only these filled is skipped.
-const NOT_CLASS_COLUMNS = ["notes", "version"];
+// Never part of a class: a row with only a note is skipped.
+const CLASS_COLUMNS = HEADERS.map((name) => name.toLowerCase()).filter(
+  (name) => name !== "notes",
+);
+// The version is a header of its own, in any column: "Version 12". The build
+// logs the text after "Version"; Publish bumps it. Its cells are never read.
+// Keep in step with VERSION_HEADER in src/data/load-yoga-schedule.mjs.
+const VERSION_HEADER = /^version(?![a-z])[\s:#-]*/i;
+const FIRST_VERSION_HEADER = "Version 1";
 const MAX_PER_SLOT = 4;
 
 function onOpen() {
@@ -71,27 +78,34 @@ function publishSchedule() {
     return;
   }
 
-  // Make sure the last edits are saved before the build reads the sheet.
-  SpreadsheetApp.flush();
-  const version = scheduleVersion_();
-  const who = Session.getActiveUser().getEmail() || "the schedule sheet";
-  const url =
-    hookUrl +
-    (hookUrl.indexOf("?") === -1 ? "?" : "&") +
-    "trigger_title=" +
-    encodeURIComponent("Schedule published by " + who);
+  // Two editors publishing at once must not bump to the same version.
+  const lock = LockService.getDocumentLock();
+  if (!lock.tryLock(10000)) {
+    ui.alert(
+      "Not published",
+      "Someone else is publishing right now. Try again in a moment.",
+      ui.ButtonSet.OK,
+    );
+    return;
+  }
 
+  let bump = null;
   let status = 0;
   try {
-    status = UrlFetchApp.fetch(url, {
-      method: "post",
-      contentType: "application/json",
-      payload: "{}",
-      muteHttpExceptions: true,
-    }).getResponseCode();
-  } catch (error) {
-    status = 0;
+    bump = bumpVersion_();
+    // Save the last edits and the new version before the build reads them.
+    SpreadsheetApp.flush();
+    status = triggerBuild_(hookUrl);
+    if ((status < 200 || status >= 300) && bump) {
+      // Nothing is rebuilding: put the version back, so the header keeps
+      // naming what was last published.
+      bump.cell.setValue(bump.previousHeader);
+      SpreadsheetApp.flush();
+    }
+  } finally {
+    lock.releaseLock();
   }
+
   if (status < 200 || status >= 300) {
     ui.alert(
       "Not published",
@@ -105,10 +119,66 @@ function publishSchedule() {
   ui.alert(
     "Publishing",
     "The website is rebuilding" +
-      (version ? " with version " + version : "") +
-      ". The new schedule will be live in about 2 minutes.",
+      (bump ? " with version " + bump.version : "") +
+      ". The new schedule will be live in about 2 minutes." +
+      (bump ? "" : ' (Add a "Version 1" header to track versions.)'),
     ui.ButtonSet.OK,
   );
+}
+
+/** POSTs to the sheet's build hook; returns the HTTP status (0 if unreachable). */
+function triggerBuild_(hookUrl) {
+  const who = Session.getActiveUser().getEmail() || "the schedule sheet";
+  const url =
+    hookUrl +
+    (hookUrl.indexOf("?") === -1 ? "?" : "&") +
+    "trigger_title=" +
+    encodeURIComponent("Schedule published by " + who);
+  try {
+    return UrlFetchApp.fetch(url, {
+      method: "post",
+      contentType: "application/json",
+      payload: "{}",
+      muteHttpExceptions: true,
+    }).getResponseCode();
+  } catch (error) {
+    return 0;
+  }
+}
+
+/**
+ * Bumps the tab's "Version …" header in place (Version 12 → Version 13).
+ * Returns the cell, its previous text and the new version — or null when the
+ * tab has no version header.
+ */
+function bumpVersion_() {
+  const sheet = SpreadsheetApp.getActive().getSheetByName(TAB_NAME);
+  const header = sheet
+    .getRange(1, 1, 1, sheet.getLastColumn())
+    .getDisplayValues()[0];
+  const at = header.findIndex((name) =>
+    VERSION_HEADER.test(String(name).trim()),
+  );
+  if (at === -1) return null;
+  const previousHeader = String(header[at]).trim();
+  const prefix = previousHeader.match(VERSION_HEADER)[0];
+  const version = nextVersion_(previousHeader.slice(prefix.length));
+  const cell = sheet.getRange(1, at + 1);
+  // A bare "Version" has no separator before the number it is about to get.
+  cell.setValue((/[\s:#-]$/.test(prefix) ? prefix : prefix + " ") + version);
+  return { cell: cell, previousHeader: previousHeader, version: version };
+}
+
+/**
+ * The next version: the last number goes up by one, keeping its zero
+ * padding — "12" → "13", "v09" → "v10", "1.9" → "1.10". No number yet:
+ * "" → "1", "beta" → "beta 2".
+ */
+function nextVersion_(value) {
+  const match = /^(.*?)(\d+)(\D*)$/.exec(value);
+  if (!match) return value ? value + " 2" : "1";
+  const next = String(Number(match[2]) + 1);
+  return match[1] + next.padStart(match[2].length, "0") + match[3];
 }
 
 function checkSchedule() {
@@ -145,9 +215,10 @@ function setupScheduleTab() {
   }
   if (!sheet) sheet = spreadsheet.insertSheet(TAB_NAME);
 
+  // The version goes in its own header, after the class columns (column I).
   sheet
-    .getRange(1, 1, 1, HEADERS.length)
-    .setValues([HEADERS])
+    .getRange(1, 1, 1, HEADERS.length + 1)
+    .setValues([HEADERS.concat(FIRST_VERSION_HEADER)])
     .setFontWeight("bold");
   sheet.setFrozenRows(1);
   const rows = sheet.getMaxRows() - 1;
@@ -169,7 +240,9 @@ function setupScheduleTab() {
     "Set up Schedule tab",
     "Done. Add one row per class: Date, Start and End (24h, e.g. 17:30) and Title. " +
       "Optional: Subtitle, Teachers (comma-separated), Highlight (tick for a gold card) and Notes (never shown on the website). " +
-      "Type a label like v1 under Version and change it with each edit: the website's build log shows the version it read.",
+      '"' +
+      FIRST_VERSION_HEADER +
+      "\" (column I) names the schedule's version: Publish schedule now bumps it, and the website's build log shows the version it read.",
     ui.ButtonSet.OK,
   );
 }
@@ -185,23 +258,19 @@ function scheduleProblems_() {
   return checkRows_(sheet.getDataRange().getDisplayValues());
 }
 
-/** The first non-empty cell under the Version header, or "" — as the build reads it. */
+/** The version in the tab's "Version …" header, or "" — as the build reads it. */
 function scheduleVersion_() {
   const sheet = SpreadsheetApp.getActive().getSheetByName(TAB_NAME);
   return sheet ? versionOf_(sheet.getDataRange().getDisplayValues()) : "";
 }
 
 function versionOf_(rows) {
-  const header = (rows[0] || []).map((name) =>
-    String(name).trim().toLowerCase(),
+  const header = (rows[0] || []).find((name) =>
+    VERSION_HEADER.test(String(name).trim()),
   );
-  const at = header.indexOf("version");
-  if (at === -1) return "";
-  for (let r = 1; r < rows.length; r++) {
-    const value = String(rows[r][at] || "").trim();
-    if (value) return value;
-  }
-  return "";
+  return header === undefined
+    ? ""
+    : String(header).trim().replace(VERSION_HEADER, "");
 }
 
 /**
@@ -216,10 +285,19 @@ function checkRows_(rows) {
   const known = HEADERS.map((name) => name.toLowerCase());
   const problems = [];
 
+  const versionHeaders = header.filter((name) => VERSION_HEADER.test(name));
+  if (versionHeaders.length > 1) {
+    problems.push('More than one "Version …" header');
+  }
   header.forEach((name, i) => {
+    if (VERSION_HEADER.test(name)) return;
     if (name && known.indexOf(name) === -1) {
       problems.push(
-        'Unknown column "' + name + '". Allowed: ' + HEADERS.join(", "),
+        'Unknown column "' +
+          name +
+          '". Allowed: ' +
+          HEADERS.join(", ") +
+          ', and one "Version …" header',
       );
     } else if (name && header.indexOf(name) !== i) {
       problems.push('Column "' + name + '" appears twice');
@@ -238,10 +316,7 @@ function checkRows_(rows) {
       const at = header.indexOf(name);
       return at === -1 ? "" : cells[at] || "";
     };
-    const classColumns = known.filter(
-      (name) => NOT_CLASS_COLUMNS.indexOf(name) === -1,
-    );
-    if (classColumns.every((name) => get(name) === "")) continue;
+    if (CLASS_COLUMNS.every((name) => get(name) === "")) continue;
     const where = "Row " + (r + 1) + ": ";
     const date = get("date");
     const start = toTime_(get("start"));
