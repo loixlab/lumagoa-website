@@ -26,7 +26,10 @@ const TIME_ZONE = "Asia/Kolkata";
 const UTC_OFFSET = "+05:30";
 
 // Classes starting before noon go in the Morning row, the rest in Evening —
-// the row is derived, never stored, so it can't contradict timeStart.
+// the row is derived, never stored, so it can't contradict timeStart. A class
+// that starts before noon and ends after it (11:00–16:00, or just 11:30–12:30)
+// belongs to both rows, so its day gets one tall cell listing every class of
+// the day in time order instead of a Morning and an Evening cell (buildWeek).
 const NOON = "12:00";
 const SLOTS = [
   { id: "morning", label: "Morning" },
@@ -34,7 +37,8 @@ const SLOTS = [
 ];
 
 // One day's Morning (or Evening) cell stacks its cards; more than this
-// won't fit legibly.
+// won't fit legibly. A class counts in the slot it starts in, so a merged day
+// (see crossesNoon) can hold twice this.
 const MAX_EVENTS_PER_SLOT = 4;
 
 const FIELDS = [
@@ -217,6 +221,11 @@ function isExternal(link) {
 
 function slotOf(event) {
   return event.timeStart < NOON ? "morning" : "evening";
+}
+
+/** Starts before noon and ends after it — the class sits across both rows. */
+function crossesNoon(event) {
+  return event.timeStart < NOON && event.timeEnd > NOON;
 }
 
 // --- Validation -----------------------------------------------------------
@@ -590,6 +599,9 @@ function toCard(e, teacherLinks) {
   const teachers = e.teachers ?? [];
   return {
     time: formatTimeRange(e.timeStart, e.timeEnd),
+    // The row the class starts in colours the card — in a merged day's cell
+    // the two rows' cards sit together.
+    slot: slotOf(e),
     title: e.title,
     subTitle: e.subTitle ?? null,
     // "with A, B & C" — each name with its link from the Teachers tab, if any
@@ -614,6 +626,12 @@ function toCard(e, teacherLinks) {
 
 function buildWeek(monday, events, teacherLinks) {
   const dates = DAY_NAMES.map((_, i) => addDays(monday, i));
+  // `events` arrive sorted by start, so each day's list is in time order.
+  const byDay = dates.map((date) => events.filter((e) => e.date === date));
+  // A day with a class across noon is shown as one tall cell — its Morning
+  // cell, spanning both rows — holding every class of the day; it has no
+  // Evening cell.
+  const merged = byDay.map((day) => day.some(crossesNoon));
   return {
     monday,
     label: weekLabel(monday),
@@ -621,15 +639,24 @@ function buildWeek(monday, events, teacherLinks) {
       date,
       name: DAY_NAMES[i],
       dateLabel: shortDayMonth(date),
+      merged: merged[i],
     })),
     slots: SLOTS.map((slot) => ({
       ...slot,
-      // One list of cards per day, Monday first; empty renders as "—".
-      cells: dates.map((date) =>
-        events
-          .filter((e) => e.date === date && slotOf(e) === slot.id)
-          .map((e) => toCard(e, teacherLinks)),
-      ),
+      // One list of cards per day, Monday first; empty renders as "—". On a
+      // merged day the Morning cell carries the whole day and the Evening
+      // cell is null: the partial renders nothing there, and the grid's
+      // auto-placement lets the tall cell take the track.
+      cells: byDay.map((day, i) => {
+        if (merged[i]) {
+          return slot.id === "morning"
+            ? day.map((e) => toCard(e, teacherLinks))
+            : null;
+        }
+        return day
+          .filter((e) => slotOf(e) === slot.id)
+          .map((e) => toCard(e, teacherLinks));
+      }),
     })),
   };
 }

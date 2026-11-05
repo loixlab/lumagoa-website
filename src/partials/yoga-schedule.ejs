@@ -14,6 +14,12 @@
      <template x-if> and only enters the DOM when the `yogaSchedule` pager
      (src/ts/yoga-schedule.ts) moves to it. Rows: Morning (classes starting
      before noon) and Evening; a slot stacks up to 4 cards, or shows "—".
+     A day with a class across noon (`day.merged`) shows one tall cell
+     instead: its Morning cell spans both rows (row-span-2 + aria-rowspan)
+     and lists every class of the day in time order, each card coloured by
+     the row it starts in (`card.slot`); its Evening cell is null and not
+     rendered — the grid's sparse auto-placement skips the occupied track,
+     so the days after it still land in their own columns.
      The 7 day columns keep a fixed minimum width and scroll sideways on
      narrow screens rather than stacking. Below md the Morning/Evening label
      column is dropped visually — the card colour and time carry the slot —
@@ -74,8 +80,8 @@ var weekLabels = schedule.weeks.map(function (week) { return week.label; });
         <div role="rowheader" class="sr-only flex items-center gap-2.5 text-sm font-bold uppercase tracking-[0.16em] md:not-sr-only">
           <span class="size-2.5 shrink-0 rounded-full <%= style.dot %>" aria-hidden="true"></span><%= slot.label %>
         </div>
-        <% slot.cells.forEach(function (cards) { %>
-        <div role="cell" class="flex flex-col gap-2">
+        <% slot.cells.forEach(function (cards, d) { if (cards === null) return; var merged = week.days[d].merged; %>
+        <div role="cell" class="flex flex-col gap-2<%= merged ? ' row-span-2' : '' %>"<% if (merged) { %> aria-rowspan="2"<% } %>>
           <% if (cards.length === 0) { %>
           <div class="flex min-h-28 flex-1 items-center justify-center rounded-2xl border-2 border-dashed <%= style.empty %>">
             <span aria-hidden="true">—</span><span class="sr-only">No class</span>
@@ -85,9 +91,9 @@ var weekLabels = schedule.weeks.map(function (week) { return week.label; });
           <%# Cards stretch to the row's height (a neighbouring slot may stack
               several), so the details stay together at the top and only the
               teacher and price lines are pushed to the bottom. %>
-          <div class="flex flex-1 flex-col justify-between gap-3 rounded-2xl p-4 <%= card.highlight ? highlightCard : style.card %>">
+          <div class="flex flex-1 flex-col justify-between gap-3 rounded-2xl p-4 <%= card.highlight ? highlightCard : slotStyles[card.slot].card %>">
             <div>
-              <p class="text-sm font-bold"><%= card.time %></p>
+              <p class="text-xs font-bold"><%= card.time %></p>
               <p class="mt-2 font-display text-xl leading-tight"><%= card.title %></p>
               <% if (card.subTitle) { %><p class="mt-1 text-xs opacity-75"><%= card.subTitle %></p><% } %>
             </div>
