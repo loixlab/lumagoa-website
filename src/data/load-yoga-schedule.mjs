@@ -459,7 +459,8 @@ function headerName(key) {
  * `known` but looks like a typo of one, a known one that appears twice, or a
  * `required` one that is missing. Any other header (`isExtra(index)` exempts
  * the Schedule tab's version header) is ignored: returns those headers, as
- * written in the sheet, for the build log. `allowed` describes the tab's
+ * written in the sheet, for the build log. A blank header is skipped without
+ * a mention, as a spacer column always was. `allowed` describes the tab's
  * columns in the typo message.
  */
 function checkColumns(

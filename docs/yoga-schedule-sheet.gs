@@ -636,7 +636,8 @@ function checkTeacherRows_(rows) {
  * ignored }. `header` is the lower-cased names, to find columns by; the
  * problems are a known column (one of `headers`) twice, a `required` one
  * missing, or another name that looks like a typo of a known one
- * (nearMiss_); every other header, as written, is ignored by the website.
+ * (nearMiss_); every other header, as written, is ignored by the website. A
+ * blank header is skipped without a mention, as a spacer column always was.
  * `isVersion(name)` exempts the Schedule tab's version header. Keep in step
  * with checkColumns() in src/data/load-yoga-schedule.mjs.
  */
