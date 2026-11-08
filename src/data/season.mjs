@@ -32,8 +32,8 @@ export const SEASON = {
 // as SEASON_RULES below — note Mid excludes 15 Dec – 15 Jan, which is closed
 // rather than sold, so no date is claimed by two pills.
 export const SEASONS = /** @type {const} */ ([
-  { id: "low", label: "Low", window: "15 - 30 Nov · Apr" },
-  { id: "mid", label: "Mid", window: "1 - 14 Dec · 16 Jan - Mar" },
+  { id: "low", label: "Low", window: "April" },
+  { id: "mid", label: "Mid", window: "15 Nov - 14 Dec · 16 Jan - Mar" },
   // { id: "high", label: "High", window: "15 Dec - 15 Jan" }, // We don't offer yoga holidays during high season
 ]);
 
@@ -66,9 +66,8 @@ export const DEFAULT_SEASON_ID = DEFAULT_SEASON.id;
 // getAvailableDates() fails the build if a day is covered by no rule at all.
 export const SEASON_RULES = [
   { season: null, from: "12-15", to: "01-15" }, // not sold — see SEASONS
-  { season: "mid", from: "12-01", to: "02-29" },
+  { season: "mid", from: "11-15", to: "02-29" },
   { season: "mid", from: "03-01", to: "03-31" },
-  { season: "low", from: "11-15", to: "11-30" },
   { season: "low", from: "04-01", to: "04-30" },
 ];
 
