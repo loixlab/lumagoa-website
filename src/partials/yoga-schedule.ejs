@@ -27,6 +27,11 @@
      column is dropped visually — the card colour and time carry the slot —
      but the labels stay as sr-only row headers: an absolutely positioned
      (sr-only) cell takes no grid track, so the 7 day columns still line up.
+     The scroller is `relative` so it is the containing block of every sr-only
+     inside it ("No class", "(opens in a new tab)", …): without it their
+     containing block is the viewport, the scroller can't clip them, and one
+     in a late-week column (~1,000px in) widens the whole page — mobile
+     Safari then zooms the page out to fit.
      The arrows ship `disabled` so they are inert without JS; Alpine's
      :disabled takes over on init. -->
 <%
@@ -65,7 +70,7 @@ var weekLabels = schedule.weeks.map(function (week) { return week.label; });
 
   <% schedule.weeks.forEach(function (week, i) { var isCurrent = i === schedule.currentIndex; %>
   <% if (!isCurrent) { %><template x-if="index === <%= i %>"><% } %>
-  <div x-show="index === <%= i %>" class="overflow-x-auto pb-2">
+  <div x-show="index === <%= i %>" class="relative overflow-x-auto pb-2">
     <div role="table" aria-label="Yoga classes, <%= week.label %>" class="grid min-w-272 grid-cols-7 gap-3 md:min-w-304 md:grid-cols-[7rem_repeat(7,minmax(0,1fr))] lg:gap-4">
       <div role="row" class="contents">
         <div role="columnheader" class="sr-only md:not-sr-only"><span class="sr-only">Time of day</span></div>
